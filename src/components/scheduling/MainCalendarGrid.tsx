@@ -111,8 +111,8 @@ export function MainCalendarGrid({ pumps, onEventClick }: MainCalendarGridProps)
       <div
         ref={setNodeRef}
         className={cn(
-          "calendar-cell border-r border-white/5 transition-all duration-150",
-          isOver && "bg-emerald-400/20 shadow-inner shadow-emerald-300/40"
+          "calendar-cell border-r border-border/40 transition-all duration-150",
+          isOver && "bg-primary/15 shadow-inner shadow-[0_0_15px_rgba(37,99,235,0.35)]"
         )}
         style={{ minHeight: 28 }}
         data-testid={`calendar-cell-${dateId}`}
@@ -122,25 +122,25 @@ export function MainCalendarGrid({ pumps, onEventClick }: MainCalendarGridProps)
 
   return (
     <div
-      className="flex-1 overflow-auto rounded-3xl border border-white/5 bg-black/30 p-4"
+      className="flex-1 overflow-auto rounded-3xl border border-border/60 bg-card/95 p-4 shadow-inner"
       data-testid="calendar-grid"
     >
-      <div className="min-w-[1000px] rounded-2xl bg-black/20 p-1">
+      <div className="min-w-[1000px] rounded-2xl bg-card/80 p-1">
         {Array.from({ length: weeks }).map((_, weekIndex) => {
           const weekStart = weekIndex * 7;
           const weekDates = viewDates.slice(weekStart, weekStart + 7);
           
           return (
-            <div key={weekIndex} className="border-b border-white/5">
+            <div key={weekIndex} className="border-b border-border/50">
               {/* Week Header */}
-              <div className="sticky top-0 z-10 grid grid-cols-7 border-b border-white/10 bg-white/5 backdrop-blur">
+              <div className="sticky top-0 z-10 grid grid-cols-7 border-b border-border/60 bg-background/70 backdrop-blur">
                 {weekDates.map((date, dayIndex) => (
                   <div
                     key={dayIndex}
                     className={cn(
-                      "border-r border-white/10 p-3 text-center transition-all duration-150",
+                      "border-r border-border/40 p-3 text-center transition-all duration-150",
                       date.toDateString() === today.toDateString() &&
-                        "bg-white/10 text-primary"
+                        "bg-primary/10 text-primary"
                     )}
                   >
                     <div className="text-xs uppercase tracking-[0.2em] text-foreground/60">
@@ -148,7 +148,7 @@ export function MainCalendarGrid({ pumps, onEventClick }: MainCalendarGridProps)
                     </div>
                     <div
                       className={cn(
-                        "text-lg font-semibold text-white",
+                        "text-lg font-semibold text-foreground",
                         date.toDateString() === today.toDateString() && "text-primary"
                       )}
                     >

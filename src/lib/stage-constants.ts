@@ -31,12 +31,12 @@ export const STAGE_LABELS: Record<Stage, string> = {
 };
 
 export const STAGE_COLORS: Record<Stage, string> = {
-  "UNSCHEDULED": "bg-gradient-to-r from-slate-500/30 to-slate-400/20",
-  "NOT STARTED": "bg-gradient-to-r from-slate-500/40 to-slate-400/30",
-  FABRICATION: "bg-gradient-to-r from-blue-500/70 to-sky-400/70",
-  "POWDER COAT": "bg-gradient-to-r from-purple-500/70 to-fuchsia-400/70",
-  ASSEMBLY: "bg-gradient-to-r from-amber-500/70 to-orange-400/70",
-  TESTING: "bg-gradient-to-r from-rose-500/70 to-orange-400/70",
-  SHIPPING: "bg-gradient-to-r from-emerald-500/70 to-lime-400/70",
-  CLOSED: "bg-gradient-to-r from-cyan-500/70 to-blue-400/70",
+  "UNSCHEDULED": "stage-color stage-color-unscheduled",
+  "NOT STARTED": "stage-color stage-color-not-started",
+  FABRICATION: "stage-color stage-color-fabrication",
+  "POWDER COAT": "stage-color stage-color-powder",
+  ASSEMBLY: "stage-color stage-color-assembly",
+  TESTING: "stage-color stage-color-testing",
+  SHIPPING: "stage-color stage-color-shipping",
+  CLOSED: "stage-color stage-color-closed",
 };

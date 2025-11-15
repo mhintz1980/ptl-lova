@@ -63,8 +63,8 @@ interface AppState {
   updatePump: (id: string, patch: Partial<Pump>) => void;
   schedulePump: (id: string, dropDate: string) => void;
   clearSchedule: (id: string) => void;
-  clearNotStartedSchedules: () => void;
-  levelNotStartedSchedules: () => void;
+  clearNotStartedSchedules: () => number;
+  levelNotStartedSchedules: () => number;
   replaceDataset: (rows: Pump[]) => void;
   toggleStageCollapse: (stage: Stage) => void;
   toggleCollapsedCards: () => void;
@@ -213,12 +213,13 @@ export const useApp = create<AppState>()(
         const now = new Date().toISOString();
         const updates: Pump[] = [];
         const next = get().pumps.map((pump) => {
-          if (pump.stage !== "NOT STARTED") {
+          if (!pump.scheduledStart) {
             return pump;
           }
+          const shouldResetStage = pump.stage === "NOT STARTED";
           const updated: Pump = {
             ...pump,
-            stage: "UNSCHEDULED",
+            stage: shouldResetStage ? "UNSCHEDULED" : pump.stage,
             scheduledStart: undefined,
             scheduledEnd: undefined,
             last_update: now,
@@ -226,7 +227,7 @@ export const useApp = create<AppState>()(
           updates.push(updated);
           return updated;
         });
-        if (!updates.length) return;
+        if (!updates.length) return 0;
         set({ pumps: next });
         updates.forEach((pump) => {
           get().adapter.update(pump.id, {
@@ -236,6 +237,7 @@ export const useApp = create<AppState>()(
             last_update: pump.last_update,
           });
         });
+        return updates.length;
       },
       levelNotStartedSchedules: () => {
         const state = get();
@@ -322,7 +324,7 @@ export const useApp = create<AppState>()(
           }
         });
 
-        if (!patches.length) return;
+        if (!patches.length) return 0;
 
         const now = new Date().toISOString();
         const next = state.pumps.map((pump) => {
@@ -343,6 +345,7 @@ export const useApp = create<AppState>()(
             last_update: now,
           });
         });
+        return patches.length;
       },
 
       filtered: () => applyFilters(get().pumps, get().filters),

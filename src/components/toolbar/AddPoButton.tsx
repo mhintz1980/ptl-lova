@@ -10,11 +10,13 @@ export function AddPoButton({ onClick }: AddPoButtonProps) {
   return (
     <Button
       onClick={onClick}
-      size="sm"
-      className="rounded-full bg-accent text-accent-foreground font-semibold shadow-layer-md hover:bg-accent/85 hover:-translate-y-[1px]"
+      size="icon"
+      variant="default"
+      className="header-button header-button--accent h-10 w-10 rounded-full"
+      title="Add PO"
+      aria-label="Add purchase order"
     >
-      <Plus className="h-4 w-4 mr-1" />
-      Add PO
+      <Plus className="h-5 w-5" />
     </Button>
   );
 }

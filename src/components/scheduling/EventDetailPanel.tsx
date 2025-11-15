@@ -23,44 +23,45 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
 
   return (
     <div
-      className="flex w-[320px] flex-col justify-between border-l border-white/10 bg-black/40 px-5 py-6 backdrop-blur-xl"
+      className="flex w-[320px] flex-col justify-between border-l border-border/70 bg-card/90 px-5 py-6 text-foreground shadow-xl"
       data-testid="event-detail-panel"
     >
       <div>
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">{event.title}</h3>
-            <p className="text-sm text-white/70">PO {event.subtitle}</p>
+            <h3 className="text-lg font-semibold">{event.title}</h3>
+            <p className="text-sm text-foreground/70">PO {event.subtitle}</p>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-full border border-white/10"
+            className="header-button h-8 w-8 rounded-full border border-border/60 bg-card/80"
             onClick={onClose}
+            aria-label="Close event details"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="space-y-5 text-sm text-white/80">
+        <div className="space-y-5 text-sm text-foreground/80">
           {event.customer && (
             <div>
-              <div className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
                 Customer
               </div>
-              <p className="text-base text-white">{event.customer}</p>
+              <p className="text-base">{event.customer}</p>
             </div>
           )}
 
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+            <div className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               Stage
             </div>
             <Badge
               variant="outline"
               className={cn(
-                STAGE_COLORS[event.stage] ?? "bg-slate-500/40",
-                "border-none text-white"
+                STAGE_COLORS[event.stage] ?? "stage-color stage-color-unscheduled",
+                "border-none text-xs font-semibold"
               )}
             >
               {stageLabel}
@@ -68,18 +69,18 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
           </div>
 
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+            <div className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               Window
             </div>
-            <p className="font-medium text-white">{dateRange}</p>
+            <p className="font-medium">{dateRange}</p>
           </div>
 
           {event.priority && (
             <div>
-              <div className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
                 Priority
               </div>
-              <Badge className="border-none bg-white/10 text-white">
+              <Badge className="border-none bg-muted/80 text-foreground">
                 {event.priority}
               </Badge>
             </div>
@@ -87,8 +88,11 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-2 border-t border-white/10 pt-4">
-        <Button variant="outline" className="rounded-full">
+      <div className="mt-4 flex justify-end gap-2 border-t border-border/60 pt-4">
+        <Button
+          variant="ghost"
+          className="header-button rounded-full border border-border/60 bg-card/80 px-4"
+        >
           Adjust
         </Button>
         <Button variant="destructive" className="rounded-full">

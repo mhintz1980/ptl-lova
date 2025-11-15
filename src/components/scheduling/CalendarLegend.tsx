@@ -40,10 +40,10 @@ function LegendItem({ stage }: { stage: Stage }) {
       side="top"
       align="center"
     >
-      <div className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-white/5 transition-colors cursor-default">
+      <div className="flex items-center gap-2 rounded-lg px-3 py-1 transition-colors hover:bg-muted/50 cursor-default">
         <div
           className={cn(
-            "w-4 h-4 rounded-md border border-white/20",
+            "stage-color w-4 h-4 rounded-md border",
             colorClass
           )}
           aria-hidden="true"

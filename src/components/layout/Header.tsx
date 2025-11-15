@@ -41,17 +41,17 @@ export function Header({
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 text-foreground backdrop-blur-xl">
       <div className="flex h-16 items-center gap-4 px-8">
         <div className="flex min-w-[180px] items-center gap-3">
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-2 shadow-layer-sm">
-            <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
+          <div className="rounded-2xl border border-border/70 bg-card/80 p-2 shadow-layer-sm">
+            <Package className="h-5 w-5 text-primary" strokeWidth={2.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold tracking-tight text-white">
+            <span className="text-sm font-semibold tracking-tight text-foreground">
               PumpTracker
             </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Flow Ops
             </span>
           </div>
@@ -65,8 +65,9 @@ export function Header({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-9 w-9 rounded-full border border-white/15 bg-white/5 text-white/70 transition-all hover:bg-white/15 hover:text-white",
-                  currentView === id && "bg-white/20 text-white"
+                  "header-button h-9 w-9 rounded-full border border-border/60 bg-card/70 text-foreground/70",
+                  currentView === id &&
+                    "border-primary/40 bg-primary/15 text-foreground"
                 )}
                 onClick={() => onChangeView(id)}
                 title={label}
@@ -77,25 +78,25 @@ export function Header({
             ))}
           </nav>
 
-          <div className="relative hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 md:flex">
-            <Search className="h-3.5 w-3.5 text-white/50" />
+          <div className="relative hidden items-center gap-1 rounded-full border border-border/60 bg-card/80 px-3 py-1 text-sm text-foreground/80 shadow-sm md:flex">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={filters.q || ""}
               onChange={(event) => setFilters({ q: event.target.value })}
               placeholder="Search"
-              className="h-7 w-32 border-none bg-transparent p-0 text-xs text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-7 w-32 border-none bg-transparent p-0 text-xs text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/20"
+            className="header-button relative h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={() => setFiltersOpen((open) => !open)}
           >
             <Filter className="h-4 w-4" />
             {activeFilterCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-black">
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
                 {activeFilterCount}
               </span>
             )}
@@ -109,7 +110,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20"
+            className="header-button h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={toggle}
             title={`Switch to ${mode === "dark" ? "light" : "dark"} mode`}
             aria-label="Toggle theme"

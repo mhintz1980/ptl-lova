@@ -53,7 +53,7 @@ export function SegmentedCalendarBar({
   const eventContent = (
     <div
       className={cn(
-        "flex h-full items-center justify-between gap-3 rounded-xl border border-white/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-white shadow-soft backdrop-blur cursor-pointer transition-all duration-150",
+        "flex h-full items-center justify-between gap-3 rounded-xl border border-border/70 px-3 py-1 text-[11px] font-semibold tracking-wide text-foreground shadow-soft backdrop-blur cursor-pointer transition-all duration-150",
         isDragging && "opacity-50 border-2 border-dashed border-gray-600"
       )}
       style={{
@@ -76,9 +76,9 @@ export function SegmentedCalendarBar({
     >
       {/* Left side: Pump info */}
       <div className="flex flex-col truncate text-left flex-shrink-0">
-        <span className="truncate text-xs font-semibold text-white">{title}</span>
+        <span className="truncate text-xs font-semibold">{title}</span>
         {subtitle && (
-          <span className="truncate text-[10px] font-normal text-white/80">
+          <span className="truncate text-[10px] font-normal text-foreground/70">
             {subtitle}
           </span>
         )}
@@ -89,7 +89,7 @@ export function SegmentedCalendarBar({
         <div className="flex-1 h-4 min-w-0 ml-2">
           <div className="w-full h-full rounded-md overflow-hidden flex">
             {sortedSegments.map((segment, index) => {
-              const colorClass = STAGE_COLORS[segment.stage] || "bg-gray-500";
+                  const colorClass = STAGE_COLORS[segment.stage] || "stage-color stage-color-unscheduled";
               const widthPercent = `${segment.percentage * 100}%`;
 
               return (

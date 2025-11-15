@@ -72,14 +72,14 @@ export function BacklogDock() {
   return (
     <aside
       className={cn(
-        "relative flex h-full flex-col border-r border-white/5 bg-black/25 backdrop-blur-2xl transition-all duration-300",
+        "relative flex h-full flex-col border-r border-border/60 bg-card/85 text-foreground shadow-inner transition-all duration-300",
         open ? "w-[23%] min-w-[260px] max-w-sm" : "w-10"
       )}
       data-testid="backlog-dock"
     >
       <button
         type="button"
-        className="absolute -right-4 top-6 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white"
+        className="header-button absolute -right-4 top-6 flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background/80 text-foreground"
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Toggle backlog dock"
       >
@@ -92,18 +92,18 @@ export function BacklogDock() {
 
       {open ? (
         <>
-          <header className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+          <header className="flex items-center justify-between border-b border-border/60 px-4 py-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                 Backlog
               </p>
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-semibold text-foreground">
                 {filteredPumps.length} jobs
               </h3>
             </div>
           </header>
 
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+          <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
             {FILTERS.map(({ key, label }) => {
               const active = activeFilters.includes(key);
               return (
@@ -114,8 +114,8 @@ export function BacklogDock() {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-semibold transition-all",
                     active
-                      ? "bg-accent text-black"
-                      : "border border-white/15 bg-white/5 text-white/70 hover:text-white"
+                      ? "bg-primary/90 text-primary-foreground shadow-glow"
+                      : "border border-border/70 bg-card/70 text-foreground/70 hover:text-foreground"
                   )}
                 >
                   {label}
@@ -125,7 +125,7 @@ export function BacklogDock() {
           </div>
 
           <div className="flex-1 overflow-hidden px-4 py-4">
-            <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-dark">
+            <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-themed">
               {filteredPumps.map((pump) => (
                 <UnscheduledJobCard
                   key={pump.id}
@@ -135,7 +135,7 @@ export function BacklogDock() {
               ))}
 
               {filteredPumps.length === 0 && (
-                <div className="rounded-xl border border-dashed border-white/20 px-4 py-8 text-center text-xs text-white/60">
+                <div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-center text-xs text-muted-foreground">
                   Nothing matches the current filters.
                 </div>
               )}
@@ -143,9 +143,9 @@ export function BacklogDock() {
           </div>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-[10px] uppercase tracking-[0.3em] text-white/50">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
           <span>Backlog</span>
-          <span className="text-lg text-white">{filteredPumps.length}</span>
+          <span className="text-lg text-foreground">{filteredPumps.length}</span>
         </div>
       )}
     </aside>

@@ -88,7 +88,7 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
         {!isCollapsed && (
           <div
             ref={setNodeRef}
-            className="flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-3 py-4 scrollbar-dark"
+            className="flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-3 py-4 scrollbar-themed"
             style={{ maxHeight: "calc(100vh - 230px)" }}
           >
             {pumps.map((pump) => (

@@ -11,7 +11,7 @@ export function CollapseToggle({ collapsed, onToggle }: CollapseToggleProps) {
     <Button
       variant="ghost"
       size="icon"
-      className="h-9 w-9 rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/20"
+      className="header-button h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
       onClick={onToggle}
       title={collapsed ? "Expand cards" : "Collapse cards"}
       aria-label="Toggle pump card density"

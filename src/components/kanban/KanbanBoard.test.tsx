@@ -45,7 +45,7 @@ describe("KanbanBoard", () => {
     const scrollArea = container.querySelector(".flex.h-full.gap-4");
 
     expect(scrollArea).not.toBeNull();
-    expect(scrollArea?.className).toContain("scrollbar-dark");
+    expect(scrollArea?.className).toContain("scrollbar-themed");
   });
 
   it("bubbles overloaded stages to the front", () => {
