@@ -85,52 +85,42 @@ export function Tooltip({
   }, [timeoutId]);
 
   return (
-    <div className="relative inline-block">
-      <div
-        ref={triggerRef}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
-        onFocus={showTooltip}
-        onBlur={hideTooltip}
-        className="inline-block"
-      >
+    <div
+      className="relative inline-block"
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      onFocus={showTooltip}
+      onBlur={hideTooltip}
+    >
+      <div ref={triggerRef} className="inline-block">
         {children}
       </div>
 
       {isVisible && (
-        <>
-          {/* Invisible overlay to prevent mouseleave on gap */}
-          <div
-            className="fixed inset-0 z-40"
-            onMouseEnter={hideTooltip}
-            aria-hidden="true"
-          />
-
-          <div
-            ref={tooltipRef}
-            role="tooltip"
-            aria-live="polite"
-            className={cn(
-              "absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg border border-gray-700 pointer-events-none",
-              "max-w-xs break-words",
-              "animate-in fade-in-0 zoom-in-95 duration-200",
-              getPositionClasses(),
-              className
-            )}
-          >
-            <div className="relative">
-              {content}
-              {/* Arrow */}
-              <div
-                className={cn(
-                  "absolute w-0 h-0 border-4",
-                  getArrowClasses()
-                )}
-                aria-hidden="true"
-              />
-            </div>
+        <div
+          ref={tooltipRef}
+          role="tooltip"
+          aria-live="polite"
+          className={cn(
+            "absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg border border-gray-700",
+            "max-w-xs break-words pointer-events-none",
+            "animate-in fade-in-0 zoom-in-95 duration-200",
+            getPositionClasses(),
+            className
+          )}
+        >
+          <div className="relative">
+            {content}
+            {/* Arrow */}
+            <div
+              className={cn(
+                "absolute w-0 h-0 border-4",
+                getArrowClasses()
+              )}
+              aria-hidden="true"
+            />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
