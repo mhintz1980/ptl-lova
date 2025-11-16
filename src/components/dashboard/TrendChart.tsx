@@ -85,11 +85,11 @@ export const TrendChart: React.FC<TrendChartProps> = ({ pumps }) => {
   };
 
   return (
-    <Card className="layer-l1">
+    <Card className="layer-l1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-1">
         <CardHeader>
           <CardTitle className="text-lg">Build Time Trend</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="transition-transform duration-300 hover:translate-y-[-4px]">
           {weeklyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart
