@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import type { Pump } from "../../../types";
 import { WipByStageChart } from "./WipByStageChart";
 import { PumpsByCustomerChart } from "./PumpsByCustomerChart";
+import { CapacityByDepartmentChart } from "./CapacityByDepartmentChart";
+import { LateOrdersChart } from "./LateOrdersChart";
 
 vi.mock("../../charts/HoverAnimatedPieChart", () => ({
   HoverAnimatedPieChart: () => null,
@@ -93,5 +95,55 @@ describe("dashboard chart drilldowns", () => {
 
     fireEvent.click(screen.getByTestId("customer-chip-Sunbelt"));
     expect(handleDrilldown).toHaveBeenCalledWith({ customerId: "Sunbelt" });
+  });
+
+  it("CapacityByDepartmentChart emits department drilldown events", () => {
+    const pumps = [
+      buildPump({ id: "a", stage: "FABRICATION" }),
+      buildPump({ id: "b", stage: "ASSEMBLY" }),
+    ];
+    const handle = vi.fn();
+
+    render(
+      <CapacityByDepartmentChart
+        pumps={pumps}
+        filters={{ ...baseFilters }}
+        onDrilldown={handle}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("department-chip-Fabrication"));
+    expect(handle).toHaveBeenCalledWith({ department: "Fabrication" });
+  });
+
+  it("LateOrdersChart renders late pumps and exposes clear action", () => {
+    const pumps = [
+      buildPump({
+        id: "a",
+        scheduledEnd: "2024-01-01",
+        last_update: "2024-02-01",
+        stage: "FABRICATION",
+        customer: "Acme",
+        po: "PO-1",
+      }),
+    ];
+    const handle = vi.fn();
+
+    render(
+      <LateOrdersChart
+        pumps={pumps}
+        filters={{ ...baseFilters, stage: "FABRICATION" }}
+        onDrilldown={handle}
+      />
+    );
+
+    expect(screen.getByText(/PO-1/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /clear filters/i }));
+    expect(handle).toHaveBeenCalledWith({
+      stage: undefined,
+      customerId: undefined,
+      modelId: undefined,
+      department: undefined,
+    });
   });
 });

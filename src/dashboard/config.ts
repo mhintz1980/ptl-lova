@@ -3,6 +3,8 @@ import type { Pump, Stage, Department } from "../types";
 import { WipByStageChart } from "../components/dashboard/charts/WipByStageChart";
 import { PumpsByCustomerChart } from "../components/dashboard/charts/PumpsByCustomerChart";
 import { PumpsByModelChart } from "../components/dashboard/charts/PumpsByModelChart";
+import { CapacityByDepartmentChart } from "../components/dashboard/charts/CapacityByDepartmentChart";
+import { LateOrdersChart } from "../components/dashboard/charts/LateOrdersChart";
 
 export type DashboardTopicId =
   | "production"
@@ -67,14 +69,14 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
     id: "capacityByDept",
     title: "Capacity by Department",
     description: "Utilization vs. departmental limits.",
-    component: PlaceholderChart,
+    component: CapacityByDepartmentChart,
     defaultSize: "lg",
   },
   lateOrders: {
     id: "lateOrders",
     title: "Late Orders",
     description: "POs exceeding their promise dates.",
-    component: PlaceholderChart,
+    component: LateOrdersChart,
     defaultSize: "md",
   },
   leadTimeTrend: {

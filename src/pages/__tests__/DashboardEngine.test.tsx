@@ -53,11 +53,15 @@ vi.mock("../../store", () => {
     },
   ];
 
+  const state = {
+    pumps,
+    filters: {},
+    sortField: "default",
+    sortDirection: "desc",
+  };
+
   return {
-    useApp: (selector: (state: any) => any) =>
-      selector({
-        filtered: () => pumps,
-      }),
+    useApp: (selector: (state: typeof state) => any) => selector(state),
   };
 });
 
@@ -88,7 +92,19 @@ describe("DashboardEngine", () => {
     expect(chartRenderSpy).toHaveBeenCalled();
     const drillButtons = screen.getAllByTestId("chart-stub");
     fireEvent.click(drillButtons[0]);
-    const latestFilters = chartRenderSpy.mock.calls.at(-1)[0];
+    const latestFilters =
+      chartRenderSpy.mock.calls[chartRenderSpy.mock.calls.length - 1][0];
     expect(latestFilters.stage).toBe("FABRICATION");
+  });
+
+  it("shows filter breadcrumb and allows clearing a filter", () => {
+    render(<DashboardEngine />);
+    const drillButtons = screen.getAllByTestId("chart-stub");
+    fireEvent.click(drillButtons[0]);
+    const crumb = screen.getByRole("button", { name: /stage:/i });
+    fireEvent.click(crumb);
+    const latestFilters =
+      chartRenderSpy.mock.calls[chartRenderSpy.mock.calls.length - 1][0];
+    expect(latestFilters.stage).toBeUndefined();
   });
 });

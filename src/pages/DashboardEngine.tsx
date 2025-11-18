@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import { CHART_REGISTRY, TOPIC_CONFIGS, type ChartId, type DashboardFilters } from "../dashboard/config";
 import type { Pump } from "../types";
 import { useApp } from "../store";
+import { applyFilters } from "../lib/utils";
+import { sortPumps } from "../lib/sort";
+import { FilterBreadcrumb } from "../components/dashboard/FilterBreadcrumb";
 
 const DEFAULT_FILTERS: DashboardFilters = {
   dateRange: { from: null, to: null },
@@ -12,10 +15,17 @@ interface DashboardEngineProps {
 }
 
 export function DashboardEngine({ pumps }: DashboardEngineProps) {
-  const storePumps = useApp((state) => state.filtered());
-  const availablePumps = pumps ?? storePumps;
+  const rawStorePumps = useApp((state) => state.pumps);
+  const storeFilters = useApp((state) => state.filters);
+  const storeSortField = useApp((state) => state.sortField);
+  const storeSortDirection = useApp((state) => state.sortDirection);
+  const fallbackPumps = useMemo(() => {
+    const filtered = applyFilters(rawStorePumps, storeFilters);
+    return sortPumps(filtered, storeSortField, storeSortDirection);
+  }, [rawStorePumps, storeFilters, storeSortField, storeSortDirection]);
+  const availablePumps = pumps ?? fallbackPumps;
   const [topicIndex, setTopicIndex] = useState(0);
-  const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<DashboardFilters>({ ...DEFAULT_FILTERS });
 
   const topic = TOPIC_CONFIGS[topicIndex % TOPIC_CONFIGS.length];
   const chartIdsToRender = useMemo(() => {
@@ -30,6 +40,20 @@ export function DashboardEngine({ pumps }: DashboardEngineProps) {
     setTopicIndex((current) => (current + 1) % TOPIC_CONFIGS.length);
   };
 
+  const handleClearFilters = () => {
+    setFilters({ ...DEFAULT_FILTERS });
+  };
+
+  const handleClearChip = (key: keyof DashboardFilters) => {
+    setFilters((prev) => ({ ...prev, [key]: undefined }));
+  };
+
+  const hasActiveFilters =
+    filters.stage ||
+    filters.department ||
+    filters.customerId ||
+    filters.modelId;
+
   return (
     <div className="space-y-6" data-testid="dashboard-engine">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
@@ -38,6 +62,15 @@ export function DashboardEngine({ pumps }: DashboardEngineProps) {
           <h2 className="text-2xl font-semibold text-foreground">{topic.label}</h2>
         </div>
         <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-primary/10"
+              onClick={handleClearFilters}
+            >
+              Clear Filters
+            </button>
+          )}
           <button
             type="button"
             className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-primary/10"
@@ -47,6 +80,8 @@ export function DashboardEngine({ pumps }: DashboardEngineProps) {
           </button>
         </div>
       </header>
+
+      <FilterBreadcrumb filters={filters} onClear={handleClearChip} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {chartIdsToRender.length === 0 && (

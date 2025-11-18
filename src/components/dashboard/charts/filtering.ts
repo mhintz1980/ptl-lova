@@ -10,7 +10,7 @@ const IN_PROGRESS_STAGES: Stage[] = [
 ];
 const DONE_STAGES: Stage[] = ["CLOSED"];
 
-const STAGE_DEPARTMENT: Record<Stage, Department> = {
+export const STAGE_DEPARTMENT: Record<Stage, Department> = {
   UNSCHEDULED: "Fabrication",
   "NOT STARTED": "Fabrication",
   FABRICATION: "Fabrication",
@@ -20,6 +20,13 @@ const STAGE_DEPARTMENT: Record<Stage, Department> = {
   SHIPPING: "Testing & Shipping",
   CLOSED: "Testing & Shipping",
 };
+
+export const DEPARTMENTS: Department[] = [
+  "Fabrication",
+  "Powder Coat",
+  "Assembly",
+  "Testing & Shipping",
+];
 
 const matchesDateRange = (
   dateString: string,
@@ -74,4 +81,39 @@ export function groupCounts(
   return Array.from(map.entries())
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
+}
+
+export function groupByDepartment(
+  pumps: Pump[],
+  filters: DashboardFilters
+) {
+  const filtered = filterPumpsForDashboard(pumps, filters);
+  const map = new Map<Department, number>();
+  filtered.forEach((pump) => {
+    const dept = STAGE_DEPARTMENT[pump.stage];
+    map.set(dept, (map.get(dept) ?? 0) + 1);
+  });
+  return DEPARTMENTS.map((dept) => ({
+    department: dept,
+    value: map.get(dept) ?? 0,
+  }));
+}
+
+export function getLateOrders(
+  pumps: Pump[],
+  filters: DashboardFilters
+): Pump[] {
+  const filtered = filterPumpsForDashboard(pumps, filters);
+  const now = new Date();
+  return filtered
+    .filter((pump) => {
+      if (!pump.scheduledEnd) return false;
+      if (pump.stage === "CLOSED") return false;
+      return new Date(pump.scheduledEnd) < now;
+    })
+    .sort((a, b) => {
+      const aDate = new Date(a.scheduledEnd ?? "").getTime();
+      const bDate = new Date(b.scheduledEnd ?? "").getTime();
+      return bDate - aDate;
+    });
 }
