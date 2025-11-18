@@ -12,6 +12,12 @@ export type Stage =
 
 export type Priority = "Low" | "Normal" | "High" | "Rush" | "Urgent";
 
+export type Department =
+  | "Fabrication"
+  | "Powder Coat"
+  | "Assembly"
+  | "Testing & Shipping";
+
 export interface Pump {
   id: string;              // uuid
   serial: number;          // 4-digit unique
