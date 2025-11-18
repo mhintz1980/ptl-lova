@@ -508,4 +508,99 @@
     box-shadow: 0 0 20px rgba(94, 234, 212, 0.25);
   }
 
+  .chart-card {
+    min-height: 320px;
+    padding: 1.25rem;
+  }
+
+  .chart-card__content {
+    padding-top: 0;
+  }
+  .chart-canvas {
+    filter: drop-shadow(0 20px 45px rgba(5, 10, 20, 0.45));
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+
+  .chart-canvas--hovered {
+    transform: scale(1.025);
+    filter: drop-shadow(0 28px 65px rgba(34, 211, 238, 0.25));
+  }
+
+  .chart-slice {
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+
+  .chart-card:hover .chart-slice {
+    transform: scale(1.02);
+    filter: brightness(1.05);
+  }
+
+  .chart-legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 0.5rem;
+    margin-top: 0.75rem;
+    max-height: calc(3 * 2.1rem);
+    overflow: hidden;
+  }
+
+  .chart-legend-row__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: clamp(0.65rem, 1.6vw, 0.78rem);
+    line-height: 1.2;
+    border: 1px solid transparent;
+    transition: border 0.2s ease, color 0.2s ease;
+    max-width: 12rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chart-legend-row__item--active {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: hsl(var(--foreground));
+  }
+
+  .chart-legend-row__chip {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    box-shadow: 0 0 6px rgba(94, 234, 212, 0.35);
+    flex-shrink: 0;
+  }
+
+  .chart-legend-row__label {
+    font-weight: 600;
+    max-width: 5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chart-legend-row__value {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+    max-width: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chart-callout__label-text,
+  .chart-callout__value-text {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    fill: hsl(var(--muted-foreground));
+  }
+
+  .chart-callout__value-text {
+    font-weight: 600;
+    fill: hsl(var(--foreground));
+  }
+
 }

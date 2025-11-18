@@ -5,7 +5,6 @@ import { KpiStrip } from "../components/dashboard/KpiStrip";
 import { WorkloadChart } from "../components/dashboard/WorkloadChart";
 import { ValueChart } from "../components/dashboard/ValueChart";
 import { CapacityChart } from "../components/dashboard/CapacityChart";
-import { TrendChart } from "../components/dashboard/TrendChart";
 import { PumpTable } from "../components/dashboard/PumpTable";
 import { useApp } from "../store";
 
@@ -27,16 +26,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <KpiStrip pumps={pumps} compact={collapsed} />
 
       {!collapsed && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <WorkloadChart pumps={pumps} type="customer" />
-          <WorkloadChart pumps={pumps} type="model" />
-          <ValueChart pumps={pumps} type="customer" />
-          <ValueChart pumps={pumps} type="model" />
-          <CapacityChart pumps={pumps} />
-          <div className="md:col-span-2 lg:col-span-3">
-            <TrendChart pumps={pumps} />
+        <>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <WorkloadChart pumps={pumps} type="customer" />
+            <WorkloadChart pumps={pumps} type="model" />
+            <ValueChart pumps={pumps} type="customer" />
           </div>
-        </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <ValueChart pumps={pumps} type="model" />
+            <CapacityChart pumps={pumps} />
+          </div>
+        </>
       )}
 
       <PumpTable pumps={pumps} onSelectPump={onSelectPump} />
