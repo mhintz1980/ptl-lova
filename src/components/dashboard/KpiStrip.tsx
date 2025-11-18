@@ -3,6 +3,7 @@ import { Pump } from "../../types";
 import { Card, CardContent } from "../ui/Card";
 import { round } from "../../lib/format";
 import { cn } from "../../lib/utils";
+import { useTheme } from "../../hooks/useTheme";
 
 interface KpiStripProps {
   pumps: Pump[];
@@ -17,6 +18,9 @@ function diffDays(pump: Pump): number {
 }
 
 export function KpiStrip({ pumps, compact = false }: KpiStripProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+
   const closed = pumps.filter(p => p.stage === "CLOSED");
   const onTime = closed.filter(p => !p.scheduledEnd || new Date(p.last_update) <= new Date(p.scheduledEnd));
   const lateOpen = pumps.filter(p => p.scheduledEnd && new Date() > new Date(p.scheduledEnd) && p.stage !== "CLOSED");
@@ -74,17 +78,24 @@ export function KpiStrip({ pumps, compact = false }: KpiStripProps) {
           key={metric.label}
           className={cn(
             "layer-l1 border border-white/10 bg-gradient-to-br from-card/70 via-card/30 to-card/80",
-            compact ? "p-3" : "p-0"
+            compact ? "p-3" : "p-0",
+            isLight && "bg-white text-foreground"
           )}
         >
           <CardContent className={cn("p-6", compact && "p-4")}>
             <div className="space-y-2">
-              <div className="text-[10px] uppercase tracking-[0.35em] text-white/60">
+              <div
+                className={cn(
+                  "text-[10px] uppercase tracking-[0.35em]",
+                  isLight ? "text-muted-foreground" : "text-white/60"
+                )}
+              >
                 {metric.label}
               </div>
               <div
                 className={cn(
-                  "text-2xl font-semibold text-white",
+                  "text-2xl font-semibold",
+                  isLight ? "text-foreground" : "text-white",
                   compact && "text-xl"
                 )}
               >
