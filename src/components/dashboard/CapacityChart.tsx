@@ -49,14 +49,14 @@ const getStageCapacity = (pumps: Pump[]) => {
 
 const getStageColor = (stage: Stage) => {
   const colors: Record<Stage, string> = {
-    "UNSCHEDULED": "hsl(var(--muted))",
+    "UNSCHEDULED": "hsl(var(--muted-foreground))",
     "NOT STARTED": "hsl(var(--muted-foreground))",
     "FABRICATION": "hsl(var(--chart-1))",
     "POWDER COAT": "hsl(var(--chart-2))",
     "ASSEMBLY": "hsl(var(--chart-3))",
     "TESTING": "hsl(var(--chart-4))",
     "SHIPPING": "hsl(var(--chart-5))",
-    "CLOSED": "hsl(var(--primary))"
+    "CLOSED": "hsl(var(--primary))",
   };
   return colors[stage];
 };
@@ -90,26 +90,17 @@ const CustomTooltip = ({ active, payload }: CapacityTooltipProps) => {
 
 export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps }) => {
   const data = React.useMemo(() => getStageCapacity(pumps), [pumps]);
-  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
   return (
-    <Card className="layer-l1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-1">
+    <Card className="layer-l1">
         <CardHeader>
           <CardTitle className="text-lg">Production Capacity by Stage</CardTitle>
         </CardHeader>
-        <CardContent className="transition-transform duration-300 hover:translate-y-[-4px]">
+        <CardContent>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart
               data={data}
               margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
-              onMouseMove={(state) => {
-                if (state.isTooltipActive && typeof state.activeTooltipIndex === 'number') {
-                  setHoveredIndex(state.activeTooltipIndex);
-                } else {
-                  setHoveredIndex(null);
-                }
-              }}
-              onMouseLeave={() => setHoveredIndex(null)}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
               <XAxis
@@ -132,12 +123,6 @@ export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps }) => {
                   <Cell
                     key={`cell-${index}`}
                     fill={getStageColor(entry.displayName)}
-                    style={{
-                      filter: hoveredIndex === index ? 'drop-shadow(0 0 8px currentColor) brightness(1.2)' : 'none',
-                      transform: hoveredIndex === index ? 'scaleY(1.05)' : 'scaleY(1)',
-                      transformOrigin: 'bottom',
-                      transition: 'all 0.2s ease',
-                    }}
                   />
                 ))}
               </Bar>
