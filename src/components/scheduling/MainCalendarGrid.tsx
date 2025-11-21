@@ -14,7 +14,7 @@ import { useApp } from "../../store";
 
 interface MainCalendarGridProps {
   pumps: Pump[];
-  onEventClick: (event: CalendarStageEvent) => void;
+  onEventClick?: (event: CalendarStageEvent) => void;
   visibleStages?: Stage[];
 }
 
@@ -134,7 +134,7 @@ export function MainCalendarGrid({ pumps, onEventClick, visibleStages }: MainCal
         {Array.from({ length: weeks }).map((_, weekIndex) => {
           const weekStart = weekIndex * 7;
           const weekDates = viewDates.slice(weekStart, weekStart + 7);
-          
+
           return (
             <div key={weekIndex} className="border-b border-border/50">
               {/* Week Header */}
@@ -149,7 +149,7 @@ export function MainCalendarGrid({ pumps, onEventClick, visibleStages }: MainCal
                         "border-r border-border/40 px-2 py-2 text-center text-foreground transition-all duration-150",
                         isWeekend && "calendar-weekend-header",
                         date.toDateString() === today.toDateString() &&
-                          "bg-primary/10 text-primary"
+                        "bg-primary/10 text-primary"
                       )}
                     >
                       <div className="flex items-center justify-center gap-1 text-[11px] font-semibold uppercase tracking-[0.15em]">
