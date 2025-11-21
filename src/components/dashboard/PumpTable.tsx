@@ -31,8 +31,7 @@ const priorityColors: Record<PriorityDot, string> = {
 };
 
 const stageLabels: Record<Stage, string> = {
-  "UNSCHEDULED": "Unscheduled",
-  "NOT STARTED": "Not Started",
+  "QUEUE": "Queue",
   FABRICATION: "Fabrication",
   "POWDER COAT": "Powder Coat",
   ASSEMBLY: "Assembly",

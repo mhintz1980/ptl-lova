@@ -19,8 +19,10 @@ interface HoverAnimatedPieChartProps<T extends DataPoint> {
   colors: string[];
   title: string;
   subtitle?: string;
+  headless?: boolean;
+  onDrilldown?: (key: string, value: any) => void;
+  valueFormatter?: (value: number, item?: T) => string;
   height?: number;
-  valueFormatter?: (value: number, payload: T) => string;
 }
 
 const RADIAN = Math.PI / 180;
@@ -35,6 +37,8 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
   subtitle,
   height = 220,
   valueFormatter = defaultValueFormatter,
+  headless = false,
+  onDrilldown,
 }: HoverAnimatedPieChartProps<T>) {
   const [activeSlice, setActiveSlice] = React.useState(0);
   const [chartSize, setChartSize] = React.useState({ width: 0, height: 0 });
@@ -140,6 +144,115 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
     );
   };
 
+  const Content = (
+    <div className="h-full w-full flex flex-col">
+      <div
+        style={{ height: headless ? '100%' : height }}
+        ref={chartBoundsRef}
+        className={isHovered ? "chart-canvas chart-canvas--hovered flex-1" : "chart-canvas flex-1"}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <defs>
+              <filter
+                id="chartGlow"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="14"
+                  result="blur"
+                />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <Pie
+              {...({
+                data,
+                dataKey: dataKey as string,
+                nameKey: nameKey as string,
+                cx: "50%",
+                cy: "50%",
+                innerRadius: "56%",
+                outerRadius: "72%",
+                paddingAngle: 5,
+                cornerRadius: 999,
+                activeIndex: activeSlice,
+                activeShape: renderActiveShape,
+                onMouseEnter: (_: any, index: number) => setActiveSlice(index),
+                onClick: (data: any) => {
+                  if (onDrilldown && data && data[nameKey]) {
+                    onDrilldown(String(nameKey), data[nameKey]);
+                  }
+                }
+              } satisfies PieProps & {
+                activeIndex: number;
+                activeShape: typeof renderActiveShape;
+                onMouseEnter: (_: any, index: number) => void;
+                onClick: (data: any) => void;
+              })}
+            >
+              {data.map((item, index) => (
+                <Cell
+                  key={`${item[nameKey]}-${index}`}
+                  fill={colors[index % colors.length]}
+                  className="chart-slice cursor-pointer"
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="chart-legend-row mt-4" aria-label="Chart legend">
+        {data.map((item, index) => {
+          const value =
+            typeof item[dataKey] === "number" ? (item[dataKey] as number) : 0;
+          const percentage = total ? Math.round((value / total) * 100) : 0;
+          const label = String(item[nameKey]);
+
+          return (
+            <button
+              type="button"
+              key={`${item[nameKey]}-legend`}
+              className={`chart-legend-row__item ${index === activeSlice ? "chart-legend-row__item--active" : ""
+                }`}
+              onMouseEnter={() => setActiveSlice(index)}
+              onFocus={() => setActiveSlice(index)}
+              onClick={() => {
+                if (onDrilldown) {
+                  onDrilldown(String(nameKey), item[nameKey]);
+                }
+              }}
+              title={`${label} – ${valueFormatter(value, item)} (${percentage}%)`}
+            >
+              <span
+                className="chart-legend-row__chip"
+                style={{ backgroundColor: colors[index % colors.length] }}
+              />
+              <span className="chart-legend-row__label">{label}</span>
+              <span className="chart-legend-row__value">
+                {valueFormatter(value, item)} · {percentage}%
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  if (headless) {
+    return Content;
+  }
+
   return (
     <Card className="layer-l1 chart-card">
       <CardHeader>
@@ -153,96 +266,7 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
         </CardTitle>
       </CardHeader>
       <CardContent className="relative chart-card__content">
-        <div
-          style={{ height }}
-          ref={chartBoundsRef}
-          className={isHovered ? "chart-canvas chart-canvas--hovered" : "chart-canvas"}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <defs>
-                <filter
-                  id="chartGlow"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur
-                    in="SourceGraphic"
-                    stdDeviation="14"
-                    result="blur"
-                  />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <Pie
-                {...({
-                  data,
-                  dataKey: dataKey as string,
-                  nameKey: nameKey as string,
-                  cx: "50%",
-                  cy: "50%",
-                  innerRadius: "56%",
-                  outerRadius: "72%",
-                  paddingAngle: 5,
-                  cornerRadius: 999,
-                  activeIndex: activeSlice,
-                  activeShape: renderActiveShape,
-                  onMouseEnter: (_: any, index: number) => setActiveSlice(index),
-                } satisfies PieProps & {
-                  activeIndex: number;
-                  activeShape: typeof renderActiveShape;
-                  onMouseEnter: (_: any, index: number) => void;
-                })}
-              >
-                {data.map((item, index) => (
-                  <Cell
-                    key={`${item[nameKey]}-${index}`}
-                    fill={colors[index % colors.length]}
-                    className="chart-slice"
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="chart-legend-row" aria-label="Chart legend">
-          {data.map((item, index) => {
-            const value =
-              typeof item[dataKey] === "number" ? (item[dataKey] as number) : 0;
-            const percentage = total ? Math.round((value / total) * 100) : 0;
-            const label = String(item[nameKey]);
-
-            return (
-              <button
-                type="button"
-                key={`${item[nameKey]}-legend`}
-                className={`chart-legend-row__item ${
-                  index === activeSlice ? "chart-legend-row__item--active" : ""
-                }`}
-                onMouseEnter={() => setActiveSlice(index)}
-                onFocus={() => setActiveSlice(index)}
-                title={`${label} – ${valueFormatter(value, item)} (${percentage}%)`}
-              >
-                <span
-                  className="chart-legend-row__chip"
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                />
-                <span className="chart-legend-row__label">{label}</span>
-                <span className="chart-legend-row__value">
-                  {valueFormatter(value, item)} · {percentage}%
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {Content}
       </CardContent>
     </Card>
   );

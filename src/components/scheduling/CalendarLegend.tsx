@@ -14,7 +14,7 @@ interface CalendarLegendProps {
 
 // Only show active stages in the legend (excluding unscheduled and closed)
 const ACTIVE_STAGES: Stage[] = [
-  "NOT STARTED",
+  "QUEUE",
   "FABRICATION",
   "POWDER COAT",
   "ASSEMBLY",
@@ -33,8 +33,8 @@ function LegendItem({ stage, active }: { stage: Stage; active: boolean }) {
         <div className="text-center">
           <div className="font-medium">{label}</div>
           <div className="text-xs text-gray-300 mt-1">
-            {stage === "NOT STARTED"
-              ? "Items not yet scheduled"
+            {stage === "QUEUE"
+              ? "Items in production queue"
               : `Production stage: ${label.toLowerCase()}`}
           </div>
         </div>

@@ -1,8 +1,7 @@
 import type { Stage } from "../types";
 
 export const STAGE_SEQUENCE: Stage[] = [
-  "UNSCHEDULED",
-  "NOT STARTED",
+  "QUEUE",
   "FABRICATION",
   "POWDER COAT",
   "ASSEMBLY",
@@ -17,11 +16,11 @@ export const PRODUCTION_STAGES: Stage[] = [
   "ASSEMBLY",
   "TESTING",
   "SHIPPING",
+  "CLOSED",
 ];
 
 export const STAGE_LABELS: Record<Stage, string> = {
-  "UNSCHEDULED": "Unscheduled",
-  "NOT STARTED": "Not Started",
+  "QUEUE": "Queue",
   FABRICATION: "Fabrication",
   "POWDER COAT": "Powder Coat",
   ASSEMBLY: "Assembly",
@@ -31,8 +30,7 @@ export const STAGE_LABELS: Record<Stage, string> = {
 };
 
 export const STAGE_COLORS: Record<Stage, string> = {
-  "UNSCHEDULED": "stage-color stage-color-unscheduled",
-  "NOT STARTED": "stage-color stage-color-not-started",
+  "QUEUE": "stage-color stage-color-queue",
   FABRICATION: "stage-color stage-color-fabrication",
   "POWDER COAT": "stage-color stage-color-powder",
   ASSEMBLY: "stage-color stage-color-assembly",

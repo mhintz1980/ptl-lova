@@ -2,10 +2,15 @@
 import React from "react";
 import { Pump } from "../../types";
 import { HoverAnimatedPieChart } from "../charts/HoverAnimatedPieChart";
+import { ChartProps } from "./dashboardConfig";
+import { useApp } from "../../store";
+import { applyDashboardFilters } from "./utils";
 
 interface ValueChartProps {
   pumps: Pump[];
   type: "customer" | "model";
+  headless?: boolean;
+  onDrilldown?: (update: Partial<any>) => void;
 }
 
 const aggregatePoValue = (pumps: Pump[], type: 'customer' | 'model') => {
@@ -33,7 +38,7 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export const ValueChart: React.FC<ValueChartProps> = ({ pumps, type }) => {
+export const ValueChart: React.FC<ValueChartProps> = ({ pumps, type, headless, onDrilldown }) => {
   const data = React.useMemo(() => aggregatePoValue(pumps, type), [pumps, type]);
 
   const colors = [
@@ -53,6 +58,24 @@ export const ValueChart: React.FC<ValueChartProps> = ({ pumps, type }) => {
       title={`Value by ${type === "customer" ? "Customer" : "Model"}`}
       subtitle="Top 8 combined PO values"
       valueFormatter={(value) => formatCurrency(value)}
+      headless={headless}
+      onDrilldown={(_, value) => {
+        if (onDrilldown) {
+          onDrilldown({ [type]: value });
+        }
+      }}
     />
   );
+};
+
+export const ValueByCustomerChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <ValueChart pumps={filteredPumps} type="customer" headless={true} onDrilldown={onDrilldown} />;
+};
+
+export const ValueByModelChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <ValueChart pumps={filteredPumps} type="model" headless={true} onDrilldown={onDrilldown} />;
 };
