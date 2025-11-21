@@ -29,7 +29,7 @@ const samplePumps: Pump[] = [
     po: "PO-001",
     customer: "Customer A",
     model: "Model X",
-    stage: "NOT STARTED",
+    stage: "QUEUE",
     priority: "Normal",
     last_update: new Date().toISOString(),
     value: 5000,

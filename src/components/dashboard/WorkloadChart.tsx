@@ -2,10 +2,15 @@
 import React from "react";
 import { Pump } from "../../types";
 import { HoverAnimatedPieChart } from "../charts/HoverAnimatedPieChart";
+import { ChartProps } from "./dashboardConfig";
+import { useApp } from "../../store";
+import { applyDashboardFilters } from "./utils";
 
 interface WorkloadChartProps {
   pumps: Pump[];
   type: "customer" | "model";
+  headless?: boolean;
+  onDrilldown?: (update: Partial<any>) => void;
 }
 
 const buildCounts = (pumps: Pump[], type: 'customer' | 'model') => {
@@ -21,7 +26,7 @@ const buildCounts = (pumps: Pump[], type: 'customer' | 'model') => {
     .slice(0, 8); // Top 8 for better visualization
 };
 
-export const WorkloadChart: React.FC<WorkloadChartProps> = ({ pumps, type }) => {
+export const WorkloadChart: React.FC<WorkloadChartProps> = ({ pumps, type, headless, onDrilldown }) => {
   const data = React.useMemo(() => buildCounts(pumps, type), [pumps, type]);
 
   const getChartColor = (index: number) => {
@@ -46,6 +51,24 @@ export const WorkloadChart: React.FC<WorkloadChartProps> = ({ pumps, type }) => 
       valueFormatter={(value) =>
         `${value} ${type === "customer" ? "pumps" : "units"}`
       }
+      headless={headless}
+      onDrilldown={(_, value) => {
+        if (onDrilldown) {
+          onDrilldown({ [type]: value });
+        }
+      }}
     />
   );
+};
+
+export const WorkloadByCustomerChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <WorkloadChart pumps={filteredPumps} type="customer" headless={true} onDrilldown={onDrilldown} />;
+};
+
+export const WorkloadByModelChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <WorkloadChart pumps={filteredPumps} type="model" headless={true} onDrilldown={onDrilldown} />;
 };

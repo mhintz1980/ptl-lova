@@ -37,15 +37,14 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
     const avg = samples.reduce((sum, value) => sum + value, 0) / samples.length;
     return `${avg.toFixed(1)}d`;
   }, [sortedPumps]);
-  
+
   const { setNodeRef, isOver } = useDroppable({
     id: stage,
     data: { type: "column", stage },
   });
 
   const stageAccent: Record<Stage, string> = {
-    "UNSCHEDULED": "bg-slate-300",
-    "NOT STARTED": "bg-slate-400",
+    "QUEUE": "bg-slate-400",
     "FABRICATION": "bg-blue-500",
     "POWDER COAT": "bg-purple-500",
     "ASSEMBLY": "bg-amber-500",

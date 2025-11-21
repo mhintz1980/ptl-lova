@@ -20,7 +20,7 @@ describe("DragAndDropContext", () => {
     po: "PO-1",
     customer: "Customer",
     model: "Model X",
-    stage: "UNSCHEDULED" as const,
+    stage: "QUEUE" as const,
     priority: "Normal" as const,
     last_update: new Date().toISOString(),
     value: 1000,

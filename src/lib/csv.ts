@@ -53,7 +53,7 @@ function normalizeRow(r: RawPumpRow): Pump | null {
   const priority = (r.priority || "Normal") as Priority;
 
   // Basic validation for stage and priority
-  const validStages: Stage[] = ["UNSCHEDULED", "NOT STARTED", "FABRICATION", "POWDER COAT", "ASSEMBLY", "TESTING", "SHIPPING", "CLOSED"];
+  const validStages: Stage[] = ["QUEUE", "FABRICATION", "POWDER COAT", "ASSEMBLY", "TESTING", "SHIPPING", "CLOSED"];
   const validPriorities: Priority[] = ["Low", "Normal", "High", "Rush", "Urgent"];
 
   if (!validStages.includes(stage)) return null;

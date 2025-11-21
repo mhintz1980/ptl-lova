@@ -3,9 +3,14 @@ import React from "react";
 import { Pump, Stage } from "../../types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { ChartProps } from "./dashboardConfig";
+import { useApp } from "../../store";
+import { applyDashboardFilters } from "./utils";
 
 interface CapacityChartProps {
   pumps: Pump[];
+  headless?: boolean;
+  onDrilldown?: (update: Partial<any>) => void;
 }
 
 interface CapacityTooltipProps {
@@ -20,7 +25,7 @@ interface CapacityTooltipProps {
 }
 
 const STAGE_ORDER: Stage[] = [
-  "NOT STARTED",
+  "QUEUE",
   "FABRICATION",
   "POWDER COAT",
   "ASSEMBLY",
@@ -49,8 +54,7 @@ const getStageCapacity = (pumps: Pump[]) => {
 
 const getStageColor = (stage: Stage) => {
   const colors: Record<Stage, string> = {
-    "UNSCHEDULED": "hsl(var(--muted-foreground))",
-    "NOT STARTED": "hsl(var(--muted-foreground))",
+    "QUEUE": "hsl(var(--muted-foreground))",
     "FABRICATION": "hsl(var(--chart-1))",
     "POWDER COAT": "hsl(var(--chart-2))",
     "ASSEMBLY": "hsl(var(--chart-3))",
@@ -88,47 +92,75 @@ const CustomTooltip = ({ active, payload }: CapacityTooltipProps) => {
   return null;
 };
 
-export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps }) => {
+export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps, headless, onDrilldown }) => {
   const data = React.useMemo(() => getStageCapacity(pumps), [pumps]);
+
+  const Content = (
+    <ResponsiveContainer width="100%" height={headless ? "100%" : 280}>
+      <BarChart
+        data={data}
+        margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
+        onClick={(data: any) => {
+          if (onDrilldown && data && data.activePayload && data.activePayload[0]) {
+            const stage = data.activePayload[0].payload.displayName;
+            onDrilldown({ stage });
+          }
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+        <XAxis
+          dataKey="stage"
+          tick={{ fontSize: 10 }}
+          className="fill-muted-foreground"
+        />
+        <YAxis
+          tick={{ fontSize: 10 }}
+          className="fill-muted-foreground"
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Bar
+          dataKey="count"
+          radius={[4, 4, 0, 0]}
+          animationBegin={0}
+          animationDuration={800}
+          className="cursor-pointer"
+        >
+          {data.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={getStageColor(entry.displayName)}
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+
+  if (headless) {
+    return <div className="h-full w-full">{Content}</div>;
+  }
 
   return (
     <Card className="layer-l1">
-        <CardHeader>
-          <CardTitle className="text-lg">Production Capacity by Stage</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart
-              data={data}
-              margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-              <XAxis
-                dataKey="stage"
-                tick={{ fontSize: 10 }}
-                className="fill-muted-foreground"
-              />
-              <YAxis
-                tick={{ fontSize: 10 }}
-                className="fill-muted-foreground"
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="count"
-                radius={[4, 4, 0, 0]}
-                animationBegin={0}
-                animationDuration={800}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={getStageColor(entry.displayName)}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Production Capacity by Stage</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {Content}
+      </CardContent>
+    </Card>
   );
 };
+
+export const CapacityByDeptChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <CapacityChart pumps={filteredPumps} headless={true} onDrilldown={onDrilldown} />;
+};
+
+export const LeadTimeTrendChart: React.FC<ChartProps> = ({ filters }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <CapacityChart pumps={filteredPumps} />;
+};
+

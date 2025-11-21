@@ -33,14 +33,13 @@ export function SegmentedCalendarBar({
   // Sort segments by stage sequence to ensure proper order
   const sortedSegments = useMemo(() => {
     const stageOrder: Record<Stage, number> = {
-      "UNSCHEDULED": 0,
-      "NOT STARTED": 1,
-      FABRICATION: 2,
-      "POWDER COAT": 3,
-      ASSEMBLY: 4,
-      TESTING: 5,
-      SHIPPING: 6,
-      CLOSED: 7,
+      "QUEUE": 0,
+      FABRICATION: 1,
+      "POWDER COAT": 2,
+      ASSEMBLY: 3,
+      TESTING: 4,
+      SHIPPING: 5,
+      CLOSED: 6,
     };
 
     return segments
@@ -89,7 +88,7 @@ export function SegmentedCalendarBar({
         <div className="flex-1 h-4 min-w-0 ml-2">
           <div className="w-full h-full rounded-md overflow-hidden flex">
             {sortedSegments.map((segment, index) => {
-                  const colorClass = STAGE_COLORS[segment.stage] || "stage-color stage-color-unscheduled";
+              const colorClass = STAGE_COLORS[segment.stage] || "stage-color stage-color-queue";
               const widthPercent = `${segment.percentage * 100}%`;
 
               return (

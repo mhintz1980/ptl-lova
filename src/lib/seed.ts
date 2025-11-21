@@ -31,7 +31,7 @@ interface CatalogData {
 // Stage name conversion: Title Case → Uppercase
 function convertStageName(stageName: string): Stage {
   const stageMap: Record<string, Stage> = {
-    "Not Started": "NOT STARTED",
+    "Not Started": "QUEUE",
     "Fabrication": "FABRICATION",
     "Powder Coat": "POWDER COAT",
     "Assembly": "ASSEMBLY",
@@ -39,7 +39,7 @@ function convertStageName(stageName: string): Stage {
     "Shipping": "SHIPPING",
     "CLOSED": "CLOSED" // Add support for existing uppercase
   };
-  return stageMap[stageName] || "NOT STARTED";
+  return stageMap[stageName] || "QUEUE";
 }
 
 // Get production stages from catalog and add CLOSED
@@ -153,7 +153,7 @@ function generatePumpFromCatalog(
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing);
 
     // Determine current stage based on dates
-    let currentStage: Stage = "NOT STARTED";
+    let currentStage: Stage = "QUEUE";
     let lastUpdate = poDate.toISOString();
     let scheduledEnd = testingEnd.toISOString();
 
@@ -174,7 +174,7 @@ function generatePumpFromCatalog(
       currentStage = "FABRICATION";
       lastUpdate = fabricationStart.toISOString();
     } else {
-      currentStage = "NOT STARTED";
+      currentStage = "QUEUE";
       lastUpdate = poDate.toISOString();
     }
 
