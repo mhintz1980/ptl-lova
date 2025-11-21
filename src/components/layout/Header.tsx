@@ -1,4 +1,4 @@
-import { Filter, Moon, Package, Search, Sun } from "lucide-react";
+import { Filter, Moon, Package, Search, Settings, Sun } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -14,12 +14,14 @@ interface HeaderProps {
   currentView: AppView;
   onChangeView: (view: AppView) => void;
   onOpenAddPo: () => void;
+  onOpenSettings: () => void;
 }
 
 export function Header({
   currentView,
   onChangeView,
   onOpenAddPo,
+  onOpenSettings,
 }: HeaderProps) {
   const { mode, toggle } = useTheme();
   const { filters, setFilters } = useApp();
@@ -67,7 +69,7 @@ export function Header({
                 className={cn(
                   "header-button h-9 w-9 rounded-full border border-border/60 bg-card/70 text-foreground/70",
                   currentView === id &&
-                    "border-primary/40 bg-primary/15 text-foreground"
+                  "border-primary/40 bg-primary/15 text-foreground"
                 )}
                 onClick={() => onChangeView(id)}
                 title={label}
@@ -120,6 +122,17 @@ export function Header({
             ) : (
               <Moon className="h-4 w-4" />
             )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="header-button h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
+            onClick={onOpenSettings}
+            title="Settings"
+            aria-label="Open settings"
+          >
+            <Settings className="h-4 w-4" />
           </Button>
 
           <AddPoButton onClick={onOpenAddPo} />
