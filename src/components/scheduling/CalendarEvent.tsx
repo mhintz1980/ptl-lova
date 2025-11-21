@@ -5,11 +5,12 @@ import { useDraggable } from "@dnd-kit/core";
 
 interface CalendarEventProps {
   event: CalendarStageEvent;
-  onClick: (event: CalendarStageEvent) => void;
+  onClick?: (event: CalendarStageEvent) => void;
+  onDoubleClick?: (event: CalendarStageEvent) => void;
   isDragging?: boolean;
 }
 
-export function CalendarEvent({ event, onClick, isDragging = false }: CalendarEventProps) {
+export function CalendarEvent({ event, onClick, onDoubleClick, isDragging = false }: CalendarEventProps) {
   const { attributes, listeners, setNodeRef, isDragging: isDraggable } = useDraggable({
     id: event.id,
     data: {
@@ -22,45 +23,54 @@ export function CalendarEvent({ event, onClick, isDragging = false }: CalendarEv
   const stageLabel = STAGE_LABELS[event.stage] ?? event.stage;
   const idleDays = event.idleDays ?? 0;
   const status = idleDays > 6 ? "danger" : idleDays > 3 ? "warning" : "ok";
-  const handleClick = () => onClick(event);
+
+  const handleClick = () => onClick?.(event);
+  const handleDoubleClick = () => onDoubleClick?.(event);
+
   const stageColorClass = STAGE_COLORS[event.stage] ?? STAGE_COLORS["QUEUE"];
 
   const statusChipClass =
     status === "danger"
       ? "bg-rose-500/20 text-rose-900 dark:text-rose-50"
       : status === "warning"
-        ? "bg-amber-400/25 text-amber-900 dark:text-amber-50"
-        : "bg-emerald-400/25 text-emerald-900 dark:text-emerald-50";
+        ? "bg-amber-500/20 text-amber-900 dark:text-amber-50"
+        : "bg-emerald-500/20 text-emerald-900 dark:text-emerald-50";
 
-  const isEffectiveDragging = isDragging || isDraggable;
+  if (isDragging) {
+    return (
+      <div
+        className={cn(
+          "relative flex h-[34px] w-full flex-col justify-center rounded-md border px-2 py-0.5 text-xs shadow-sm transition-all",
+          stageColorClass,
+          "cursor-grabbing opacity-50 ring-2 ring-primary ring-offset-2"
+        )}
+      >
+        {/* Simplified content for drag overlay */}
+        <div className="font-bold">{event.title}</div>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
+      style={
+        {
+          gridColumnStart: event.startDay + 1,
+          gridColumnEnd: `span ${event.span}`,
+          gridRowStart: event.row + 1,
+        } as React.CSSProperties
+      }
       {...attributes}
+      {...listeners}
       className={cn(
-        "group flex h-full cursor-pointer flex-col justify-between rounded-xl border px-2.5 py-1.5 text-[11px] shadow-layer-sm transition-all duration-150",
+        "group relative flex h-[34px] w-full flex-col justify-center rounded-md border px-2 py-0.5 text-xs shadow-sm transition-all hover:shadow-md",
         stageColorClass,
-        isEffectiveDragging ? "opacity-30 border-dashed" : "hover:brightness-95"
+        isDraggable ? "opacity-50" : "opacity-100",
+        "cursor-grab active:cursor-grabbing"
       )}
-      style={{
-        gridColumn: `${event.startDay + 1} / span ${event.span}`,
-        minWidth: "100%",
-        zIndex: isEffectiveDragging ? 10 : 1,
-      }}
-      data-testid="calendar-event"
-      data-pump-id={event.pumpId}
-      data-stage={event.stage}
       onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
+      onDoubleClick={handleDoubleClick}
       aria-label={`${event.title} - ${stageLabel} - PO ${event.subtitle}`}
     >
       <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide">

@@ -1,13 +1,16 @@
 // src/types.ts
 
-export type Stage =
-  | "QUEUE"
-  | "FABRICATION"
-  | "POWDER COAT"
-  | "ASSEMBLY"
-  | "TESTING"
-  | "SHIPPING"
-  | "CLOSED";
+export const STAGES = [
+  "QUEUE",
+  "FABRICATION",
+  "POWDER COAT",
+  "ASSEMBLY",
+  "TESTING",
+  "SHIPPING",
+  "CLOSED",
+] as const;
+
+export type Stage = typeof STAGES[number];
 
 export type Priority = "Low" | "Normal" | "High" | "Rush" | "Urgent";
 

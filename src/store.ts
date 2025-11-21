@@ -1,9 +1,9 @@
-// src/store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Pump, Filters, AddPoPayload, Stage, DataAdapter } from "./types";
 import { nanoid } from "nanoid";
 import { LocalAdapter } from "./adapters/local";
+import { SandboxAdapter } from "./adapters/sandbox";
 import { getModelLeadTimes as getCatalogLeadTimes } from "./lib/seed";
 import { addDays, startOfDay, isAfter, parseISO } from "date-fns";
 import type { StageDurations } from "./lib/schedule";
@@ -27,6 +27,10 @@ interface AppState {
   schedulingStageFilters: Stage[];
   lockDate: string | null; // ISO date string
   capacityConfig: CapacityConfig;
+
+  // Sandbox State
+  isSandbox: boolean;
+  originalSnapshot: Pump[] | null;
 
   // actions
   setAdapter: (a: DataAdapter) => void;
@@ -52,6 +56,11 @@ interface AppState {
   updateDepartmentStaffing: (stage: "fabrication" | "assembly" | "testing" | "shipping", config: DepartmentStaffing) => void;
   updatePowderCoatVendor: (vendorId: string, config: Partial<PowderCoatVendor>) => void;
   resetCapacityDefaults: () => void;
+
+  // Sandbox Actions
+  enterSandbox: () => void;
+  commitSandbox: () => void;
+  exitSandbox: () => void;
 
   // selectors
   filtered: () => Pump[];
@@ -85,6 +94,9 @@ export const useApp = create<AppState>()(
       schedulingStageFilters: [],
       lockDate: null,
       capacityConfig: DEFAULT_CAPACITY_CONFIG,
+
+      isSandbox: false,
+      originalSnapshot: null,
 
       setAdapter: (a) => set({ adapter: a }),
 
@@ -371,6 +383,46 @@ export const useApp = create<AppState>()(
       resetCapacityDefaults: () =>
         set({ capacityConfig: DEFAULT_CAPACITY_CONFIG }),
 
+      // Sandbox Actions
+      enterSandbox: () => {
+        const state = get();
+        if (state.isSandbox) return;
+        set({
+          isSandbox: true,
+          originalSnapshot: [...state.pumps],
+          adapter: SandboxAdapter,
+        });
+      },
+
+      commitSandbox: () => {
+        const state = get();
+        if (!state.isSandbox) return;
+
+        // Restore LocalAdapter
+        const realAdapter = LocalAdapter;
+
+        // Persist current state to real adapter
+        realAdapter.replaceAll(state.pumps);
+
+        set({
+          isSandbox: false,
+          originalSnapshot: null,
+          adapter: realAdapter,
+        });
+      },
+
+      exitSandbox: () => {
+        const state = get();
+        if (!state.isSandbox || !state.originalSnapshot) return;
+
+        set({
+          isSandbox: false,
+          pumps: state.originalSnapshot,
+          originalSnapshot: null,
+          adapter: LocalAdapter,
+        });
+      },
+
       // Selectors
       filtered: () => {
         const { pumps, filters, sortField, sortDirection } = get();
@@ -391,6 +443,7 @@ export const useApp = create<AppState>()(
         sortDirection: state.sortDirection,
         lockDate: state.lockDate,
         capacityConfig: state.capacityConfig,
+        // Do NOT persist isSandbox or originalSnapshot
       }),
     }
   )
