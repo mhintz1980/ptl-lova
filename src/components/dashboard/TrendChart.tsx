@@ -4,9 +4,13 @@ import { Pump } from "../../types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { round } from "../../lib/format";
+import { ChartProps } from "./dashboardConfig";
+import { useApp } from "../../store";
+import { applyDashboardFilters } from "./utils";
 
 interface TrendChartProps {
   pumps: Pump[];
+  headless?: boolean;
 }
 
 interface TrendTooltipProps {
@@ -36,7 +40,7 @@ function diffDays(pump: Pump): number {
   return Math.abs((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export const TrendChart: React.FC<TrendChartProps> = ({ pumps }) => {
+export const TrendChart: React.FC<TrendChartProps> = ({ pumps, headless }) => {
   const weeklyData = React.useMemo(() => {
     const closed = pumps.filter(p => p.stage === "CLOSED" && p.scheduledEnd);
 
@@ -84,53 +88,65 @@ export const TrendChart: React.FC<TrendChartProps> = ({ pumps }) => {
     return null;
   };
 
-  return (
-    <Card className="layer-l1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-1">
-        <CardHeader>
-          <CardTitle className="text-lg">Build Time Trend</CardTitle>
-        </CardHeader>
-        <CardContent className="transition-transform duration-300 hover:translate-y-[-4px]">
-          {weeklyData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart
-                data={weeklyData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
-              >
-                <defs>
-                  <linearGradient id="colorAvgDays" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                <XAxis
-                  dataKey="week"
-                  tick={{ fontSize: 10 }}
-                  className="fill-muted-foreground"
-                />
-                <YAxis
-                  tick={{ fontSize: 10 }}
-                  className="fill-muted-foreground"
-                  label={{ value: 'Days', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="avgDays"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  fill="url(#colorAvgDays)"
-                  animationBegin={0}
-                  animationDuration={800}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-              <p className="text-sm">No completed pumps with build time data</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+  const Content = weeklyData.length > 0 ? (
+    <ResponsiveContainer width="100%" height={headless ? "100%" : 240}>
+      <AreaChart
+        data={weeklyData}
+        margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
+      >
+        <defs>
+          <linearGradient id="colorAvgDays" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+        <XAxis
+          dataKey="week"
+          tick={{ fontSize: 10 }}
+          className="fill-muted-foreground"
+        />
+        <YAxis
+          tick={{ fontSize: 10 }}
+          className="fill-muted-foreground"
+          label={{ value: 'Days', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Area
+          type="monotone"
+          dataKey="avgDays"
+          stroke="hsl(var(--primary))"
+          strokeWidth={2}
+          fill="url(#colorAvgDays)"
+          animationBegin={0}
+          animationDuration={800}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  ) : (
+    <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+      <p className="text-sm">No completed pumps with build time data</p>
+    </div>
   );
+
+  if (headless) {
+    return <div className="h-full w-full">{Content}</div>;
+  }
+
+  return (
+    <Card className="layer-l1">
+      <CardHeader>
+        <CardTitle className="text-lg">Build Time Trend</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {Content}
+      </CardContent>
+    </Card>
+  );
+};
+
+export const LeadTimeTrendChart: React.FC<ChartProps> = ({ filters }) => {
+  const pumps = useApp((state) => state.pumps);
+  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
+  return <TrendChart pumps={filteredPumps} headless={true} />;
 };

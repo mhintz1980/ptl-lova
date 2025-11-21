@@ -16,7 +16,7 @@ import { useApp } from "../../store";
 import { toast } from "sonner";
 
 const STAGES: Stage[] = [
-  "NOT STARTED",
+  "QUEUE",
   "FABRICATION",
   "POWDER COAT",
   "ASSEMBLY",

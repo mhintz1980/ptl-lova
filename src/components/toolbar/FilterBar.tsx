@@ -40,7 +40,7 @@ export function FilterBar({ className, layout = "inline" }: FilterBarProps) {
 
   const priorities: Priority[] = ["Low", "Normal", "High", "Rush", "Urgent"];
   const stages: Stage[] = [
-    "NOT STARTED",
+    "QUEUE",
     "FABRICATION",
     "POWDER COAT",
     "ASSEMBLY",

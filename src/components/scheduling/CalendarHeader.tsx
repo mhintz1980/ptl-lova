@@ -6,26 +6,20 @@ import {
 } from "../../lib/stage-constants";
 import { cn } from "../../lib/utils";
 import { useApp } from "../../store";
-import { Wand2, RefreshCw, Trash2 } from "lucide-react";
+import { Wand2, Trash2, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export function CalendarHeader() {
-  const clearNotStartedSchedules = useApp(
-    (state) => state.clearNotStartedSchedules
-  );
-  const levelNotStartedSchedules = useApp(
-    (state) => state.levelNotStartedSchedules
-  );
+  const clearQueueSchedules = useApp((state) => state.clearQueueSchedules);
+  const autoSchedule = useApp((state) => state.autoSchedule);
   const stageFilters = useApp((state) => state.schedulingStageFilters);
-  const toggleStageFilter = useApp(
-    (state) => state.toggleSchedulingStageFilter
-  );
-  const clearStageFilters = useApp(
-    (state) => state.clearSchedulingStageFilters
-  );
+  const toggleStageFilter = useApp((state) => state.toggleSchedulingStageFilter);
+  const clearStageFilters = useApp((state) => state.clearSchedulingStageFilters);
+  const lockDate = useApp((state) => state.lockDate);
+  const setLockDate = useApp((state) => state.setLockDate);
 
   const handleClear = () => {
-    const cleared = clearNotStartedSchedules();
+    const cleared = clearQueueSchedules();
     if (!cleared) {
       toast.info("No scheduled jobs to clear.");
       return;
@@ -33,13 +27,13 @@ export function CalendarHeader() {
     toast.success(`Cleared ${cleared} scheduled job${cleared === 1 ? "" : "s"}.`);
   };
 
-  const handleLevel = () => {
-    const leveled = levelNotStartedSchedules();
-    if (!leveled) {
-      toast.info("No scheduled jobs ready to level.");
+  const handleAuto = () => {
+    const scheduled = autoSchedule();
+    if (!scheduled) {
+      toast.info("No jobs could be auto-scheduled.");
       return;
     }
-    toast.success(`Re-leveled ${leveled} job${leveled === 1 ? "" : "s"} across the fabrication calendar.`);
+    toast.success(`Auto-scheduled ${scheduled} job${scheduled === 1 ? "" : "s"}.`);
   };
 
   return (
@@ -76,6 +70,17 @@ export function CalendarHeader() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3 py-1">
+            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="date"
+              className="bg-transparent text-xs text-foreground focus:outline-none"
+              value={lockDate || ""}
+              onChange={(e) => setLockDate(e.target.value || null)}
+              title="Lock schedules before this date"
+            />
+          </div>
+
           {stageFilters.length > 0 && (
             <Button
               variant="ghost"
@@ -86,19 +91,12 @@ export function CalendarHeader() {
               Clear Filters
             </Button>
           )}
+
           <Button
             variant="ghost"
             size="sm"
             className="header-button rounded-full border border-border/60 bg-card/80 text-foreground"
-            onClick={handleLevel}
-          >
-            <RefreshCw className="mr-2 h-3.5 w-3.5" />
-            Level
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="header-button rounded-full border border-border/60 bg-card/80 text-foreground"
+            onClick={handleAuto}
           >
             <Wand2 className="mr-2 h-3.5 w-3.5" />
             Auto

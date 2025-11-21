@@ -1,8 +1,7 @@
 // src/types.ts
 
 export type Stage =
-  | "UNSCHEDULED"
-  | "NOT STARTED"
+  | "QUEUE"
   | "FABRICATION"
   | "POWDER COAT"
   | "ASSEMBLY"

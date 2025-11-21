@@ -45,7 +45,7 @@ export interface BuildCalendarEventsOptions {
   leadTimeLookup: (model: string) => StageDurations | undefined;
 }
 
-const STAGE_TO_KEY: Record<Exclude<Stage, "UNSCHEDULED" | "NOT STARTED" | "CLOSED">, StageKey> = {
+const STAGE_TO_KEY: Record<Exclude<Stage, "QUEUE" | "CLOSED">, StageKey> = {
   FABRICATION: "fabrication",
   "POWDER COAT": "powder_coat",
   ASSEMBLY: "assembly",
@@ -83,7 +83,7 @@ function deriveShippingDays(raw: StageDurations, roundedSum: number): number {
 }
 
 function sanitizeDurations(raw: StageDurations) {
-  const baseStages = PRODUCTION_STAGES.slice(0, 4) as Array<Exclude<Stage, "UNSCHEDULED" | "NOT STARTED" | "CLOSED">>;
+  const baseStages = PRODUCTION_STAGES.slice(0, 4) as Array<Exclude<Stage, "QUEUE" | "CLOSED">>;
   const durations = baseStages.map((stage) => {
     const key = STAGE_TO_KEY[stage];
     return { stage, days: normalizeDays((raw as Record<StageKey, number | undefined>)[key] as number | undefined) };
@@ -141,9 +141,9 @@ function buildEventSegments(
   const endOffset = differenceInCalendarDays(block.end, viewStart);
   const idleDays = pump.last_update
     ? Math.max(
-        0,
-        differenceInCalendarDays(startOfDay(new Date()), new Date(pump.last_update))
-      )
+      0,
+      differenceInCalendarDays(startOfDay(new Date()), new Date(pump.last_update))
+    )
     : 0;
 
   if (endOffset <= 0 || startOffset >= totalDays) {
