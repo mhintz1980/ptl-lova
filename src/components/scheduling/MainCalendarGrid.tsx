@@ -15,6 +15,7 @@ import { useApp } from "../../store";
 interface MainCalendarGridProps {
   pumps: Pump[];
   onEventClick?: (event: CalendarStageEvent) => void;
+  onEventDoubleClick?: (event: CalendarStageEvent) => void;
   visibleStages?: Stage[];
 }
 
@@ -55,7 +56,12 @@ function projectSegmentsToWeek(blocks: StageBlock[], weekStart: Date, daysInWeek
   }, []);
 }
 
-export function MainCalendarGrid({ pumps, onEventClick, visibleStages }: MainCalendarGridProps) {
+export function MainCalendarGrid({
+  pumps,
+  onEventClick,
+  onEventDoubleClick,
+  visibleStages = [],
+}: MainCalendarGridProps) {
   const { getModelLeadTimes } = useApp.getState();
 
   const today = useMemo(() => startOfDay(new Date()), []);
@@ -216,6 +222,7 @@ export function MainCalendarGrid({ pumps, onEventClick, visibleStages }: MainCal
                                 key={event.id}
                                 event={event}
                                 onClick={onEventClick}
+                                onDoubleClick={onEventDoubleClick}
                               />
                             );
                           })}

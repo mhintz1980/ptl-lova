@@ -6,6 +6,7 @@ interface AppShellProps {
   currentView: AppView;
   onChangeView: (view: AppView) => void;
   onOpenAddPo: () => void;
+  onOpenSettings: () => void;
   children: ReactNode;
 }
 
@@ -13,6 +14,7 @@ export function AppShell({
   currentView,
   onChangeView,
   onOpenAddPo,
+  onOpenSettings,
   children,
 }: AppShellProps) {
   return (
@@ -22,6 +24,7 @@ export function AppShell({
           currentView={currentView}
           onChangeView={onChangeView}
           onOpenAddPo={onOpenAddPo}
+          onOpenSettings={onOpenSettings}
         />
         <main className="flex-1 overflow-auto content-stage">{children}</main>
       </div>
