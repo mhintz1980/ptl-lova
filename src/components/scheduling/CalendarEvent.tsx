@@ -63,39 +63,27 @@ export function CalendarEvent({ event, onClick, isDragging = false }: CalendarEv
       }}
       aria-label={`${event.title} - ${stageLabel} - PO ${event.subtitle}`}
     >
-      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide">
-        <span className="truncate" title={stageLabel}>
-          {stageLabel}
-        </span>
-        <span className="truncate text-[10px] normal-case text-foreground/75">
+      {/* Model name - prominent */}
+      <div className="flex items-center justify-between">
+        <span className="truncate text-[14px] font-bold leading-tight" title={event.title}>
           {event.title}
         </span>
+        {idleDays > 3 && (
+          <span
+            className={cn(
+              "ml-1 flex-shrink-0 rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-widest",
+              statusChipClass
+            )}
+          >
+            {status === "danger" ? "!" : "⚠"}
+          </span>
+        )}
       </div>
 
-      <div className="mt-1 flex items-center justify-between text-[10px]">
-        <span className="truncate">
-          {event.customer ?? `PO ${event.subtitle}`}
-        </span>
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-widest",
-            statusChipClass
-          )}
-        >
-          {status === "danger"
-            ? "Stalled"
-            : status === "warning"
-              ? "At Risk"
-              : "On Track"}
-        </span>
+      {/* Customer name - underneath model */}
+      <div className="mt-0.5 truncate text-[11px] text-foreground/70" title={event.customer}>
+        {event.customer ?? `PO ${event.subtitle}`}
       </div>
-
-      {event.priority && (
-        <div className="mt-1 flex items-center gap-1 text-[9px] text-foreground/80">
-          <span className="font-semibold">Priority:</span>
-          <span className="uppercase tracking-wide">{event.priority}</span>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // src/components/scheduling/DragAndDropContext.tsx
-import { DndContext, DragEndEvent, DragOverlay, UniqueIdentifier, Active, DragStartEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay, UniqueIdentifier, Active, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useState } from "react";
 import { useApp } from "../../store";
 import { PumpCard } from "../kanban/PumpCard";
@@ -15,6 +15,14 @@ interface DragAndDropContextProps {
 }
 
 export function DragAndDropContext({ children, pumps }: DragAndDropContextProps) {
+  // Require 5px movement before drag starts to prevent accidental drags
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
   const schedulePump = useApp((state) => state.schedulePump);
   const clearSchedule = useApp((state) => state.clearSchedule);
   const collapsedCards = useApp((state) => state.collapsedCards);
@@ -140,7 +148,7 @@ export function DragAndDropContext({ children, pumps }: DragAndDropContextProps)
   };
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {children}
       {renderDragOverlay()}
     </DndContext>
