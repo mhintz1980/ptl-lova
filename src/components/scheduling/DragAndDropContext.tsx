@@ -5,7 +5,7 @@ import { useApp } from "../../store";
 import { PumpCard } from "../kanban/PumpCard";
 import { CalendarEvent } from "./CalendarEvent";
 import { Pump } from "../../types";
-import { isValidScheduleDate } from "../../lib/schedule";
+import { isValidScheduleDate, CalendarStageEvent } from "../../lib/schedule";
 import { toast } from "sonner";
 import { startOfDay, format, parse } from "date-fns";
 
@@ -14,12 +14,19 @@ interface DragAndDropContextProps {
   pumps: Pump[];
 }
 
+interface DragData {
+  pump?: Pump;
+  type?: string;
+  event?: CalendarStageEvent;
+  pumpId?: string;
+}
+
 export function DragAndDropContext({ children, pumps }: DragAndDropContextProps) {
   const schedulePump = useApp((state) => state.schedulePump);
   const clearSchedule = useApp((state) => state.clearSchedule);
   const collapsedCards = useApp((state) => state.collapsedCards);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [activeData, setActiveData] = useState<any>(null);
+  const [activeData, setActiveData] = useState<DragData | null>(null);
 
   const normalizePumpId = (id: UniqueIdentifier) => {
     const idString = id.toString();
@@ -41,7 +48,7 @@ export function DragAndDropContext({ children, pumps }: DragAndDropContextProps)
     const pump = getPumpFromActive(event.active);
     const normalizedId = pump?.id ?? normalizePumpId(event.active.id);
     setActiveId(normalizedId);
-    setActiveData(event.active.data.current);
+    setActiveData((event.active.data.current as DragData) || null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
