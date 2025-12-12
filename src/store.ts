@@ -5,10 +5,18 @@ import { Pump, Filters, AddPoPayload, Stage, DataAdapter } from "./types";
 import { nanoid } from "nanoid";
 import { LocalAdapter } from "./adapters/local";
 import { getModelLeadTimes as getCatalogLeadTimes } from "./lib/seed";
-import { addDays, startOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 import type { StageDurations } from "./lib/schedule";
 import { applyFilters, genSerial } from "./lib/utils";
 import { sortPumps, SortDirection, SortField } from "./lib/sort";
+import {
+  CapacityTracker,
+  computeDurationSummary,
+  seedCapacityWithExistingJobs,
+  scheduleJobsWithCapacity,
+  toISODate,
+  addDaysToISODate,
+} from "./lib/capacity-scheduler";
 
 // --- Store Definition ---
 
@@ -185,14 +193,13 @@ export const useApp = create<AppState>()(
         if (!leadTimes) return;
 
         const { totalDays } = computeDurationSummary(leadTimes);
-        const startDate = new Date(dropDate);
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + totalDays);
+        const scheduledStart = dropDate;
+        const scheduledEnd = addDaysToISODate(dropDate, totalDays);
 
         // Update pump with schedule and advance stage
         get().updatePump(id, {
-          scheduledStart: startDate.toISOString().split('T')[0],
-          scheduledEnd: endDate.toISOString().split('T')[0],
+          scheduledStart,
+          scheduledEnd,
           stage: "NOT STARTED",
           last_update: new Date().toISOString(),
         });
@@ -238,118 +245,47 @@ export const useApp = create<AppState>()(
       },
       levelNotStartedSchedules: () => {
         const state = get();
+
+        // Filter for NOT STARTED pumps with scheduled dates
         const notStarted = state.pumps.filter(
           (pump) => pump.stage === "NOT STARTED" && pump.scheduledStart
         );
 
-        if (!notStarted.length) {
-          return 0;
-        }
+        if (!notStarted.length) return 0;
 
-        // --- 1. Setup: Configuration and Date Helpers ---
+        // Setup capacity tracking
         const limitSetting = state.wipLimits?.FABRICATION;
-        const capacity = typeof limitSetting === "number" && limitSetting > 0 ? limitSetting : Infinity;
-        const toISO = (date: Date) => date.toISOString().split("T")[0];
-        const fromISO = (iso: string) => new Date(`${iso}T00:00:00`);
-        const addDaysISO = (iso: string, delta: number) => toISO(addDays(fromISO(iso), delta));
-        const minDateISO = toISO(startOfDay(new Date()));
+        const capacity = typeof limitSetting === "number" && limitSetting > 0
+          ? limitSetting
+          : Infinity;
+        const tracker = new CapacityTracker(capacity);
+        const minDateISO = toISODate(startOfDay(new Date()));
 
-        // --- 2. Resource Usage Calculation ---
-        const usage = new Map<string, number>();
+        // Seed tracker with existing fabrication jobs to prevent overbooking
+        seedCapacityWithExistingJobs(tracker, state.pumps, state.getModelLeadTimes);
 
-        const reserveDays = (startISO: string, days: number) => {
-          for (let i = 0; i < days; i++) {
-            const dayISO = addDaysISO(startISO, i);
-            usage.set(dayISO, (usage.get(dayISO) ?? 0) + 1);
-          }
-        };
-
-        const canPlace = (startISO: string, days: number) => {
-          if (!Number.isFinite(capacity)) return true;
-          for (let i = 0; i < days; i++) {
-            const dayISO = addDaysISO(startISO, i);
-            if ((usage.get(dayISO) ?? 0) >= capacity) {
-              return false;
-            }
-          }
-          return true;
-        };
-
-        // Seed usage with jobs already in fabrication so we don't overbook
-        state.pumps.forEach((pump) => {
-          if (pump.stage !== "FABRICATION" || !pump.scheduledStart) {
-            return;
-          }
-          const leadTimes = state.getModelLeadTimes(pump.model);
-          if (!leadTimes) return;
-          const { fabricationDays: fabDays } = computeDurationSummary(leadTimes);
-          reserveDays(pump.scheduledStart, fabDays);
-        });
-
-        // --- 3. Sort Jobs and Determine New Schedules ---
-        const sorted = [...notStarted].sort((a, b) => {
-          const aTime = new Date(`${a.scheduledStart}T00:00:00`).getTime();
-          const bTime = new Date(`${b.scheduledStart}T00:00:00`).getTime();
-          return aTime - bTime;
-        });
-
-        const patches: Array<{ id: string; scheduledStart: string; scheduledEnd: string }> = [];
-
-        sorted.forEach((pump) => {
-          const leadTimes = state.getModelLeadTimes(pump.model);
-          if (!leadTimes) return;
-          const { fabricationDays: fabDays, totalDays } = computeDurationSummary(leadTimes);
-
-          let targetStart = pump.scheduledStart!;
-          if (!targetStart || targetStart < minDateISO) {
-            targetStart = minDateISO;
-          }
-
-          // Pull the start date as early as possible without violating capacity
-          while (true) {
-            const candidate = addDaysISO(targetStart, -1);
-            if (candidate < minDateISO) {
-              break;
-            }
-            if (!canPlace(candidate, fabDays)) {
-              break;
-            }
-            targetStart = candidate;
-          }
-
-          reserveDays(targetStart, fabDays);
-          const targetEnd = addDaysISO(targetStart, totalDays);
-
-          if (targetStart !== pump.scheduledStart || targetEnd !== pump.scheduledEnd) {
-            patches.push({
-              id: pump.id,
-              scheduledStart: targetStart,
-              scheduledEnd: targetEnd,
-            });
-          }
-        });
+        // Schedule jobs with capacity constraints
+        const patches = scheduleJobsWithCapacity(
+          notStarted,
+          tracker,
+          minDateISO,
+          state.getModelLeadTimes
+        );
 
         if (!patches.length) return 0;
 
-        // --- 4. Apply Patches to State ---
+        // Apply schedule updates to state
         const now = new Date().toISOString();
         const next = state.pumps.map((pump) => {
           const patch = patches.find((p) => p.id === pump.id);
           if (!patch) return pump;
-          return {
-            ...pump,
-            ...patch,
-            last_update: now,
-          };
+          return { ...pump, ...patch, last_update: now };
         });
         set({ pumps: next });
 
-        // --- 5. Persist Changes via Adapter ---
+        // Persist changes
         patches.forEach((patch) => {
-          state.adapter.update(patch.id, {
-            ...patch,
-            last_update: now,
-          });
+          state.adapter.update(patch.id, { ...patch, last_update: now });
         });
 
         return patches.length;
@@ -381,19 +317,3 @@ export const useApp = create<AppState>()(
     }
   )
 );
-const normalizeDays = (value?: number) => Math.max(1, Math.ceil(value ?? 0));
-
-const computeDurationSummary = (leadTimes: StageDurations) => {
-  const fabrication = normalizeDays(leadTimes.fabrication);
-  const powder = normalizeDays(leadTimes.powder_coat);
-  const assembly = normalizeDays(leadTimes.assembly);
-  const testing = normalizeDays(leadTimes.testing);
-  const baseSum = fabrication + powder + assembly + testing;
-  let shipping = normalizeDays(leadTimes.shipping);
-  if (typeof leadTimes.shipping !== "number" && typeof leadTimes.total_days === "number") {
-    const remainder = Math.max(leadTimes.total_days - baseSum, 0);
-    shipping = normalizeDays(remainder || 1);
-  }
-  const total = baseSum + shipping;
-  return { fabricationDays: fabrication, totalDays: total };
-};
