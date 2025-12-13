@@ -13,7 +13,7 @@ export const toISODate = (date: Date): string =>
  * Converts an ISO date string to a Date object
  */
 export const fromISODate = (iso: string): Date =>
-  new Date(`${iso}T00:00:00`);
+  new Date(`${iso}T00:00:00.000Z`);
 
 /**
  * Adds days to an ISO date string and returns the result as ISO date string
