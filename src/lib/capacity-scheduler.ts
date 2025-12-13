@@ -40,7 +40,7 @@ export const computeDurationSummary = (leadTimes: StageDurations) => {
   let shipping = normalizeDays(leadTimes.shipping);
   if (typeof leadTimes.shipping !== "number" && typeof leadTimes.total_days === "number") {
     const remainder = Math.max(leadTimes.total_days - baseSum, 0);
-    shipping = normalizeDays(remainder || 1);
+    shipping = normalizeDays(remainder);
   }
 
   const total = baseSum + shipping;
