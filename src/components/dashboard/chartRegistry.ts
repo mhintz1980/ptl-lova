@@ -9,6 +9,10 @@ import { PumpTableChart } from './PumpTableChart';
 import { LateOrdersChartWrapper } from './LateOrdersChart';
 import { TotalValueChartWrapper } from './TotalValueChart';
 import { PlaceholderChart } from './PlaceholderChart';
+import { ModelBarChart } from './charts/ModelBarChart';
+import { PumpCardGrid } from './charts/PumpCardGrid';
+import { RadialBarChart } from './charts/RadialBarChart';
+import { ValueByModelChart } from './charts/ValueByModelChart';
 
 
 
@@ -17,9 +21,9 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         id: 'wipByStage',
         title: 'WIP by Stage',
         description: 'Current pumps in each stage',
-        component: CapacityByDeptChart, // Reusing capacity for now as it shows stage counts
+        component: CapacityByDeptChart,
         defaultSize: 'md',
-        drillDownSequence: ['pumpsByCustomer', 'pumpTable'],
+        drillDownSequence: ['pumpsByCustomer'],
     },
     capacityByDept: {
         id: 'capacityByDept',
@@ -27,6 +31,7 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Workload distribution across departments',
         component: CapacityByDeptChart,
         defaultSize: 'lg',
+        drillDownSequence: ['pumpsByModel', 'radialBarChart'],
     },
     lateOrders: {
         id: 'lateOrders',
@@ -34,7 +39,7 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Orders past their promise date',
         component: LateOrdersChartWrapper,
         defaultSize: 'md',
-        drillDownSequence: ['pumpTable'], // Filtered by stage
+        drillDownSequence: ['pumpCardGrid'],
     },
     leadTimeTrend: {
         id: 'leadTimeTrend',
@@ -42,7 +47,7 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Average build time over last 12 weeks',
         component: LeadTimeTrendChart,
         defaultSize: 'lg',
-        drillDownSequence: ['pumpTable'], // Filtered by week (requires date range filter support in PumpTable)
+        drillDownSequence: ['pumpCardGrid'],
     },
     pumpsByCustomer: {
         id: 'pumpsByCustomer',
@@ -50,15 +55,45 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Top customers by volume',
         component: WorkloadByCustomerChart,
         defaultSize: 'md',
-        drillDownSequence: ['pumpsByModel', 'pumpTable'],
+        drillDownSequence: ['modelBarChart', 'pumpCardGrid'],
     },
     pumpsByModel: {
         id: 'pumpsByModel',
-        title: 'Pumps by Model',
+        title: 'WIP by Model',
         description: 'Most popular pump models',
         component: WorkloadByModelChart,
         defaultSize: 'md',
-        drillDownSequence: ['pumpTable'],
+        drillDownSequence: ['pumpsByCustomer'],
+    },
+    modelBarChart: {
+        id: 'modelBarChart',
+        title: 'Models Breakdown',
+        description: 'Horizontal bar chart of pump models',
+        component: ModelBarChart,
+        defaultSize: 'lg',
+        drillDownSequence: ['pumpCardGrid'],
+    },
+    radialBarChart: {
+        id: 'radialBarChart',
+        title: 'Model Distribution',
+        description: 'Circular visualization of pump models',
+        component: RadialBarChart,
+        defaultSize: 'lg',
+        drillDownSequence: ['valueByModel'],
+    },
+    valueByModel: {
+        id: 'valueByModel',
+        title: 'Value by Model',
+        description: 'Total value distribution across models',
+        component: ValueByModelChart,
+        defaultSize: 'lg',
+    },
+    pumpCardGrid: {
+        id: 'pumpCardGrid',
+        title: 'Pump Overview',
+        description: 'Visual card layout of filtered pumps',
+        component: PumpCardGrid,
+        defaultSize: 'lg',
     },
     reworkRate: {
         id: 'reworkRate',
@@ -73,7 +108,7 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Total order value by customer',
         component: ValueByCustomerChart,
         defaultSize: 'md',
-        drillDownSequence: ['pumpTable'],
+        drillDownSequence: ['valueByModel', 'pumpCardGrid'],
     },
     treemap: {
         id: 'treemap',
@@ -81,7 +116,7 @@ export const CHART_REGISTRY: Record<ChartId, ChartConfig> = {
         description: 'Interactive view of all active orders (Click to drill down)',
         component: TreemapChart,
         defaultSize: 'lg',
-        drillDownSequence: ['pumpTable'],
+        drillDownSequence: ['modelBarChart', 'pumpCardGrid'],
     },
     pumpTable: {
         id: 'pumpTable',

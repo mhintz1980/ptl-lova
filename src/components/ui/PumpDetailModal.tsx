@@ -170,7 +170,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
             onClick={onClose}
         >
             <div
-                className="surface-elevated shadow-frame border border-border/40 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 m-4 animate-in zoom-in-95 duration-200 bg-card"
+                className="bg-background shadow-frame border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 m-4 animate-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -180,23 +180,20 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                             Pump Details
                             <span className="text-sm font-normal text-muted-foreground">#{pump.serial}</span>
                         </h2>
-                        <p className="text-sm text-muted-foreground">
-                            {pump.id}
-                        </p>
                     </div>
                     <div className="flex items-center gap-2">
                         {isEditing ? (
                             <>
-                                <Button variant="outline" size="sm" onClick={handleCancel}>
+                                <Button variant="outline" size="sm" onClick={handleCancel} className="font-semibold">
                                     Cancel
                                 </Button>
-                                <Button size="sm" onClick={handleSave} className="gap-2">
+                                <Button size="sm" onClick={handleSave} className="gap-2 font-semibold">
                                     <Save className="h-4 w-4" />
                                     Save
                                 </Button>
                             </>
                         ) : (
-                            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-2 font-semibold border-2 hover:bg-primary/10">
                                 <Edit2 className="h-4 w-4" />
                                 Edit
                             </Button>
@@ -217,7 +214,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* PO Number - Text Input Only */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">PO Number</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">PO Number</label>
                             {isEditing ? (
                                 <Input
                                     value={formData.po}
@@ -231,7 +228,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Customer - Datalist */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Customer</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Customer</label>
                             {isEditing ? (
                                 <>
                                     <Input
@@ -251,7 +248,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Model - Datalist */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Model</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Model</label>
                             {isEditing ? (
                                 <>
                                     <Input
@@ -271,7 +268,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Stage - Select (Fixed list) */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Stage</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Stage</label>
                             {isEditing ? (
                                 <select
                                     className="flex h-10 w-full rounded-lg border border-white/12 bg-background/50 px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
@@ -289,7 +286,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Priority - Datalist */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Priority</label>
                             {isEditing ? (
                                 <>
                                     <Input
@@ -316,7 +313,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Powder Color - Datalist */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Powder Color</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Powder Color</label>
                             {isEditing ? (
                                 <>
                                     <Input
@@ -339,13 +336,13 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Scheduled Start - Date */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Scheduled Start</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Scheduled Start</label>
                             {isEditing ? (
                                 <Input
                                     type="date"
                                     value={formatDateForInput(formData.scheduledStart)}
                                     onChange={(e) => handleDateChange('scheduledStart', e.target.value)}
-                                    className="bg-background/50"
+                                    className="bg-background/50 [color-scheme:light] dark:[color-scheme:dark]"
                                 />
                             ) : (
                                 <p className="font-medium text-foreground">
@@ -356,13 +353,13 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
                         {/* Scheduled End - Date */}
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Scheduled End</label>
+                            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Scheduled End</label>
                             {isEditing ? (
                                 <Input
                                     type="date"
                                     value={formatDateForInput(formData.scheduledEnd)}
                                     onChange={(e) => handleDateChange('scheduledEnd', e.target.value)}
-                                    className="bg-background/50"
+                                    className="bg-background/50 [color-scheme:light] dark:[color-scheme:dark]"
                                 />
                             ) : (
                                 <p className="font-medium text-foreground">

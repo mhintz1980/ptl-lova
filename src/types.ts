@@ -29,6 +29,12 @@ export interface Pump {
   scheduledStart?: string; // ISO
   // derived, non-persistent:
   promiseDate?: string;    // from PO line
+  work_hours?: {
+    fabrication: number;
+    assembly: number;
+    testing: number;
+    shipping: number;
+  };
 }
 
 export interface PoLine {

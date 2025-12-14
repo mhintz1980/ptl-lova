@@ -24,4 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+*.bmad
+*.agent
+*.claude
+*.gemini
+*.github
+*.serena

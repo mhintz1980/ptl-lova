@@ -4,7 +4,7 @@ if (typeof localStorage === 'undefined') {
   interface GlobalWithLocalStorage {
     localStorage: Storage;
   }
-  (global as unknown as GlobalWithLocalStorage).localStorage = {
+  (globalThis as unknown as GlobalWithLocalStorage).localStorage = {
     getItem: () => null,
     setItem: () => { },
     removeItem: () => { },

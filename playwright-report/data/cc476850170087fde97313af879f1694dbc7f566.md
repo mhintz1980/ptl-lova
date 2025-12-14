@@ -1,0 +1,186 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img [ref=e9]
+            - generic [ref=e13]:
+              - generic [ref=e14]: PumpTracker
+              - generic [ref=e15]: Flow Ops
+          - generic [ref=e16]:
+            - navigation [ref=e17]:
+              - button "Go to Dashboard" [ref=e18] [cursor=pointer]:
+                - img
+              - button "Go to Kanban" [ref=e19] [cursor=pointer]:
+                - img
+              - button "Go to Scheduling" [ref=e20] [cursor=pointer]:
+                - img
+            - generic [ref=e21]:
+              - img [ref=e22]
+              - textbox "Search" [ref=e25]
+            - button [ref=e26] [cursor=pointer]:
+              - img
+            - button "Toggle pump card density" [ref=e27] [cursor=pointer]:
+              - img
+            - button "Toggle theme" [ref=e28] [cursor=pointer]:
+              - img
+            - button "Open settings" [ref=e29] [cursor=pointer]:
+              - img
+            - button "Add purchase order" [ref=e30] [cursor=pointer]:
+              - img
+      - main [ref=e31]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Avg Build Time
+              - generic [ref=e39]: 0 days
+              - generic [ref=e40]: No closed pumps yet
+            - generic [ref=e43]:
+              - generic [ref=e44]: Shop Efficiency
+              - generic [ref=e45]: 0%
+              - generic [ref=e46]: 0 of 22 pumps closed
+            - generic [ref=e49]:
+              - generic [ref=e50]: On-time Orders
+              - generic [ref=e51]: "0"
+              - generic [ref=e52]: Monitoring active jobs
+            - generic [ref=e55]:
+              - generic [ref=e56]: Late Orders
+              - generic [ref=e57]: "0"
+              - generic [ref=e58]: All jobs on pace
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - heading "Production Overview" [level=1] [ref=e63]
+                - paragraph [ref=e64]: Topic 1 of 4
+              - generic [ref=e65]:
+                - button "Favorites" [ref=e66] [cursor=pointer]:
+                  - img
+                  - text: Favorites
+                - button "Next Topic" [ref=e67] [cursor=pointer]:
+                  - text: Next Topic
+                  - img
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - generic [ref=e71]:
+                    - heading "WIP by Stage" [level=2] [ref=e72]
+                    - paragraph [ref=e73]: Current pumps in each stage
+                  - button "Toggle favorite" [ref=e74] [cursor=pointer]:
+                    - img [ref=e75]
+                - application [ref=e81]:
+                  - generic [ref=e99]:
+                    - generic [ref=e100]:
+                      - generic [ref=e102]: QUEUE
+                      - generic [ref=e104]: POWDER COAT
+                      - generic [ref=e106]: TESTING
+                      - generic [ref=e108]: CLOSED
+                    - generic [ref=e109]:
+                      - generic [ref=e111]: "0"
+                      - generic [ref=e113]: "6"
+                      - generic [ref=e115]: "12"
+                      - generic [ref=e117]: "18"
+                      - generic [ref=e119]: "24"
+              - generic [ref=e120]:
+                - generic [ref=e121]:
+                  - generic [ref=e122]:
+                    - heading "Capacity by Department" [level=2] [ref=e123]
+                    - paragraph [ref=e124]: Workload distribution across departments
+                  - button "Toggle favorite" [ref=e125] [cursor=pointer]:
+                    - img [ref=e126]
+                - application [ref=e132]:
+                  - generic [ref=e150]:
+                    - generic [ref=e151]:
+                      - generic [ref=e153]: QUEUE
+                      - generic [ref=e155]: FABRICATION
+                      - generic [ref=e157]: POWDER COAT
+                      - generic [ref=e159]: ASSEMBLY
+                      - generic [ref=e161]: TESTING
+                      - generic [ref=e163]: SHIPPING
+                      - generic [ref=e165]: CLOSED
+                    - generic [ref=e166]:
+                      - generic [ref=e168]: "0"
+                      - generic [ref=e170]: "6"
+                      - generic [ref=e172]: "12"
+                      - generic [ref=e174]: "18"
+                      - generic [ref=e176]: "24"
+              - generic [ref=e177]:
+                - generic [ref=e178]:
+                  - generic [ref=e179]:
+                    - heading "Late Orders" [level=2] [ref=e180]
+                    - paragraph [ref=e181]: Orders past their promise date
+                  - button "Toggle favorite" [ref=e182] [cursor=pointer]:
+                    - img [ref=e183]
+                - paragraph [ref=e188]: No late orders
+              - generic [ref=e189]:
+                - generic [ref=e190]:
+                  - generic [ref=e191]:
+                    - heading "Production Treemap" [level=2] [ref=e192]
+                    - paragraph [ref=e193]: Interactive view of all active orders (Click to drill down)
+                  - button "Toggle favorite" [ref=e194] [cursor=pointer]:
+                    - img [ref=e195]
+                - generic [ref=e198]:
+                  - button "All" [ref=e200] [cursor=pointer]:
+                    - img [ref=e201]
+                    - text: All
+                  - img [ref=e207]
+                  - generic [ref=e208]: By Customer Value
+          - generic [ref=e209]:
+            - generic [ref=e211]: Purchase Order Breakdown
+            - table [ref=e214]:
+              - rowgroup [ref=e215]:
+                - row "PO Number Customer Promise Date Total Value" [ref=e216]:
+                  - cell [ref=e217]
+                  - cell "PO Number" [ref=e218]
+                  - cell "Customer" [ref=e219]
+                  - cell "Promise Date" [ref=e220]
+                  - cell "Total Value" [ref=e221]
+              - rowgroup [ref=e222]:
+                - row "PO# 13501 United Rentals Dec 2, 2025 $0" [ref=e223] [cursor=pointer]:
+                  - cell [ref=e224]:
+                    - img [ref=e225]
+                  - cell "PO# 13501" [ref=e227]
+                  - cell "United Rentals" [ref=e228]
+                  - cell "Dec 2, 2025" [ref=e229]
+                  - cell "$0" [ref=e230]
+                - row "PO# 13502 United Rentals Dec 20, 2025 $0" [ref=e231] [cursor=pointer]:
+                  - cell [ref=e232]:
+                    - img [ref=e233]
+                  - cell "PO# 13502" [ref=e235]
+                  - cell "United Rentals" [ref=e236]
+                  - cell "Dec 20, 2025" [ref=e237]
+                  - cell "$0" [ref=e238]
+                - row "PO# 22569 Nat. Tank & Equip. Dec 11, 2025 $0" [ref=e239] [cursor=pointer]:
+                  - cell [ref=e240]:
+                    - img [ref=e241]
+                  - cell "PO# 22569" [ref=e243]
+                  - cell "Nat. Tank & Equip." [ref=e244]
+                  - cell "Dec 11, 2025" [ref=e245]
+                  - cell "$0" [ref=e246]
+                - row "PO# 33567 Sunbelt Rentals Dec 29, 2025 $0" [ref=e247] [cursor=pointer]:
+                  - cell [ref=e248]:
+                    - img [ref=e249]
+                  - cell "PO# 33567" [ref=e251]
+                  - cell "Sunbelt Rentals" [ref=e252]
+                  - cell "Dec 29, 2025" [ref=e253]
+                  - cell "$0" [ref=e254]
+                - row "PO# 55534 Ring Power CAT Dec 19, 2025 $0" [ref=e255] [cursor=pointer]:
+                  - cell [ref=e256]:
+                    - img [ref=e257]
+                  - cell "PO# 55534" [ref=e259]
+                  - cell "Ring Power CAT" [ref=e260]
+                  - cell "Dec 19, 2025" [ref=e261]
+                  - cell "$0" [ref=e262]
+                - row "PO# 87564 Rain For Rent Dec 3, 2025 $0" [ref=e263] [cursor=pointer]:
+                  - cell [ref=e264]:
+                    - img [ref=e265]
+                  - cell "PO# 87564" [ref=e267]
+                  - cell "Rain For Rent" [ref=e268]
+                  - cell "Dec 3, 2025" [ref=e269]
+                  - cell "$0" [ref=e270]
+  - generic [ref=e271]: "0"
+```

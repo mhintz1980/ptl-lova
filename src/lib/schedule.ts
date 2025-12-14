@@ -1,5 +1,5 @@
 import { addBusinessDays, differenceInCalendarDays, startOfDay, addDays } from "date-fns";
-import type { Pump, Stage } from "../types";
+import type { Pump, Stage, CapacityConfig } from "../types";
 import { PRODUCTION_STAGES } from "./stage-constants";
 
 type StageKey = "fabrication" | "powder_coat" | "assembly" | "testing" | "shipping" | "total_days";
@@ -43,6 +43,7 @@ export interface BuildCalendarEventsOptions {
   viewStart: Date;
   days: number;
   leadTimeLookup: (model: string) => StageDurations | undefined;
+  capacityConfig?: CapacityConfig;
 }
 
 const STAGE_TO_KEY: Record<Exclude<Stage, "QUEUE" | "CLOSED">, StageKey> = {
@@ -111,9 +112,34 @@ function resolveScheduleStart(pump: Pump, totalDays: number): Date {
 export function buildStageTimeline(
   pump: Pump,
   leadTimes: StageDurations,
-  options?: { startDate?: Date }
+  options?: { startDate?: Date; capacityConfig?: CapacityConfig }
 ): StageBlock[] {
-  const durations = sanitizeDurations(leadTimes);
+  // If capacity config and work hours are present, recalculate durations
+  let durations = sanitizeDurations(leadTimes);
+
+  if (options?.capacityConfig && pump.work_hours) {
+    const { capacityConfig } = options;
+    const { work_hours } = pump;
+
+    durations = durations.map(d => {
+      let days = d.days;
+
+      // Calculate days based on man-hours and capacity
+      if (d.stage === "FABRICATION" && work_hours.fabrication) {
+        days = Math.ceil(work_hours.fabrication / capacityConfig.fabrication.dailyManHours);
+      } else if (d.stage === "ASSEMBLY" && work_hours.assembly) {
+        days = Math.ceil(work_hours.assembly / capacityConfig.assembly.dailyManHours);
+      } else if (d.stage === "TESTING" && work_hours.testing) {
+        days = Math.ceil(work_hours.testing / capacityConfig.testing.dailyManHours);
+      } else if (d.stage === "SHIPPING" && work_hours.shipping) {
+        days = Math.ceil(work_hours.shipping / capacityConfig.shipping.dailyManHours);
+      }
+      // Powder Coat remains fixed as it's a vendor lead time
+
+      return { ...d, days: Math.max(1, days) };
+    });
+  }
+
   if (durations.length === 0) {
     return [];
   }
@@ -187,6 +213,7 @@ export function buildCalendarEvents({
   viewStart,
   days,
   leadTimeLookup,
+  capacityConfig,
 }: BuildCalendarEventsOptions): CalendarStageEvent[] {
   const viewStartDay = startOfDay(viewStart);
 
@@ -195,7 +222,7 @@ export function buildCalendarEvents({
     if (!leadTimes) {
       return [];
     }
-    const timeline = buildStageTimeline(pump, leadTimes);
+    const timeline = buildStageTimeline(pump, leadTimes, { capacityConfig });
     return timeline.flatMap((block) => buildEventSegments(pump, block, viewStartDay, days));
   });
 }
@@ -213,10 +240,11 @@ export function getScheduleWindow(blocks: StageBlock[]): ScheduleWindow | null {
 export function deriveScheduleWindow(
   pump: Pump,
   leadTimes: StageDurations,
-  dropDate: Date
+  dropDate: Date,
+  capacityConfig?: CapacityConfig
 ): { timeline: StageBlock[]; window: ScheduleWindow } | null {
   const start = startOfDay(dropDate);
-  const timeline = buildStageTimeline(pump, leadTimes, { startDate: start });
+  const timeline = buildStageTimeline(pump, leadTimes, { startDate: start, capacityConfig });
   const window = getScheduleWindow(timeline);
   if (!window) {
     return null;
@@ -242,7 +270,7 @@ export interface WeekSegment {
 export function buildStageSegments(
   pump: Pump,
   leadTimes: StageDurations,
-  options?: { startDate?: Date }
+  options?: { startDate?: Date; capacityConfig?: CapacityConfig }
 ): StageSegment[] {
   const timeline = buildStageTimeline(pump, leadTimes, options);
   return timeline.map((block) => ({

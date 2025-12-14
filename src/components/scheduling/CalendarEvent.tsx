@@ -24,8 +24,17 @@ export function CalendarEvent({ event, onClick, onDoubleClick, isDragging = fals
   const idleDays = event.idleDays ?? 0;
   const status = idleDays > 6 ? "danger" : idleDays > 3 ? "warning" : "ok";
 
-  const handleClick = () => onClick?.(event);
-  const handleDoubleClick = () => onDoubleClick?.(event);
+  // Use single click to open details - better UX than double-click
+  const handleClick = () => {
+    // Only trigger if not dragging
+    if (!isDraggable) {
+      onClick?.(event);
+    }
+  };
+
+  const handleDoubleClick = () => {
+    onDoubleClick?.(event);
+  };
 
   const stageColorClass = STAGE_COLORS[event.stage] ?? STAGE_COLORS["QUEUE"];
 
@@ -74,6 +83,7 @@ export function CalendarEvent({ event, onClick, onDoubleClick, isDragging = fals
       aria-label={`${event.title} - ${stageLabel} - PO ${event.subtitle}`}
       data-testid="calendar-event"
       data-span={event.span}
+      data-stage={event.stage}
     >
       {/* Model name - prominent */}
       <div className="flex items-center justify-between">

@@ -20,7 +20,6 @@ interface MainCalendarGridProps {
 }
 
 const weeks = 6;
-const daysInView = weeks * 7;
 
 interface WeekSegment {
   stage: Stage;
@@ -30,7 +29,21 @@ interface WeekSegment {
   span: number;
 }
 
-function projectSegmentsToWeek(blocks: StageBlock[], weekStart: Date, daysInWeek = 7): WeekSegment[] {
+const HOLIDAYS = [
+  "2025-01-01", // New Year
+  "2025-05-26", // Memorial Day
+  "2025-07-04", // Independence Day
+  "2025-09-01", // Labor Day
+  "2025-11-27", // Thanksgiving
+  "2025-12-25", // Christmas
+];
+
+function isHoliday(date: Date) {
+  const dateStr = format(date, "yyyy-MM-dd");
+  return HOLIDAYS.includes(dateStr);
+}
+
+function projectSegmentsToWeek(blocks: StageBlock[], weekStart: Date, daysInWeek = 5): WeekSegment[] {
   const weekEnd = addDays(weekStart, daysInWeek);
 
   return blocks.reduce<WeekSegment[]>((segments, block) => {
@@ -40,9 +53,14 @@ function projectSegmentsToWeek(blocks: StageBlock[], weekStart: Date, daysInWeek
 
     const clampedStart = block.start < weekStart ? weekStart : block.start;
     const clampedEnd = block.end > weekEnd ? weekEnd : block.end;
+
+    // Calculate columns based on 5-day week (Mon-Fri)
+    // Assuming weekStart is always Monday
     const startCol = Math.max(0, differenceInCalendarDays(clampedStart, weekStart));
-    const endCol = Math.max(startCol + 1, differenceInCalendarDays(clampedEnd, weekStart));
-    const span = Math.max(1, endCol - startCol);
+    const endCol = Math.max(startCol, differenceInCalendarDays(clampedEnd, weekStart));
+
+    // Ensure span is at least 1, but cap at 5
+    const span = Math.min(5 - startCol, Math.max(1, endCol - startCol));
 
     segments.push({
       stage: block.stage,
@@ -70,11 +88,6 @@ export function MainCalendarGrid({
     [today]
   );
 
-  const viewDates = useMemo(
-    () => Array.from({ length: daysInView }, (_, index) => addDays(viewStart, index)),
-    [viewStart]
-  );
-
   const stageFilter = useMemo(() => new Set(visibleStages ?? []), [visibleStages]);
 
   const pumpTimelines = useMemo(() => {
@@ -94,7 +107,7 @@ export function MainCalendarGrid({
 
   const DroppableCell = ({ date }: { date: Date }) => {
     const dateId = format(date, "yyyy-MM-dd");
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const isHolidayDate = isHoliday(date);
     const { isOver, setNodeRef } = useDroppable({
       id: dateId,
       data: { date: dateId },
@@ -105,11 +118,12 @@ export function MainCalendarGrid({
         ref={setNodeRef}
         className={cn(
           "calendar-cell border-r border-border/40 transition-all duration-150",
-          isWeekend && "calendar-weekend",
+          isHolidayDate && "bg-muted/50 repeating-linear-gradient-45 from-transparent to-muted/20",
           isOver && "bg-primary/20 shadow-[0_0_15px_rgba(37,99,235,0.35)]"
         )}
         style={{ minHeight: 24 }}
         data-testid={`calendar-cell-${dateId}`}
+        title={isHolidayDate ? "Holiday" : undefined}
       />
     );
   };
@@ -121,22 +135,23 @@ export function MainCalendarGrid({
     >
       <div className="min-w-[1000px] rounded-2xl bg-card/80 p-1">
         {Array.from({ length: weeks }).map((_, weekIndex) => {
-          const weekStart = weekIndex * 7;
-          const weekDates = viewDates.slice(weekStart, weekStart + 7);
+          const weekStart = addDays(viewStart, weekIndex * 7);
+          // Get only Mon-Fri for this week
+          const weekDates = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
 
           return (
             <div key={weekIndex} className="border-b border-border/50">
               {/* Week Header */}
-              <div className="sticky top-0 z-10 grid grid-cols-7 border-b border-border/60 bg-background/70 backdrop-blur">
+              <div className="sticky top-0 z-10 grid grid-cols-5 border-b border-border/60 bg-background/70 backdrop-blur">
                 {weekDates.map((date, dayIndex) => {
-                  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                  const isHolidayDate = isHoliday(date);
                   const label = date.toLocaleDateString("en-US", { weekday: "short" });
                   return (
                     <div
                       key={dayIndex}
                       className={cn(
                         "border-r border-border/40 px-2 py-2 text-center text-foreground transition-all duration-150",
-                        isWeekend && "calendar-weekend-header",
+                        isHolidayDate && "bg-muted/30 text-muted-foreground",
                         date.toDateString() === today.toDateString() &&
                         "bg-primary/10 text-primary"
                       )}
@@ -151,20 +166,19 @@ export function MainCalendarGrid({
               </div>
 
               <div className="relative min-h-[180px]">
-                <div className="grid grid-cols-7 absolute inset-0">
+                <div className="grid grid-cols-5 absolute inset-0">
                   {weekDates.map((date, i) => (
                     <DroppableCell key={i} date={date} />
                   ))}
                 </div>
 
                 <div
-                  className="relative grid grid-cols-7 gap-y-2 p-2"
+                  className="relative grid grid-cols-5 gap-y-2 p-2"
                   style={{ gridAutoRows: "30px" }}
                 >
                   {pumpTimelines
                     .map(({ pump, timeline }) => {
-                      const weekStartDate = addDays(viewStart, weekIndex * 7);
-                      let segments = projectSegmentsToWeek(timeline, weekStartDate);
+                      let segments = projectSegmentsToWeek(timeline, weekStart, 5);
                       if (stageFilter.size) {
                         segments = segments.filter((segment) => stageFilter.has(segment.stage));
                       }
@@ -178,11 +192,11 @@ export function MainCalendarGrid({
                       return (
                         <div
                           key={`${pump.id}-${weekIndex}`}
-                          className="col-start-1 col-span-7"
+                          className="col-start-1 col-span-5"
                           style={{
                             gridRow: rowIdx + 1,
                             display: "grid",
-                            gridTemplateColumns: "repeat(7, 1fr)",
+                            gridTemplateColumns: "repeat(5, 1fr)",
                           }}
                         >
                           {segments.map((segment, segIdx) => {

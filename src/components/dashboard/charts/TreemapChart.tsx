@@ -1,26 +1,33 @@
-
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, Treemap, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
 import { ChartProps } from '../dashboardConfig';
 import { useApp } from '../../../store';
 import { applyDashboardFilters } from '../utils';
-import { Pump } from '../../../types';
-import { Stage } from '../../../types';
 
-// ... (rest of imports and interfaces) ...
+import { ChevronRight, Home } from 'lucide-react';
 
 interface TreemapNode {
     name: string;
     value: number;
+    type: 'customer' | 'po' | 'model' | 'root';
+    originalName: string; // To store exact ID/Name for filtering
+    children?: TreemapNode[];
 }
 
 const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payload: TreemapNode; value: number }[] }) => {
     if (active && payload && payload.length) {
+        const node = payload[0].payload;
         return (
-            <div className="bg-popover border border-border rounded-md shadow-lg p-2 text-sm">
-                <p className="font-semibold">{payload[0].payload.name}</p>
-                <p className="text-muted-foreground">Count: {payload[0].value}</p>
+            <div className="bg-background/95 backdrop-blur-sm border-2 border-border rounded-lg shadow-xl p-3">
+                <p className="font-bold text-foreground text-base">{node.name}</p>
+                <p className="text-sm font-semibold text-primary">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(payload[0].value)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                    {node.type === 'customer' ? 'Click to view POs' :
+                        node.type === 'po' ? 'Click to view Models' : 'Model Value'}
+                </p>
             </div>
         );
     }
@@ -35,14 +42,26 @@ interface AnimatedTreemapContentProps {
     index?: number;
     name?: string;
     value?: number;
-    colors?: string[];
     payload?: TreemapNode;
+    depth?: number;
     onClick?: (node: TreemapNode) => void;
 }
 
-// Custom content component for the Treemap nodes
+const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    'hsl(var(--primary))',
+];
+
+const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0, notation: "compact" }).format(val);
+
 const AnimatedTreemapContent = (props: AnimatedTreemapContentProps) => {
-    const { x, y, width, height, index, name, value, colors, payload, onClick } = props;
+    const { x, y, width, height, index, name, value, payload, depth, onClick } = props;
+
+    if (depth === 1) return null;
 
     if (
         x === undefined ||
@@ -50,7 +69,6 @@ const AnimatedTreemapContent = (props: AnimatedTreemapContentProps) => {
         width === undefined ||
         height === undefined ||
         index === undefined ||
-        !colors ||
         !payload ||
         !onClick
     ) {
@@ -64,108 +82,174 @@ const AnimatedTreemapContent = (props: AnimatedTreemapContentProps) => {
                 y={y}
                 width={width}
                 height={height}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{
-                    scale: 1.02,
-                    filter: "drop-shadow(0 0 8px rgba(59, 130, 246, 0.6))",
+                    scale: 1.03,
+                    filter: "brightness(1.2) drop-shadow(0 0 12px rgba(59, 130, 246, 0.5))",
                     zIndex: 10
                 }}
                 transition={{ duration: 0.3 }}
                 style={{
-                    fill: colors[index % colors.length],
-                    stroke: '#fff',
+                    fill: COLORS[index % COLORS.length],
+                    stroke: 'hsl(var(--background))',
                     strokeWidth: 2,
-                    strokeOpacity: 0.2,
                     cursor: 'pointer',
-                    transformBox: 'fill-box',
-                    transformOrigin: 'center',
                 }}
                 onClick={() => onClick(payload)}
             />
-            {width > 50 && height > 30 && (
+            {width > 40 && height > 20 && (
                 <text
                     x={x + width / 2}
                     y={y + height / 2}
                     textAnchor="middle"
+                    dominantBaseline="middle"
                     fill="#fff"
-                    fontSize={12}
+                    fontSize={Math.min(14, width / 8)}
                     fontWeight="bold"
-                    style={{ pointerEvents: 'none' }}
+                    style={{ pointerEvents: 'none', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
                 >
                     {name}
                 </text>
             )}
-            {width > 50 && height > 50 && (
+            {width > 40 && height > 40 && (
                 <text
                     x={x + width / 2}
-                    y={y + height / 2 + 16}
+                    y={y + height / 2 + 14}
                     textAnchor="middle"
-                    fill="rgba(255,255,255,0.8)"
-                    fontSize={10}
-                    style={{ pointerEvents: 'none' }}
+                    fill="rgba(255,255,255,0.9)"
+                    fontSize={Math.min(11, width / 10)}
+                    fontWeight={600}
+                    style={{ pointerEvents: 'none', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
                 >
-                    {value}
+                    {value ? formatCurrency(value) : ''}
                 </text>
             )}
         </g>
     );
 };
 
-const COLORS = [
-    '#3b82f6', // blue
-    '#10b981', // green
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#8b5cf6', // violet
-    '#ec4899', // pink
-    '#06b6d4', // cyan
-    '#f97316', // orange
-];
-
 export const TreemapChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
     const pumps = useApp((state) => state.pumps);
     const filteredPumps = useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
 
-    // Group by Stage (or maybe Model if Stage is filtered?)
-    // If Stage is already filtered, showing a treemap of that single stage is boring (1 block).
-    // So if Stage is filtered, we should group by Model or Customer.
-
-    const groupBy = filters.stage ? 'model' : 'stage';
+    const [view, setView] = useState<'root' | 'customer' | 'po'>('root');
+    const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+    const [selectedPo, setSelectedPo] = useState<string | null>(null);
 
     const data = useMemo(() => {
-        const groups: Record<string, number> = {};
+        let currentPumps = filteredPumps;
+        let groupBy: 'customer' | 'po' | 'model' = 'customer';
 
-        filteredPumps.forEach((pump: Pump) => {
-            const key = groupBy === 'stage' ? pump.stage : pump.model;
-            groups[key] = (groups[key] || 0) + 1; // Sizing by count for now, could be value
+        if (view === 'customer' && selectedCustomer) {
+            currentPumps = currentPumps.filter(p => p.customer === selectedCustomer);
+            groupBy = 'po';
+        } else if (view === 'po' && selectedPo) {
+            currentPumps = currentPumps.filter(p => p.po === selectedPo);
+            groupBy = 'model';
+        }
+
+        const groups: Record<string, number> = {};
+        currentPumps.forEach(pump => {
+            const key = groupBy === 'customer' ? pump.customer :
+                groupBy === 'po' ? pump.po : pump.model;
+            groups[key] = (groups[key] || 0) + pump.value;
         });
 
-        return Object.entries(groups)
-            .map(([name, value]) => ({ name, value }))
+        const items = Object.entries(groups)
+            .map(([name, value]) => ({
+                name,
+                value,
+                type: groupBy,
+                originalName: name
+            }))
             .sort((a, b) => b.value - a.value);
-    }, [filteredPumps, groupBy]);
+
+        return [{
+            name: 'Root',
+            value: 0,
+            type: 'root' as const,
+            originalName: 'root',
+            children: items
+        }];
+    }, [filteredPumps, view, selectedCustomer, selectedPo]);
 
     const handleNodeClick = (node: TreemapNode) => {
-        if (groupBy === 'stage') {
-            onDrilldown({ stage: node.name as Stage });
+        if (node.type === 'customer') {
+            setSelectedCustomer(node.originalName);
+            setView('customer');
+        } else if (node.type === 'po') {
+            setSelectedPo(node.originalName);
+            setView('po');
         } else {
-            onDrilldown({ modelId: node.name });
+            // Leaf node (Model) - maybe drill down to global filter?
+            onDrilldown({ modelId: node.originalName });
         }
     };
 
+    const handleReset = () => {
+        setView('root');
+        setSelectedCustomer(null);
+        setSelectedPo(null);
+    };
+
+    const handleBack = () => {
+        if (view === 'po') {
+            setView('customer');
+            setSelectedPo(null);
+        } else if (view === 'customer') {
+            handleReset();
+        }
+    };
+
+    if (data.length === 0) {
+        return (
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                No data available
+            </div>
+        );
+    }
+
     return (
-        <ResponsiveContainer width="100%" height="100%">
-            <Treemap
-                data={data}
-                dataKey="value"
-                aspectRatio={4 / 3}
-                stroke="#fff"
-                fill="#8884d8"
-                content={<AnimatedTreemapContent colors={COLORS} onClick={handleNodeClick} />}
-            >
-                <Tooltip content={<CustomTooltip />} />
-            </Treemap>
-        </ResponsiveContainer>
+        <div className="h-full w-full flex flex-col">
+            <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                <button onClick={handleReset} className="hover:text-foreground flex items-center gap-1">
+                    <Home className="h-3 w-3" /> All
+                </button>
+                {view !== 'root' && (
+                    <>
+                        <ChevronRight className="h-3 w-3" />
+                        <button onClick={() => view === 'po' ? handleBack() : null} className={view === 'po' ? "hover:text-foreground" : "font-semibold text-foreground"}>
+                            {selectedCustomer}
+                        </button>
+                    </>
+                )}
+                {view === 'po' && (
+                    <>
+                        <ChevronRight className="h-3 w-3" />
+                        <span className="font-semibold text-foreground">{selectedPo}</span>
+                    </>
+                )}
+            </div>
+
+            <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                    <Treemap
+                        data={data}
+                        dataKey="value"
+                        aspectRatio={4 / 3}
+                        stroke="hsl(var(--background))"
+                        fill="#8884d8"
+                        content={<AnimatedTreemapContent onClick={handleNodeClick} />}
+                        animationDuration={500}
+                    >
+                        <Tooltip content={<CustomTooltip />} />
+                    </Treemap>
+                </ResponsiveContainer>
+            </div>
+            <div className="text-center text-[10px] text-muted-foreground mt-1">
+                {view === 'root' ? 'By Customer Value' : view === 'customer' ? 'By PO Value' : 'By Model Value'}
+            </div>
+        </div>
     );
 };

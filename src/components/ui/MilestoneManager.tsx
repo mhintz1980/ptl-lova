@@ -49,47 +49,49 @@ export function MilestoneManager() {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Create Milestone */}
-                <div className="p-4 border rounded-lg space-y-4">
-                    <h3 className="text-lg font-semibold">Create Milestone</h3>
+                <div className="p-4 border-2 border-border rounded-lg bg-card space-y-4">
+                    <h3 className="text-lg font-bold text-foreground">Create Milestone</h3>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Title</label>
+                        <label className="text-sm font-semibold text-foreground/80">Title</label>
                         <Input
                             value={newMilestoneTitle}
                             onChange={(e) => setNewMilestoneTitle(e.target.value)}
                             placeholder="e.g. Q4 Safety Audit"
+                            className="font-medium"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Department</label>
+                        <label className="text-sm font-semibold text-foreground/80">Department</label>
                         <select
-                            className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            className="w-full h-10 rounded-md border-2 border-input bg-background px-3 py-2 text-sm font-medium text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             value={newMilestoneDept}
                             onChange={(e) => setNewMilestoneDept(e.target.value as Stage)}
                         >
-                            {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                            {STAGES.map(s => <option key={s} value={s} className="bg-background text-foreground">{s}</option>)}
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Deadline</label>
+                        <label className="text-sm font-semibold text-foreground/80">Deadline</label>
                         <Input
                             type="date"
                             value={newMilestoneDate}
                             onChange={(e) => setNewMilestoneDate(e.target.value)}
+                            className="font-medium [color-scheme:light] dark:[color-scheme:dark]"
                         />
                     </div>
-                    <Button onClick={handleAddMilestone} className="w-full">Add Milestone</Button>
+                    <Button onClick={handleAddMilestone} className="w-full font-semibold">Add Milestone</Button>
                 </div>
 
                 {/* List Milestones */}
                 <div className="space-y-4 max-h-[600px] overflow-y-auto">
                     {milestones.map((m) => (
-                        <div key={m.id} className={`p-4 border rounded-lg ${selectedMilestoneId === m.id ? 'ring-2 ring-primary' : ''}`} onClick={() => setSelectedMilestoneId(m.id)}>
+                        <div key={m.id} className={`p-4 border-2 rounded-lg bg-card cursor-pointer transition-all ${selectedMilestoneId === m.id ? 'ring-2 ring-primary border-primary' : 'border-border hover:border-primary/50'}`} onClick={() => setSelectedMilestoneId(m.id)}>
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <h4 className="font-bold">{m.title}</h4>
+                                    <h4 className="font-bold text-foreground">{m.title}</h4>
                                     <div className="flex gap-2 mt-1">
-                                        <Badge variant="secondary">{m.department}</Badge>
-                                        <span className="text-xs text-muted-foreground self-center">Due {new Date(m.deadline).toLocaleDateString()}</span>
+                                        <Badge variant="secondary" className="font-semibold">{m.department}</Badge>
+                                        <span className="text-xs font-medium text-foreground/70 self-center">Due {new Date(m.deadline).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteMilestone(m.id); }}>
@@ -113,8 +115,8 @@ export function MilestoneManager() {
 
             {/* Task Editor for Selected Milestone */}
             {selectedMilestoneId && (
-                <div className="p-4 border rounded-lg bg-secondary/10">
-                    <h3 className="text-lg font-semibold mb-4">Manage Tasks for: {milestones.find(m => m.id === selectedMilestoneId)?.title}</h3>
+                <div className="p-4 border-2 border-primary/30 rounded-lg bg-primary/5">
+                    <h3 className="text-lg font-bold text-foreground mb-4">Manage Tasks for: {milestones.find(m => m.id === selectedMilestoneId)?.title}</h3>
 
                     <div className="flex gap-2 mb-4">
                         <Input

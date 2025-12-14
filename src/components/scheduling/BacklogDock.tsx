@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { UnscheduledJobCard } from "./UnscheduledJobCard";
 import { useDroppable } from "@dnd-kit/core";
-import { toast } from "sonner";
 import { cn } from "../../lib/utils";
 import type { Pump } from "../../types";
 import { useApp } from "../../store";
@@ -66,23 +65,7 @@ export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
                 {sortedPumps.length} jobs
               </h3>
             </div>
-            {sortedPumps.length > 0 && (
-              <button
-                onClick={() => {
-                  const count = useApp.getState().autoSchedule();
-                  if (count > 0) {
-                    toast.success(`Autoscheduled ${count} jobs`);
-                  } else {
-                    toast.info("No slots available or backlog empty");
-                  }
-                }}
-                className="flex h-7 items-center gap-1.5 rounded-md bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
-                title="Automatically schedule jobs based on priority and capacity"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Auto
-              </button>
-            )}
+
           </header>
 
           <div className="flex-1 overflow-hidden px-4 py-4">

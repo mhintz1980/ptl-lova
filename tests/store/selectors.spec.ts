@@ -35,7 +35,7 @@ describe("store selectors", () => {
 
   describe("getModelLeadTimes", () => {
     it("returns catalog durations for known models", () => {
-      const sample = { fabrication: 2, powder_coat: 1, assembly: 1, testing: 1, shipping: 2 };
+      const sample = { fabrication: 2, powder_coat: 1, assembly: 1, testing: 1, total_days: 7 };
       mockGetModelLeadTimes.mockReturnValue(sample);
 
       const result = useApp.getState().getModelLeadTimes("DD-6");
@@ -50,8 +50,8 @@ describe("store selectors", () => {
 
     it("does not memoize across models", () => {
       mockGetModelLeadTimes
-        .mockReturnValueOnce({ fabrication: 1, powder_coat: 1, assembly: 1, testing: 1 })
-        .mockReturnValueOnce({ fabrication: 3, powder_coat: 2, assembly: 1, testing: 1 });
+        .mockReturnValueOnce({ fabrication: 1, powder_coat: 1, assembly: 1, testing: 1, total_days: 4 })
+        .mockReturnValueOnce({ fabrication: 3, powder_coat: 2, assembly: 1, testing: 1, total_days: 7 });
 
       const { getModelLeadTimes } = useApp.getState();
       expect(getModelLeadTimes("DD-4")?.fabrication).toBe(1);
@@ -126,7 +126,7 @@ describe("store selectors", () => {
       po: "PO-SCHED",
       customer: "Scheduler",
       model: "DD-12",
-      stage: "UNSCHEDULED",
+      stage: "QUEUE",
       priority: "Normal",
       last_update: "2025-01-01T00:00:00.000Z",
       value: 44000,
@@ -143,15 +143,15 @@ describe("store selectors", () => {
         powder_coat: 1,
         assembly: 1,
         testing: 1,
-        shipping: 2,
+        total_days: 7,
       });
 
       useApp.getState().schedulePump("schedule-me", "2025-02-10");
       const pump = useApp.getState().pumps[0];
 
-      expect(pump?.scheduledStart).toBe("2025-02-10");
-      expect(pump?.scheduledEnd).toBe("2025-02-17");
-      expect(pump?.stage).toBe("NOT STARTED");
+      expect(pump?.scheduledStart).toContain("2025-02-10");
+      expect(pump?.scheduledEnd).toContain("2025-02-19");
+      expect(pump?.stage).toBe("QUEUE");
       expect(pump?.last_update).toBeTruthy();
     });
 
@@ -160,13 +160,13 @@ describe("store selectors", () => {
       useApp.getState().schedulePump("schedule-me", "2025-02-10");
       const pump = useApp.getState().pumps[0];
       expect(pump?.scheduledStart).toBeUndefined();
-      expect(pump?.stage).toBe("UNSCHEDULED");
+      expect(pump?.stage).toBe("QUEUE");
     });
 
     it("gracefully ignores unknown pump ids", () => {
-      mockGetModelLeadTimes.mockReturnValue({ fabrication: 1, powder_coat: 1, assembly: 1, testing: 1 });
+      mockGetModelLeadTimes.mockReturnValue({ fabrication: 1, powder_coat: 1, assembly: 1, testing: 1, total_days: 4 });
       useApp.getState().schedulePump("missing-id", "2025-02-10");
-      expect(useApp.getState().pumps[0]?.stage).toBe("UNSCHEDULED");
+      expect(useApp.getState().pumps[0]?.stage).toBe("QUEUE");
     });
   });
 
@@ -196,7 +196,7 @@ describe("store selectors", () => {
 
       expect(pump?.scheduledStart).toBeUndefined();
       expect(pump?.scheduledEnd).toBeUndefined();
-      expect(pump?.stage).toBe("UNSCHEDULED");
+      expect(pump?.stage).toBe("QUEUE");
       expect(pump?.last_update).toBeTruthy();
     });
 

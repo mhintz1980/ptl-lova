@@ -20,6 +20,12 @@ interface CatalogModel {
     testing: number;
     total_days: number;
   };
+  work_hours?: {
+    fabrication: number;
+    assembly: number;
+    testing: number;
+    shipping: number;
+  };
 }
 
 interface CatalogData {
@@ -28,16 +34,27 @@ interface CatalogData {
   productionStages: string[];
 }
 
+// Export lead times lookup
+export function getModelLeadTimes(modelCode: string) {
+  const model = CATALOG_MODELS.find((m) => m.model === modelCode);
+  return model ? model.lead_times : undefined;
+}
+
+export function getModelWorkHours(modelCode: string) {
+  const model = CATALOG_MODELS.find((m) => m.model === modelCode);
+  return model ? model.work_hours : undefined;
+}
+
 // Stage name conversion: Title Case → Uppercase
 function convertStageName(stageName: string): Stage {
   const stageMap: Record<string, Stage> = {
     "Not Started": "QUEUE",
-    "Fabrication": "FABRICATION",
+    Fabrication: "FABRICATION",
     "Powder Coat": "POWDER COAT",
-    "Assembly": "ASSEMBLY",
-    "Testing": "TESTING",
-    "Shipping": "SHIPPING",
-    "CLOSED": "CLOSED" // Add support for existing uppercase
+    Assembly: "ASSEMBLY",
+    Testing: "TESTING",
+    Shipping: "SHIPPING",
+    CLOSED: "CLOSED", // Add support for existing uppercase
   };
   return stageMap[stageName] || "QUEUE";
 }
@@ -45,7 +62,7 @@ function convertStageName(stageName: string): Stage {
 // Get production stages from catalog and add CLOSED
 const CATALOG_STAGES: Stage[] = [
   ...(catalogData as CatalogData).productionStages.map(convertStageName),
-  "CLOSED"
+  "CLOSED",
 ];
 
 // Customers from catalog
@@ -55,7 +72,16 @@ const CUSTOMERS = (catalogData as CatalogData).customers;
 const CATALOG_MODELS = (catalogData as CatalogData).models;
 
 // Colors for powder coating
-const COLORS = ["Red", "Blue", "Green", "Yellow", "Black", "White", "Orange", "Gray"];
+const COLORS = [
+  "Red",
+  "Blue",
+  "Green",
+  "Yellow",
+  "Black",
+  "White",
+  "Orange",
+  "Gray",
+];
 
 // Price fallback logic
 function getEffectivePrice(basePrice: number | null, model: string): number {
@@ -63,22 +89,25 @@ function getEffectivePrice(basePrice: number | null, model: string): number {
 
   // Fallback prices for models with null prices
   if (model.includes("SAFE")) return model.includes("4") ? 32000 : 52000;
-  if (model.includes("RL")) return 48000;  // Rotary Lobe
-  if (model.includes("HC")) return 38000;  // High Capacity
+  if (model.includes("RL")) return 48000; // Rotary Lobe
+  if (model.includes("HC")) return 38000; // High Capacity
 
   // Default fallback
   return 28000;
 }
 
 // BOM component fallback logic
-function getBomComponent(component: string | null, type: string): string | null {
+function getBomComponent(
+  component: string | null,
+  type: string
+): string | null {
   if (component !== null) return component;
 
   // Standard fallbacks
   const fallbacks: Record<string, string> = {
     engine: "STANDARD ENGINE",
     gearbox: "STANDARD GEARBOX",
-    control_panel: "STANDARD CONTROL"
+    control_panel: "STANDARD CONTROL",
   };
 
   return fallbacks[type] || null;
@@ -105,7 +134,8 @@ function addBusinessDays(startDate: Date, days: number): Date {
   while (businessDays < days) {
     result.setDate(result.getDate() + 1);
     const dayOfWeek = result.getDay();
-    if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not Saturday (6) or Sunday (0)
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      // Not Saturday (6) or Sunday (0)
       businessDays++;
     }
   }
@@ -115,7 +145,7 @@ function addBusinessDays(startDate: Date, days: number): Date {
 // PO number generation
 let poCounter = 1;
 function genPONumber(): string {
-  return `PO2025-${String(poCounter++).padStart(4, '0')}`;
+  return `PO2025-${String(poCounter++).padStart(4, "0")}`;
 }
 
 // Priority assignment logic
@@ -141,16 +171,38 @@ function generatePumpFromCatalog(
 
   for (let i = 0; i < quantity; i++) {
     const serial = genSerial();
-    const po = `${poBase}-${String(startIndex + i + 1).padStart(2, '0')}`;
+    const po = `${poBase}-${String(startIndex + i + 1).padStart(2, "0")}`;
 
     // Generate realistic schedule based on lead times
+    // Spread POs across past 60 days to ensure variety in stages
     const now = new Date();
-    const poDate = addBusinessDays(now, -Math.floor(Math.random() * 30)); // PO placed in last 30 business days
-    const fabricationStart = addBusinessDays(poDate, Math.floor(Math.random() * 5)); // Start within 5 days
-    const fabricationEnd = addBusinessDays(fabricationStart, model.lead_times.fabrication);
-    const powderCoatEnd = addBusinessDays(fabricationEnd, model.lead_times.powder_coat);
-    const assemblyEnd = addBusinessDays(powderCoatEnd, model.lead_times.assembly);
+    const daysBack = Math.floor(Math.random() * 60); // 0-60 days ago
+    const poDate = addBusinessDays(now, -daysBack);
+    const fabricationStart = addBusinessDays(
+      poDate,
+      Math.floor(Math.random() * 5)
+    ); // Start within 5 days
+    const fabricationEnd = addBusinessDays(
+      fabricationStart,
+      model.lead_times.fabrication
+    );
+    const powderCoatEnd = addBusinessDays(
+      fabricationEnd,
+      model.lead_times.powder_coat
+    );
+    const assemblyEnd = addBusinessDays(
+      powderCoatEnd,
+      model.lead_times.assembly
+    );
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing);
+
+    // Generate promise date (2-7 days before scheduled end)
+    // Some pumps (20%) will have promise dates in the past to create "late orders"
+    const promiseDaysBefore = Math.floor(Math.random() * 6) + 2; // 2-7 days
+    const isIntentionallyLate = Math.random() < 0.2; // 20% chance
+    const promiseDate = isIntentionallyLate
+      ? addBusinessDays(now, -Math.floor(Math.random() * 10) - 1) // 1-10 days ago
+      : addBusinessDays(testingEnd, -promiseDaysBefore);
 
     // Determine current stage based on dates
     let currentStage: Stage = "QUEUE";
@@ -159,7 +211,7 @@ function generatePumpFromCatalog(
 
     const nowTime = now.getTime();
     if (nowTime >= testingEnd.getTime()) {
-      currentStage = Math.random() > 0.7 ? "CLOSED" : "SHIPPING";
+      currentStage = Math.random() > 0.6 ? "CLOSED" : "SHIPPING"; // 40% CLOSED, 60% SHIPPING
       lastUpdate = testingEnd.toISOString();
     } else if (nowTime >= assemblyEnd.getTime()) {
       currentStage = "TESTING";
@@ -186,17 +238,24 @@ function generatePumpFromCatalog(
       model: model.model,
       stage: currentStage,
       priority,
-      powder_color: hasColor ? COLORS[Math.floor(Math.random() * COLORS.length)] : undefined,
+      powder_color: hasColor
+        ? COLORS[Math.floor(Math.random() * COLORS.length)]
+        : undefined,
       last_update: lastUpdate,
       value: basePrice,
       scheduledEnd,
+      promiseDate: promiseDate.toISOString(),
       // BOM details (for future UI visibility)
-      engine_model: getBomComponent(model.bom.engine, 'engine'),
-      gearbox_model: getBomComponent(model.bom.gearbox, 'gearbox'),
-      control_panel_model: getBomComponent(model.bom.control_panel, 'control_panel'),
+      engine_model: getBomComponent(model.bom.engine, "engine"),
+      gearbox_model: getBomComponent(model.bom.gearbox, "gearbox"),
+      control_panel_model: getBomComponent(
+        model.bom.control_panel,
+        "control_panel"
+      ),
       // Additional metadata
       description: model.description,
-      total_lead_days: model.lead_times.total_days
+      total_lead_days: model.lead_times.total_days,
+      work_hours: model.work_hours,
     } as Pump & {
       engine_model?: string | null;
       gearbox_model?: string | null;
@@ -226,7 +285,10 @@ export function seed(count: number = 80): Pump[] {
     if (generated >= count) break;
 
     // Determine order quantity (1-5 pumps per order)
-    const orderQuantity = Math.min(Math.floor(Math.random() * 5) + 1, count - generated);
+    const orderQuantity = Math.min(
+      Math.floor(Math.random() * 5) + 1,
+      count - generated
+    );
     const customer = CUSTOMERS[generated % CUSTOMERS.length];
     const poBase = genPONumber();
 
@@ -262,18 +324,32 @@ export function seed(count: number = 80): Pump[] {
   }
 
   // Ensure we have exactly the requested count
-  return pumps.slice(0, count);
+  const finalPumps = pumps.slice(0, count);
+
+  // POST-PROCESSING: Ensure some unscheduled QUEUE pumps (without scheduledStart)
+  const unscheduledCount = finalPumps.filter(
+    (p) => p.stage === "QUEUE" && !p.scheduledStart
+  ).length;
+  if (unscheduledCount < 5) {
+    // Force at least 5 unscheduled QUEUE pumps
+    const queuePumps = finalPumps.filter((p) => p.stage === "QUEUE");
+    const needed = Math.min(5 - unscheduledCount, queuePumps.length);
+
+    for (let i = 0; i < needed; i++) {
+      const pump = queuePumps[i];
+      if (pump) {
+        pump.scheduledStart = undefined;
+        pump.scheduledEnd = undefined;
+      }
+    }
+  }
+
+  return finalPumps;
 }
 
 // Export catalog data for store integration
 export function getCatalogData() {
   return catalogData as CatalogData;
-}
-
-// Export lead times lookup
-export function getModelLeadTimes(modelCode: string) {
-  const model = CATALOG_MODELS.find(m => m.model === modelCode);
-  return model ? model.lead_times : undefined;
 }
 
 // Export production stages for UI components

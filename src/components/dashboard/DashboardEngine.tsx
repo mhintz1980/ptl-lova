@@ -190,9 +190,9 @@ export function DashboardEngine() {
                                 variant={showFavorites ? "default" : "outline"}
                                 size="sm"
                                 onClick={() => setShowFavorites((prev) => !prev)}
-                                className="gap-2"
+                                className="gap-2 font-semibold border-2 bg-background text-foreground hover:bg-muted"
                             >
-                                <Star className={`h - 4 w - 4 ${showFavorites ? "fill-current" : ""} `} />
+                                <Star className={`h-4 w-4 ${showFavorites ? "fill-current" : ""}`} />
                                 {showFavorites ? 'Show Topic View' : 'Favorites'}
                             </Button>
 
@@ -200,7 +200,7 @@ export function DashboardEngine() {
                                 variant="outline"
                                 size="sm"
                                 onClick={handleNextTopic}
-                                className="gap-2 group"
+                                className="gap-2 group font-semibold border-2 bg-background text-foreground hover:bg-muted"
                             >
                                 Next Topic
                                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

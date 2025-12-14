@@ -1,0 +1,206 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img [ref=e9]
+            - generic [ref=e13]:
+              - generic [ref=e14]: PumpTracker
+              - generic [ref=e15]: Flow Ops
+          - generic [ref=e16]:
+            - navigation [ref=e17]:
+              - button "Go to Dashboard" [ref=e18] [cursor=pointer]:
+                - img
+              - button "Go to Kanban" [ref=e19] [cursor=pointer]:
+                - img
+              - button "Go to Scheduling" [ref=e20] [cursor=pointer]:
+                - img
+            - generic [ref=e21]:
+              - img [ref=e22]
+              - textbox "Search" [ref=e25]
+            - button [ref=e26] [cursor=pointer]:
+              - img
+            - button "Toggle pump card density" [ref=e27] [cursor=pointer]:
+              - img
+            - button "Toggle theme" [ref=e28] [cursor=pointer]:
+              - img
+            - button "Open settings" [ref=e29] [cursor=pointer]:
+              - img
+            - button "Add purchase order" [ref=e30] [cursor=pointer]:
+              - img
+      - main [ref=e31]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Avg Build Time
+              - generic [ref=e39]: 0 days
+              - generic [ref=e40]: No closed pumps yet
+            - generic [ref=e43]:
+              - generic [ref=e44]: Shop Efficiency
+              - generic [ref=e45]: 0%
+              - generic [ref=e46]: 0 of 22 pumps closed
+            - generic [ref=e49]:
+              - generic [ref=e50]: On-time Orders
+              - generic [ref=e51]: "0"
+              - generic [ref=e52]: Monitoring active jobs
+            - generic [ref=e55]:
+              - generic [ref=e56]: Late Orders
+              - generic [ref=e57]: "0"
+              - generic [ref=e58]: All jobs on pace
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - heading "Sales & Customers" [level=1] [ref=e63]
+                - paragraph [ref=e64]: Topic 3 of 4
+              - generic [ref=e65]:
+                - button "Favorites" [ref=e66] [cursor=pointer]:
+                  - img
+                  - text: Favorites
+                - button "Next Topic" [active] [ref=e67] [cursor=pointer]:
+                  - text: Next Topic
+                  - img
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - generic [ref=e71]:
+                    - heading "Pumps by Customer" [level=2] [ref=e72]
+                    - paragraph [ref=e73]: Top customers by volume
+                  - button "Toggle favorite" [ref=e74] [cursor=pointer]:
+                    - img [ref=e75]
+                - generic [ref=e78]:
+                  - application [ref=e82]
+                  - generic "Chart legend" [ref=e96]:
+                    - button "United Rentals 8 pumps · 36%" [ref=e97] [cursor=pointer]:
+                      - generic [ref=e99]: United Rentals
+                      - generic [ref=e100]: 8 pumps · 36%
+                    - button "Nat. Tank & Equip. 5 pumps · 23%" [ref=e101] [cursor=pointer]:
+                      - generic [ref=e103]: Nat. Tank & Equip.
+                      - generic [ref=e104]: 5 pumps · 23%
+                    - button "Rain For Rent 4 pumps · 18%" [ref=e105] [cursor=pointer]:
+                      - generic [ref=e107]: Rain For Rent
+                      - generic [ref=e108]: 4 pumps · 18%
+                    - button "Sunbelt Rentals 3 pumps · 14%" [ref=e109] [cursor=pointer]:
+                      - generic [ref=e111]: Sunbelt Rentals
+                      - generic [ref=e112]: 3 pumps · 14%
+                    - button "Ring Power CAT 2 pumps · 9%" [ref=e113] [cursor=pointer]:
+                      - generic [ref=e115]: Ring Power CAT
+                      - generic [ref=e116]: 2 pumps · 9%
+              - generic [ref=e117]:
+                - generic [ref=e118]:
+                  - generic [ref=e119]:
+                    - heading "WIP by Model" [level=2] [ref=e120]
+                    - paragraph [ref=e121]: Most popular pump models
+                  - button "Toggle favorite" [ref=e122] [cursor=pointer]:
+                    - img [ref=e123]
+                - generic [ref=e126]:
+                  - application [ref=e130]
+                  - generic "Chart legend" [ref=e150]:
+                    - button "DD-6 SAFE 8 units · 36%" [ref=e151] [cursor=pointer]:
+                      - generic [ref=e153]: DD-6 SAFE
+                      - generic [ref=e154]: 8 units · 36%
+                    - button "DD4SE 5 units · 23%" [ref=e155] [cursor=pointer]:
+                      - generic [ref=e157]: DD4SE
+                      - generic [ref=e158]: 5 units · 23%
+                    - button "RL200-SAFE 2 units · 9%" [ref=e159] [cursor=pointer]:
+                      - generic [ref=e161]: RL200-SAFE
+                      - generic [ref=e162]: 2 units · 9%
+                    - button "HC-150-SAFE 2 units · 9%" [ref=e163] [cursor=pointer]:
+                      - generic [ref=e165]: HC-150-SAFE
+                      - generic [ref=e166]: 2 units · 9%
+                    - button "RPC-DP-200 2 units · 9%" [ref=e167] [cursor=pointer]:
+                      - generic [ref=e169]: RPC-DP-200
+                      - generic [ref=e170]: 2 units · 9%
+                    - button "RL300 1 units · 5%" [ref=e171] [cursor=pointer]:
+                      - generic [ref=e173]: RL300
+                      - generic [ref=e174]: 1 units · 5%
+                    - button "RL300-SAFE 1 units · 5%" [ref=e175] [cursor=pointer]:
+                      - generic [ref=e177]: RL300-SAFE
+                      - generic [ref=e178]: 1 units · 5%
+                    - button "DP-150 1 units · 5%" [ref=e179] [cursor=pointer]:
+                      - generic [ref=e181]: DP-150
+                      - generic [ref=e182]: 1 units · 5%
+              - generic [ref=e183]:
+                - generic [ref=e184]:
+                  - generic [ref=e185]:
+                    - heading "Value by Customer" [level=2] [ref=e186]
+                    - paragraph [ref=e187]: Total order value by customer
+                  - button "Toggle favorite" [ref=e188] [cursor=pointer]:
+                    - img [ref=e189]
+                - generic [ref=e192]:
+                  - application [ref=e196]
+                  - generic "Chart legend" [ref=e197]:
+                    - button "United Rentals $0 · 0%" [ref=e198] [cursor=pointer]:
+                      - generic [ref=e200]: United Rentals
+                      - generic [ref=e201]: $0 · 0%
+                    - button "Nat. Tank & Equip. $0 · 0%" [ref=e202] [cursor=pointer]:
+                      - generic [ref=e204]: Nat. Tank & Equip.
+                      - generic [ref=e205]: $0 · 0%
+                    - button "Sunbelt Rentals $0 · 0%" [ref=e206] [cursor=pointer]:
+                      - generic [ref=e208]: Sunbelt Rentals
+                      - generic [ref=e209]: $0 · 0%
+                    - button "Ring Power CAT $0 · 0%" [ref=e210] [cursor=pointer]:
+                      - generic [ref=e212]: Ring Power CAT
+                      - generic [ref=e213]: $0 · 0%
+                    - button "Rain For Rent $0 · 0%" [ref=e214] [cursor=pointer]:
+                      - generic [ref=e216]: Rain For Rent
+                      - generic [ref=e217]: $0 · 0%
+          - generic [ref=e218]:
+            - generic [ref=e220]: Purchase Order Breakdown
+            - table [ref=e223]:
+              - rowgroup [ref=e224]:
+                - row "PO Number Customer Promise Date Total Value" [ref=e225]:
+                  - cell [ref=e226]
+                  - cell "PO Number" [ref=e227]
+                  - cell "Customer" [ref=e228]
+                  - cell "Promise Date" [ref=e229]
+                  - cell "Total Value" [ref=e230]
+              - rowgroup [ref=e231]:
+                - row "PO# 13501 United Rentals Dec 18, 2025 $0" [ref=e232] [cursor=pointer]:
+                  - cell [ref=e233]:
+                    - img [ref=e234]
+                  - cell "PO# 13501" [ref=e236]
+                  - cell "United Rentals" [ref=e237]
+                  - cell "Dec 18, 2025" [ref=e238]
+                  - cell "$0" [ref=e239]
+                - row "PO# 13502 United Rentals Dec 2, 2025 $0" [ref=e240] [cursor=pointer]:
+                  - cell [ref=e241]:
+                    - img [ref=e242]
+                  - cell "PO# 13502" [ref=e244]
+                  - cell "United Rentals" [ref=e245]
+                  - cell "Dec 2, 2025" [ref=e246]
+                  - cell "$0" [ref=e247]
+                - row "PO# 22569 Nat. Tank & Equip. Dec 6, 2025 $0" [ref=e248] [cursor=pointer]:
+                  - cell [ref=e249]:
+                    - img [ref=e250]
+                  - cell "PO# 22569" [ref=e252]
+                  - cell "Nat. Tank & Equip." [ref=e253]
+                  - cell "Dec 6, 2025" [ref=e254]
+                  - cell "$0" [ref=e255]
+                - row "PO# 33567 Sunbelt Rentals Dec 18, 2025 $0" [ref=e256] [cursor=pointer]:
+                  - cell [ref=e257]:
+                    - img [ref=e258]
+                  - cell "PO# 33567" [ref=e260]
+                  - cell "Sunbelt Rentals" [ref=e261]
+                  - cell "Dec 18, 2025" [ref=e262]
+                  - cell "$0" [ref=e263]
+                - row "PO# 55534 Ring Power CAT Dec 19, 2025 $0" [ref=e264] [cursor=pointer]:
+                  - cell [ref=e265]:
+                    - img [ref=e266]
+                  - cell "PO# 55534" [ref=e268]
+                  - cell "Ring Power CAT" [ref=e269]
+                  - cell "Dec 19, 2025" [ref=e270]
+                  - cell "$0" [ref=e271]
+                - row "PO# 87564 Rain For Rent Dec 24, 2025 $0" [ref=e272] [cursor=pointer]:
+                  - cell [ref=e273]:
+                    - img [ref=e274]
+                  - cell "PO# 87564" [ref=e276]
+                  - cell "Rain For Rent" [ref=e277]
+                  - cell "Dec 24, 2025" [ref=e278]
+                  - cell "$0" [ref=e279]
+  - generic [ref=e280]: "0"
+```

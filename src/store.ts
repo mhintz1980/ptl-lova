@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
 import { LocalAdapter } from "./adapters/local";
 import { SandboxAdapter } from "./adapters/sandbox";
 import { getModelLeadTimes as getCatalogLeadTimes } from "./lib/seed";
-import { addDays, startOfDay, isAfter, parseISO } from "date-fns";
+import { addDays, startOfDay, isAfter, parseISO, parse } from "date-fns";
 import { buildStageTimeline, type StageDurations, type StageBlock } from "./lib/schedule";
 import { applyFilters, genSerial } from "./lib/utils";
 import { sortPumps, SortDirection, SortField } from "./lib/sort";
@@ -190,12 +190,16 @@ export const useApp = create<AppState>()(
 
         // Calculate end date based on lead time
         const leadTimes = get().getModelLeadTimes(pump.model);
-        const totalDays = leadTimes ? Object.values(leadTimes).reduce((a, b) => a + b, 0) : 1;
+        if (!leadTimes) return;
 
-        // dropDate is YYYY-MM-DD from the calendar cell
-        // We treat it as the start of the FABRICATION phase
-        const start = startOfDay(new Date(dropDate));
-        const end = addDays(start, totalDays);
+        const capacityConfig = get().capacityConfig;
+
+        // Use buildStageTimeline to calculate total duration with capacity
+        // Parse dropDate as local date (YYYY-MM-DD)
+        const parsedDate = parse(dropDate, "yyyy-MM-dd", new Date());
+        const timeline = leadTimes ? buildStageTimeline(pump, leadTimes, { startDate: startOfDay(parsedDate), capacityConfig }) : [];
+        const end = timeline.length > 0 ? timeline[timeline.length - 1].end : addDays(startOfDay(parsedDate), 1);
+        const start = timeline.length > 0 ? timeline[0].start : startOfDay(parsedDate);
 
         const patch: Partial<Pump> = {
           stage: "QUEUE", // Ensure it's in QUEUE
@@ -321,9 +325,11 @@ export const useApp = create<AppState>()(
           if (foundDate) {
             // Calculate end date
             const leadTimes = getModelLeadTimes(pump.model);
-            const duration = leadTimes ? Object.values(leadTimes).reduce((a, b) => a + b, 0) : 1;
             const start = startOfDay(new Date(targetDateStr));
-            const end = addDays(start, duration);
+
+            // Use buildStageTimeline to calculate proper end date with capacity
+            const timeline = leadTimes ? buildStageTimeline(pump, leadTimes, { startDate: start, capacityConfig }) : [];
+            const end = timeline.length > 0 ? timeline[timeline.length - 1].end : addDays(start, 1);
 
             updatePump(pump.id, {
               scheduledStart: start.toISOString(),
@@ -516,7 +522,7 @@ export const useApp = create<AppState>()(
         const leadTimes = get().getModelLeadTimes(pump.model);
         if (!leadTimes) return undefined;
 
-        return buildStageTimeline(pump, leadTimes);
+        return buildStageTimeline(pump, leadTimes, { capacityConfig: get().capacityConfig });
       },
     }),
     {
