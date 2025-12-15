@@ -30,3 +30,7 @@ dist-ssr
 *.gemini
 *.github
 *.serena
+
+# Test results
+/playwright-report/
+/test-results/

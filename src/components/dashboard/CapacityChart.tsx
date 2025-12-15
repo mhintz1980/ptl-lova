@@ -1,69 +1,78 @@
 // src/components/dashboard/CapacityChart.tsx
-import React from "react";
-import { Pump, Stage } from "../../types";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { ChartProps, DashboardFilters } from "./dashboardConfig";
-import { useApp } from "../../store";
-import { applyDashboardFilters } from "./utils";
+import React from 'react'
+import { Pump, Stage } from '../../types'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts'
+import { ChartProps, DashboardFilters } from './dashboardConfig'
+import { useApp } from '../../store'
+import { applyDashboardFilters } from './utils'
 
 interface CapacityChartProps {
-  pumps: Pump[];
-  headless?: boolean;
-  onDrilldown?: (update: Partial<DashboardFilters>) => void;
+  pumps: Pump[]
+  headless?: boolean
+  onDrilldown?: (update: Partial<DashboardFilters>) => void
 }
 
 interface CapacityTooltipProps {
-  active?: boolean;
+  active?: boolean
   payload?: Array<{
     payload: {
-      displayName: string;
-      count: number;
-      value: number;
-    };
-  }>;
+      displayName: string
+      count: number
+      value: number
+    }
+  }>
 }
 
 const STAGE_ORDER: Stage[] = [
-  "QUEUE",
-  "FABRICATION",
-  "POWDER COAT",
-  "ASSEMBLY",
-  "TESTING",
-  "SHIPPING",
-  "CLOSED"
-];
+  'QUEUE',
+  'FABRICATION',
+  'POWDER COAT',
+  'ASSEMBLY',
+  'TESTING',
+  'SHIPPING',
+  'CLOSED',
+]
 
 const getStageCapacity = (pumps: Pump[]) => {
-  const stageCounts = STAGE_ORDER.map(stage => {
-    const count = pumps.filter(p => p.stage === stage).length;
+  const stageCounts = STAGE_ORDER.map((stage) => {
+    const count = pumps.filter((p) => p.stage === stage).length
     const totalValue = pumps
-      .filter(p => p.stage === stage)
-      .reduce((sum, p) => sum + p.value, 0);
+      .filter((p) => p.stage === stage)
+      .reduce((sum, p) => sum + p.value, 0)
 
     return {
       stage: stage.replace(' ', '\n'),
       count,
       value: totalValue,
-      displayName: stage
-    };
-  });
+      displayName: stage,
+    }
+  })
 
-  return stageCounts;
-};
+  return stageCounts
+}
 
 const getStageColor = (stage: Stage) => {
   const colors: Record<Stage, string> = {
-    "QUEUE": "hsl(var(--muted-foreground))",
-    "FABRICATION": "hsl(var(--chart-1))",
-    "POWDER COAT": "hsl(var(--chart-2))",
-    "ASSEMBLY": "hsl(var(--chart-3))",
-    "TESTING": "hsl(var(--chart-4))",
-    "SHIPPING": "hsl(var(--chart-5))",
-    "CLOSED": "hsl(var(--primary))",
-  };
-  return colors[stage];
-};
+    QUEUE: 'hsl(var(--muted-foreground))',
+    FABRICATION: 'hsl(var(--chart-1))',
+    'POWDER COAT': 'hsl(var(--chart-2))',
+    ASSEMBLY: 'hsl(var(--chart-3))',
+    TESTING: 'hsl(var(--chart-4))',
+    SHIPPING: 'hsl(var(--chart-5))',
+    CLOSED: 'hsl(var(--muted))',
+  }
+  return colors[stage]
+}
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -71,12 +80,12 @@ const formatCurrency = (value: number) => {
     currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value);
-};
+  }).format(value)
+}
 
 const CustomTooltip = ({ active, payload }: CapacityTooltipProps) => {
   if (active && payload && payload[0]) {
-    const data = payload[0].payload;
+    const data = payload[0].payload
     return (
       <div className="bg-popover border border-border rounded-md shadow-lg p-3 space-y-1">
         <p className="text-sm font-medium">{data.displayName}</p>
@@ -87,24 +96,30 @@ const CustomTooltip = ({ active, payload }: CapacityTooltipProps) => {
           {formatCurrency(data.value)}
         </p>
       </div>
-    );
+    )
   }
-  return null;
-};
+  return null
+}
 
-export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps, headless, onDrilldown }) => {
-  const data = React.useMemo(() => getStageCapacity(pumps), [pumps]);
+export const CapacityChart: React.FC<CapacityChartProps> = ({
+  pumps,
+  headless,
+  onDrilldown,
+}) => {
+  const data = React.useMemo(() => getStageCapacity(pumps), [pumps])
 
   const Content = (
-    <ResponsiveContainer width="100%" height={headless ? "100%" : 280}>
+    <ResponsiveContainer width="100%" height={headless ? '100%' : 280}>
       <BarChart
         data={data}
         margin={{ top: 0, right: 0, left: 0, bottom: 40 }}
         onClick={(data: unknown) => {
-          const chartData = data as { activePayload?: Array<{ payload: { displayName: Stage } }> };
+          const chartData = data as {
+            activePayload?: Array<{ payload: { displayName: Stage } }>
+          }
           if (onDrilldown && chartData?.activePayload?.[0]) {
-            const stage = chartData.activePayload[0].payload.displayName;
-            onDrilldown({ stage });
+            const stage = chartData.activePayload[0].payload.displayName
+            onDrilldown({ stage })
           }
         }}
       >
@@ -114,10 +129,7 @@ export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps, headless, o
           tick={{ fontSize: 10 }}
           className="fill-muted-foreground"
         />
-        <YAxis
-          tick={{ fontSize: 10 }}
-          className="fill-muted-foreground"
-        />
+        <YAxis tick={{ fontSize: 10 }} className="fill-muted-foreground" />
         <Tooltip content={<CustomTooltip />} />
         <Bar
           dataKey="count"
@@ -135,10 +147,10 @@ export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps, headless, o
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  );
+  )
 
   if (headless) {
-    return <div className="h-full w-full">{Content}</div>;
+    return <div className="h-full w-full">{Content}</div>
   }
 
   return (
@@ -146,18 +158,25 @@ export const CapacityChart: React.FC<CapacityChartProps> = ({ pumps, headless, o
       <CardHeader>
         <CardTitle className="text-lg">Production Capacity by Stage</CardTitle>
       </CardHeader>
-      <CardContent>
-        {Content}
-      </CardContent>
+      <CardContent>{Content}</CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export const CapacityByDeptChart: React.FC<ChartProps> = ({ filters, onDrilldown }) => {
-  const pumps = useApp((state) => state.pumps);
-  const filteredPumps = React.useMemo(() => applyDashboardFilters(pumps, filters), [pumps, filters]);
-  return <CapacityChart pumps={filteredPumps} headless={true} onDrilldown={onDrilldown} />;
-};
-
-
-
+export const CapacityByDeptChart: React.FC<ChartProps> = ({
+  filters,
+  onDrilldown,
+}) => {
+  const pumps = useApp((state) => state.pumps)
+  const filteredPumps = React.useMemo(
+    () => applyDashboardFilters(pumps, filters),
+    [pumps, filters]
+  )
+  return (
+    <CapacityChart
+      pumps={filteredPumps}
+      headless={true}
+      onDrilldown={onDrilldown}
+    />
+  )
+}

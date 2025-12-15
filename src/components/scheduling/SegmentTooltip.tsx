@@ -12,6 +12,7 @@ interface SegmentTooltipProps {
   className?: string;
 }
 
+
 function formatDate(date: Date): string {
   return format(date, "MMM d, yyyy");
 }

@@ -43,7 +43,7 @@
             - generic [ref=e43]:
               - generic [ref=e44]: Shop Efficiency
               - generic [ref=e45]: 0%
-              - generic [ref=e46]: 0 of 22 pumps closed
+              - generic [ref=e46]: 0 of 80 pumps closed
             - generic [ref=e49]:
               - generic [ref=e50]: On-time Orders
               - generic [ref=e51]: "0"
@@ -73,114 +73,271 @@
                   - button "Toggle favorite" [ref=e74] [cursor=pointer]:
                     - img [ref=e75]
                 - application [ref=e81]:
-                  - generic [ref=e99]:
-                    - generic [ref=e100]:
-                      - generic [ref=e102]: QUEUE
-                      - generic [ref=e104]: POWDER COAT
-                      - generic [ref=e106]: TESTING
-                      - generic [ref=e108]: CLOSED
-                    - generic [ref=e109]:
-                      - generic [ref=e111]: "0"
-                      - generic [ref=e113]: "6"
-                      - generic [ref=e115]: "12"
-                      - generic [ref=e117]: "18"
-                      - generic [ref=e119]: "24"
-              - generic [ref=e120]:
-                - generic [ref=e121]:
-                  - generic [ref=e122]:
-                    - heading "Capacity by Department" [level=2] [ref=e123]
-                    - paragraph [ref=e124]: Workload distribution across departments
-                  - button "Toggle favorite" [ref=e125] [cursor=pointer]:
-                    - img [ref=e126]
-                - application [ref=e132]:
-                  - generic [ref=e150]:
-                    - generic [ref=e151]:
-                      - generic [ref=e153]: QUEUE
-                      - generic [ref=e155]: FABRICATION
-                      - generic [ref=e157]: POWDER COAT
-                      - generic [ref=e159]: ASSEMBLY
-                      - generic [ref=e161]: TESTING
-                      - generic [ref=e163]: SHIPPING
-                      - generic [ref=e165]: CLOSED
-                    - generic [ref=e166]:
-                      - generic [ref=e168]: "0"
-                      - generic [ref=e170]: "6"
-                      - generic [ref=e172]: "12"
-                      - generic [ref=e174]: "18"
-                      - generic [ref=e176]: "24"
-              - generic [ref=e177]:
-                - generic [ref=e178]:
-                  - generic [ref=e179]:
-                    - heading "Late Orders" [level=2] [ref=e180]
-                    - paragraph [ref=e181]: Orders past their promise date
-                  - button "Toggle favorite" [ref=e182] [cursor=pointer]:
-                    - img [ref=e183]
-                - paragraph [ref=e188]: No late orders
-              - generic [ref=e189]:
-                - generic [ref=e190]:
-                  - generic [ref=e191]:
-                    - heading "Production Treemap" [level=2] [ref=e192]
-                    - paragraph [ref=e193]: Interactive view of all active orders (Click to drill down)
-                  - button "Toggle favorite" [ref=e194] [cursor=pointer]:
-                    - img [ref=e195]
-                - generic [ref=e198]:
-                  - button "All" [ref=e200] [cursor=pointer]:
-                    - img [ref=e201]
+                  - generic [ref=e101]:
+                    - generic [ref=e102]:
+                      - generic [ref=e104]: QUEUE
+                      - generic [ref=e106]: POWDER COAT
+                      - generic [ref=e108]: TESTING
+                      - generic [ref=e110]: CLOSED
+                    - generic [ref=e111]:
+                      - generic [ref=e113]: "0"
+                      - generic [ref=e115]: "20"
+                      - generic [ref=e117]: "40"
+                      - generic [ref=e119]: "60"
+                      - generic [ref=e121]: "80"
+              - generic [ref=e122]:
+                - generic [ref=e123]:
+                  - generic [ref=e124]:
+                    - heading "Capacity by Department" [level=2] [ref=e125]
+                    - paragraph [ref=e126]: Workload distribution across departments
+                  - button "Toggle favorite" [ref=e127] [cursor=pointer]:
+                    - img [ref=e128]
+                - application [ref=e134]:
+                  - generic [ref=e154]:
+                    - generic [ref=e155]:
+                      - generic [ref=e157]: QUEUE
+                      - generic [ref=e159]: FABRICATION
+                      - generic [ref=e161]: POWDER COAT
+                      - generic [ref=e163]: ASSEMBLY
+                      - generic [ref=e165]: TESTING
+                      - generic [ref=e167]: SHIPPING
+                      - generic [ref=e169]: CLOSED
+                    - generic [ref=e170]:
+                      - generic [ref=e172]: "0"
+                      - generic [ref=e174]: "20"
+                      - generic [ref=e176]: "40"
+                      - generic [ref=e178]: "60"
+                      - generic [ref=e180]: "80"
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - generic [ref=e183]:
+                    - heading "Late Orders" [level=2] [ref=e184]
+                    - paragraph [ref=e185]: Orders past their promise date
+                  - button "Toggle favorite" [ref=e186] [cursor=pointer]:
+                    - img [ref=e187]
+                - application [ref=e193]:
+                  - generic [ref=e213]:
+                    - generic [ref=e214]:
+                      - generic [ref=e216]: QUEUE
+                      - generic [ref=e218]: FABRICATION
+                    - generic [ref=e219]:
+                      - generic [ref=e221]: "0"
+                      - generic [ref=e223]: "3"
+                      - generic [ref=e225]: "6"
+                      - generic [ref=e227]: "9"
+                      - generic [ref=e229]: "12"
+              - generic [ref=e230]:
+                - generic [ref=e231]:
+                  - generic [ref=e232]:
+                    - heading "Production Treemap" [level=2] [ref=e233]
+                    - paragraph [ref=e234]: Interactive view of all active orders (Click to drill down)
+                  - button "Toggle favorite" [ref=e235] [cursor=pointer]:
+                    - img [ref=e236]
+                - generic [ref=e239]:
+                  - button "All" [ref=e241] [cursor=pointer]:
+                    - img [ref=e242]
                     - text: All
-                  - img [ref=e207]
-                  - generic [ref=e208]: By Customer Value
-          - generic [ref=e209]:
-            - generic [ref=e211]: Purchase Order Breakdown
-            - table [ref=e214]:
-              - rowgroup [ref=e215]:
-                - row "PO Number Customer Promise Date Total Value" [ref=e216]:
-                  - cell [ref=e217]
-                  - cell "PO Number" [ref=e218]
-                  - cell "Customer" [ref=e219]
-                  - cell "Promise Date" [ref=e220]
-                  - cell "Total Value" [ref=e221]
-              - rowgroup [ref=e222]:
-                - row "PO# 13501 United Rentals Dec 2, 2025 $0" [ref=e223] [cursor=pointer]:
-                  - cell [ref=e224]:
-                    - img [ref=e225]
-                  - cell "PO# 13501" [ref=e227]
-                  - cell "United Rentals" [ref=e228]
-                  - cell "Dec 2, 2025" [ref=e229]
-                  - cell "$0" [ref=e230]
-                - row "PO# 13502 United Rentals Dec 20, 2025 $0" [ref=e231] [cursor=pointer]:
-                  - cell [ref=e232]:
-                    - img [ref=e233]
-                  - cell "PO# 13502" [ref=e235]
-                  - cell "United Rentals" [ref=e236]
-                  - cell "Dec 20, 2025" [ref=e237]
-                  - cell "$0" [ref=e238]
-                - row "PO# 22569 Nat. Tank & Equip. Dec 11, 2025 $0" [ref=e239] [cursor=pointer]:
-                  - cell [ref=e240]:
-                    - img [ref=e241]
-                  - cell "PO# 22569" [ref=e243]
-                  - cell "Nat. Tank & Equip." [ref=e244]
-                  - cell "Dec 11, 2025" [ref=e245]
-                  - cell "$0" [ref=e246]
-                - row "PO# 33567 Sunbelt Rentals Dec 29, 2025 $0" [ref=e247] [cursor=pointer]:
-                  - cell [ref=e248]:
-                    - img [ref=e249]
-                  - cell "PO# 33567" [ref=e251]
-                  - cell "Sunbelt Rentals" [ref=e252]
-                  - cell "Dec 29, 2025" [ref=e253]
-                  - cell "$0" [ref=e254]
-                - row "PO# 55534 Ring Power CAT Dec 19, 2025 $0" [ref=e255] [cursor=pointer]:
-                  - cell [ref=e256]:
-                    - img [ref=e257]
-                  - cell "PO# 55534" [ref=e259]
-                  - cell "Ring Power CAT" [ref=e260]
-                  - cell "Dec 19, 2025" [ref=e261]
-                  - cell "$0" [ref=e262]
-                - row "PO# 87564 Rain For Rent Dec 3, 2025 $0" [ref=e263] [cursor=pointer]:
-                  - cell [ref=e264]:
-                    - img [ref=e265]
-                  - cell "PO# 87564" [ref=e267]
-                  - cell "Rain For Rent" [ref=e268]
-                  - cell "Dec 3, 2025" [ref=e269]
-                  - cell "$0" [ref=e270]
-  - generic [ref=e271]: "0"
+                  - img [ref=e248]
+                  - generic [ref=e249]: By Customer Value
+          - generic [ref=e250]:
+            - generic [ref=e252]: Purchase Order Breakdown
+            - table [ref=e255]:
+              - rowgroup [ref=e256]:
+                - row "PO Number Customer Promise Date Total Value" [ref=e257]:
+                  - columnheader [ref=e258]
+                  - columnheader "PO Number" [ref=e259]
+                  - columnheader "Customer" [ref=e260]
+                  - columnheader "Promise Date" [ref=e261]
+                  - columnheader "Total Value" [ref=e262]
+              - rowgroup [ref=e263]:
+                - row "PO2025-0001 United Rentals Dec 30, 2025 $40,000" [ref=e264] [cursor=pointer]:
+                  - cell [ref=e265]:
+                    - img [ref=e266]
+                  - cell "PO2025-0001" [ref=e268]
+                  - cell "United Rentals" [ref=e269]
+                  - cell "Dec 30, 2025" [ref=e270]
+                  - cell "$40,000" [ref=e271]
+                - row "PO2025-0002 Herc Rentals Dec 29, 2025 $50,000" [ref=e272] [cursor=pointer]:
+                  - cell [ref=e273]:
+                    - img [ref=e274]
+                  - cell "PO2025-0002" [ref=e276]
+                  - cell "Herc Rentals" [ref=e277]
+                  - cell "Dec 29, 2025" [ref=e278]
+                  - cell "$50,000" [ref=e279]
+                - row "PO2025-0003 Rain For Rent Dec 14, 2025 $96,000" [ref=e280] [cursor=pointer]:
+                  - cell [ref=e281]:
+                    - img [ref=e282]
+                  - cell "PO2025-0003" [ref=e284]
+                  - cell "Rain For Rent" [ref=e285]
+                  - cell "Dec 14, 2025" [ref=e286]
+                  - cell "$96,000" [ref=e287]
+                - row "PO2025-0004 Ring Power CAT Dec 30, 2025 $60,000" [ref=e288] [cursor=pointer]:
+                  - cell [ref=e289]:
+                    - img [ref=e290]
+                  - cell "PO2025-0004" [ref=e292]
+                  - cell "Ring Power CAT" [ref=e293]
+                  - cell "Dec 30, 2025" [ref=e294]
+                  - cell "$60,000" [ref=e295]
+                - row "PO2025-0005 Texas First CAT Dec 30, 2025 $58,000" [ref=e296] [cursor=pointer]:
+                  - cell [ref=e297]:
+                    - img [ref=e298]
+                  - cell "PO2025-0005" [ref=e300]
+                  - cell "Texas First CAT" [ref=e301]
+                  - cell "Dec 30, 2025" [ref=e302]
+                  - cell "$58,000" [ref=e303]
+                - row "PO2025-0006 Pioneer Pump Dec 14, 2025 $152,000" [ref=e304] [cursor=pointer]:
+                  - cell [ref=e305]:
+                    - img [ref=e306]
+                  - cell "PO2025-0006" [ref=e308]
+                  - cell "Pioneer Pump" [ref=e309]
+                  - cell "Dec 14, 2025" [ref=e310]
+                  - cell "$152,000" [ref=e311]
+                - row "PO2025-0007 Sunbelt Rentals Jan 2, 2026 $45,000" [ref=e312] [cursor=pointer]:
+                  - cell [ref=e313]:
+                    - img [ref=e314]
+                  - cell "PO2025-0007" [ref=e316]
+                  - cell "Sunbelt Rentals" [ref=e317]
+                  - cell "Jan 2, 2026" [ref=e318]
+                  - cell "$45,000" [ref=e319]
+                - row "PO2025-0008 Herc Rentals Dec 29, 2025 $148,500" [ref=e320] [cursor=pointer]:
+                  - cell [ref=e321]:
+                    - img [ref=e322]
+                  - cell "PO2025-0008" [ref=e324]
+                  - cell "Herc Rentals" [ref=e325]
+                  - cell "Dec 29, 2025" [ref=e326]
+                  - cell "$148,500" [ref=e327]
+                - row "PO2025-0009 Equipment Share Dec 31, 2025 $100,000" [ref=e328] [cursor=pointer]:
+                  - cell [ref=e329]:
+                    - img [ref=e330]
+                  - cell "PO2025-0009" [ref=e332]
+                  - cell "Equipment Share" [ref=e333]
+                  - cell "Dec 31, 2025" [ref=e334]
+                  - cell "$100,000" [ref=e335]
+                - row "PO2025-0010 Carter CAT Dec 29, 2025 $110,000" [ref=e336] [cursor=pointer]:
+                  - cell [ref=e337]:
+                    - img [ref=e338]
+                  - cell "PO2025-0010" [ref=e340]
+                  - cell "Carter CAT" [ref=e341]
+                  - cell "Dec 29, 2025" [ref=e342]
+                  - cell "$110,000" [ref=e343]
+                - row "PO2025-0011 Thompson CAT Dec 14, 2025 $180,000" [ref=e344] [cursor=pointer]:
+                  - cell [ref=e345]:
+                    - img [ref=e346]
+                  - cell "PO2025-0011" [ref=e348]
+                  - cell "Thompson CAT" [ref=e349]
+                  - cell "Dec 14, 2025" [ref=e350]
+                  - cell "$180,000" [ref=e351]
+                - row "PO2025-0012 SunState Dec 14, 2025 $260,000" [ref=e352] [cursor=pointer]:
+                  - cell [ref=e353]:
+                    - img [ref=e354]
+                  - cell "PO2025-0012" [ref=e356]
+                  - cell "SunState" [ref=e357]
+                  - cell "Dec 14, 2025" [ref=e358]
+                  - cell "$260,000" [ref=e359]
+                - row "PO2025-0013 Rain For Rent Dec 14, 2025 $125,000" [ref=e360] [cursor=pointer]:
+                  - cell [ref=e361]:
+                    - img [ref=e362]
+                  - cell "PO2025-0013" [ref=e364]
+                  - cell "Rain For Rent" [ref=e365]
+                  - cell "Dec 14, 2025" [ref=e366]
+                  - cell "$125,000" [ref=e367]
+                - row "PO2025-0014 Thompson CAT Jan 1, 2026 $60,000" [ref=e368] [cursor=pointer]:
+                  - cell [ref=e369]:
+                    - img [ref=e370]
+                  - cell "PO2025-0014" [ref=e372]
+                  - cell "Thompson CAT" [ref=e373]
+                  - cell "Jan 1, 2026" [ref=e374]
+                  - cell "$60,000" [ref=e375]
+                - row "PO2025-0015 Yancey CAT Dec 14, 2025 $25,000" [ref=e376] [cursor=pointer]:
+                  - cell [ref=e377]:
+                    - img [ref=e378]
+                  - cell "PO2025-0015" [ref=e380]
+                  - cell "Yancey CAT" [ref=e381]
+                  - cell "Dec 14, 2025" [ref=e382]
+                  - cell "$25,000" [ref=e383]
+                - row "PO2025-0016 Pioneer Pump Dec 30, 2025 $125,000" [ref=e384] [cursor=pointer]:
+                  - cell [ref=e385]:
+                    - img [ref=e386]
+                  - cell "PO2025-0016" [ref=e388]
+                  - cell "Pioneer Pump" [ref=e389]
+                  - cell "Dec 30, 2025" [ref=e390]
+                  - cell "$125,000" [ref=e391]
+                - row "PO2025-0017 Herc Rentals Dec 14, 2025 $75,000" [ref=e392] [cursor=pointer]:
+                  - cell [ref=e393]:
+                    - img [ref=e394]
+                  - cell "PO2025-0017" [ref=e396]
+                  - cell "Herc Rentals" [ref=e397]
+                  - cell "Dec 14, 2025" [ref=e398]
+                  - cell "$75,000" [ref=e399]
+                - row "PO2025-0018 Equipment Share Dec 29, 2025 $72,000" [ref=e400] [cursor=pointer]:
+                  - cell [ref=e401]:
+                    - img [ref=e402]
+                  - cell "PO2025-0018" [ref=e404]
+                  - cell "Equipment Share" [ref=e405]
+                  - cell "Dec 29, 2025" [ref=e406]
+                  - cell "$72,000" [ref=e407]
+                - row "PO2025-0019 Ring Power CAT Dec 14, 2025 $114,000" [ref=e408] [cursor=pointer]:
+                  - cell [ref=e409]:
+                    - img [ref=e410]
+                  - cell "PO2025-0019" [ref=e412]
+                  - cell "Ring Power CAT" [ref=e413]
+                  - cell "Dec 14, 2025" [ref=e414]
+                  - cell "$114,000" [ref=e415]
+                - row "PO2025-0020 Yancey CAT Dec 30, 2025 $150,000" [ref=e416] [cursor=pointer]:
+                  - cell [ref=e417]:
+                    - img [ref=e418]
+                  - cell "PO2025-0020" [ref=e420]
+                  - cell "Yancey CAT" [ref=e421]
+                  - cell "Dec 30, 2025" [ref=e422]
+                  - cell "$150,000" [ref=e423]
+                - row "PO2025-0021 SunState Dec 30, 2025 $156,000" [ref=e424] [cursor=pointer]:
+                  - cell [ref=e425]:
+                    - img [ref=e426]
+                  - cell "PO2025-0021" [ref=e428]
+                  - cell "SunState" [ref=e429]
+                  - cell "Dec 30, 2025" [ref=e430]
+                  - cell "$156,000" [ref=e431]
+                - row "PO2025-0022 Herc Rentals Dec 14, 2025 $75,000" [ref=e432] [cursor=pointer]:
+                  - cell [ref=e433]:
+                    - img [ref=e434]
+                  - cell "PO2025-0022" [ref=e436]
+                  - cell "Herc Rentals" [ref=e437]
+                  - cell "Dec 14, 2025" [ref=e438]
+                  - cell "$75,000" [ref=e439]
+                - row "PO2025-0023 Equipment Share Dec 14, 2025 $75,000" [ref=e440] [cursor=pointer]:
+                  - cell [ref=e441]:
+                    - img [ref=e442]
+                  - cell "PO2025-0023" [ref=e444]
+                  - cell "Equipment Share" [ref=e445]
+                  - cell "Dec 14, 2025" [ref=e446]
+                  - cell "$75,000" [ref=e447]
+                - row "PO2025-0024 Ring Power CAT Dec 30, 2025 $87,000" [ref=e448] [cursor=pointer]:
+                  - cell [ref=e449]:
+                    - img [ref=e450]
+                  - cell "PO2025-0024" [ref=e452]
+                  - cell "Ring Power CAT" [ref=e453]
+                  - cell "Dec 30, 2025" [ref=e454]
+                  - cell "$87,000" [ref=e455]
+                - row "PO2025-0025 Yancey CAT Dec 14, 2025 $148,500" [ref=e456] [cursor=pointer]:
+                  - cell [ref=e457]:
+                    - img [ref=e458]
+                  - cell "PO2025-0025" [ref=e460]
+                  - cell "Yancey CAT" [ref=e461]
+                  - cell "Dec 14, 2025" [ref=e462]
+                  - cell "$148,500" [ref=e463]
+                - row "PO2025-0026 SunState Dec 31, 2025 $108,000" [ref=e464] [cursor=pointer]:
+                  - cell [ref=e465]:
+                    - img [ref=e466]
+                  - cell "PO2025-0026" [ref=e468]
+                  - cell "SunState" [ref=e469]
+                  - cell "Dec 31, 2025" [ref=e470]
+                  - cell "$108,000" [ref=e471]
+                - row "PO2025-0027 Herc Rentals Dec 14, 2025 $90,000" [ref=e472] [cursor=pointer]:
+                  - cell [ref=e473]:
+                    - img [ref=e474]
+                  - cell "PO2025-0027" [ref=e476]
+                  - cell "Herc Rentals" [ref=e477]
+                  - cell "Dec 14, 2025" [ref=e478]
+                  - cell "$90,000" [ref=e479]
+  - generic [ref=e480]: "3"
 ```

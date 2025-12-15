@@ -17,7 +17,7 @@ import { PrintLayout } from "./components/print/PrintLayout";
 import { MondayBrief } from "./components/print/MondayBrief";
 import { CapacityForecast } from "./components/print/CapacityForecast";
 // Debug import for development
-import "./debug-seed";
+import './debug-seed'
 
 import { SandboxToolbar } from "./components/sandbox/SandboxToolbar";
 
@@ -35,13 +35,13 @@ function MainApp() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load()
+  }, [load])
 
   const filteredPumps = useMemo(() => {
-    const filtered = applyFilters(pumps, filters);
-    return sortPumps(filtered, sortField, sortDirection);
-  }, [pumps, filters, sortField, sortDirection]);
+    const filtered = applyFilters(pumps, filters)
+    return sortPumps(filtered, sortField, sortDirection)
+  }, [pumps, filters, sortField, sortDirection])
 
   const currentView = useMemo((): AppView => {
     if (location.pathname.includes("/kanban")) return "kanban";
@@ -91,7 +91,7 @@ function MainApp() {
         onClose={() => setSelectedPump(null)}
       />
     </>
-  );
+  )
 }
 
 function App() {
