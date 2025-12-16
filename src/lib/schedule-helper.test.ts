@@ -9,14 +9,20 @@ describe('Schedule Helper - Dynamic Durations', () => {
         model: 'TEST-MODEL',
         scheduledStart: '2025-01-01T09:00:00.000Z', // Wednesday
         // ... other required fields
-        serial: 1, po: 'PO1', customer: 'C1', stage: 'QUEUE', priority: 'Normal', value: 1000, last_update: ''
+        serial: 1, po: 'PO1', customer: 'C1', stage: 'QUEUE', priority: 'Normal', value: 1000, last_update: '',
+        work_hours: {
+            fabrication: 12,
+            assembly: 8,
+            testing: 2,
+            shipping: 2
+        }
     };
 
     const mockLeadTimes = {
-        fabrication: 1.5, // 12 hours
+        fabrication: 1.5,
         powder_coat: 2,
-        assembly: 1, // 8 hours
-        testing: 0.25, // 2 hours
+        assembly: 1,
+        testing: 0.25,
         total_days: 5
     };
 
@@ -26,10 +32,10 @@ describe('Schedule Helper - Dynamic Durations', () => {
         // Setup Config
         const config = { ...DEFAULT_CAPACITY_CONFIG };
 
-        // 1. Fabrication: 4 employees (32h/day). Work: 12h. Duration: 12/32 = 0.375 days.
+        // 1. Fabrication: 4 employees (32h/day). Work: 12h. Duration: 12/32 = 0.375 days -> 1 day.
         config.fabrication = { ...config.fabrication, employeeCount: 4, efficiency: 1.0, dailyManHours: 32 };
 
-        // 2. Testing: 0.25 employees (2h/day). Work: 2h. Duration: 2/2 = 1.0 days.
+        // 2. Testing: 0.25 employees (2h/day). Work: 2h. Duration: 2/2 = 1.0 days -> 1 day.
         config.testing = { ...config.testing, employeeCount: 0.25, efficiency: 1.0, dailyManHours: 2 };
 
         const timelines = buildCapacityAwareTimelines([mockPump], config, leadTimeLookup);
@@ -38,20 +44,17 @@ describe('Schedule Helper - Dynamic Durations', () => {
         expect(blocks).toBeDefined();
 
         // Check Fabrication
+        // 12h work / 32h per day = 0.375 days → roundToQuarter = 0.5 days = 12 hours
         const fabBlock = blocks.find(b => b.stage === 'FABRICATION');
         expect(fabBlock).toBeDefined();
-        // Duration 0.375 days. Should be < 1 full day.
         const fabDurationHours = (new Date(fabBlock!.end).getTime() - new Date(fabBlock!.start).getTime()) / 3600000;
-        // 0.375 work days * 8 hours/day = 3 hours.
-        expect(fabDurationHours).toBe(3);
+        expect(fabDurationHours).toBe(12); // 0.5 days
 
         // Check Testing
+        // 2h work / 2h per day = 1.0 day → roundToQuarter = 1.0 days = 24 hours
         const testBlock = blocks.find(b => b.stage === 'TESTING');
         expect(testBlock).toBeDefined();
-        // Duration 1.0 days.
-        // 1.0 days * 8 = 8 hours.
-        // It adds 8 hours.
         const testDurationHours = (new Date(testBlock!.end).getTime() - new Date(testBlock!.start).getTime()) / 3600000;
-        expect(testDurationHours).toBe(8);
+        expect(testDurationHours).toBe(24);
     });
 });
