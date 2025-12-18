@@ -27,16 +27,6 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
   const isOverLimit = typeof wipLimit === "number" ? sortedPumps.length > wipLimit : false;
   const countLabel = wipLimit != null ? `${sortedPumps.length} / ${wipLimit}` : `${sortedPumps.length}`;
 
-  const averageDwell = useMemo(() => {
-    if (!sortedPumps.length) return null;
-    const now = Date.now();
-    const samples = sortedPumps
-      .map((pump) => pump.last_update ? Math.max(0, (now - new Date(pump.last_update).getTime()) / (1000 * 60 * 60 * 24)) : null)
-      .filter((value): value is number => value !== null);
-    if (!samples.length) return null;
-    const avg = samples.reduce((sum, value) => sum + value, 0) / samples.length;
-    return `${avg.toFixed(1)}d`;
-  }, [sortedPumps]);
 
   const { setNodeRef, isOver } = useDroppable({
     id: stage,
@@ -77,12 +67,12 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
               <span className="truncate" title={stage}>
                 {stage}
               </span>
-              <div className="flex flex-col items-end text-xs font-medium text-muted-foreground">
-                <span>{countLabel}</span>
-                <span className="text-[11px] uppercase tracking-wide">
-                  Avg {averageDwell ?? "–"}
-                </span>
-              </div>
+              <span className={cn(
+                "text-xs font-medium",
+                isOverLimit ? "text-destructive" : "text-muted-foreground"
+              )}>
+                {countLabel}
+              </span>
             </div>
           </div>
           <span className="text-muted-foreground hover:text-foreground">
