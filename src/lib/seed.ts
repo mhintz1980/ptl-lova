@@ -126,6 +126,41 @@ function assignPriority(model: CatalogModel): Priority {
   return "Normal"; // Default priority
 }
 
+// Stage determination helper
+interface StageTransition {
+  completionDate: Date;
+  stage: Stage;
+  updateDate: Date;
+}
+
+function determineCurrentStage(
+  stageTransitions: StageTransition[],
+  currentTime: number,
+  poDate: Date,
+  testingEnd: Date
+): { stage: Stage; lastUpdate: string } {
+  // Check stages in reverse chronological order (latest to earliest)
+  for (const transition of stageTransitions) {
+    if (currentTime >= transition.completionDate.getTime()) {
+      // Special handling for completed testing
+      if (transition.stage === "TESTING") {
+        const stage = Math.random() > 0.7 ? "CLOSED" : "SHIPPING";
+        return { stage, lastUpdate: testingEnd.toISOString() };
+      }
+      return {
+        stage: transition.stage,
+        lastUpdate: transition.updateDate.toISOString()
+      };
+    }
+  }
+
+  // Default: NOT STARTED
+  return {
+    stage: "NOT STARTED",
+    lastUpdate: poDate.toISOString()
+  };
+}
+
 // Generate deterministic pump from catalog model
 function generatePumpFromCatalog(
   model: CatalogModel,
@@ -152,31 +187,23 @@ function generatePumpFromCatalog(
     const assemblyEnd = addBusinessDays(powderCoatEnd, model.lead_times.assembly);
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing);
 
-    // Determine current stage based on dates
-    let currentStage: Stage = "NOT STARTED";
-    let lastUpdate = poDate.toISOString();
-    let scheduledEnd = testingEnd.toISOString();
+    // Define stage transitions in reverse chronological order
+    const stageTransitions: StageTransition[] = [
+      { completionDate: testingEnd, stage: "TESTING", updateDate: testingEnd },
+      { completionDate: assemblyEnd, stage: "TESTING", updateDate: assemblyEnd },
+      { completionDate: powderCoatEnd, stage: "ASSEMBLY", updateDate: powderCoatEnd },
+      { completionDate: fabricationEnd, stage: "POWDER COAT", updateDate: fabricationEnd },
+      { completionDate: fabricationStart, stage: "FABRICATION", updateDate: fabricationStart }
+    ];
 
-    const nowTime = now.getTime();
-    if (nowTime >= testingEnd.getTime()) {
-      currentStage = Math.random() > 0.7 ? "CLOSED" : "SHIPPING";
-      lastUpdate = testingEnd.toISOString();
-    } else if (nowTime >= assemblyEnd.getTime()) {
-      currentStage = "TESTING";
-      lastUpdate = assemblyEnd.toISOString();
-    } else if (nowTime >= powderCoatEnd.getTime()) {
-      currentStage = "ASSEMBLY";
-      lastUpdate = powderCoatEnd.toISOString();
-    } else if (nowTime >= fabricationEnd.getTime()) {
-      currentStage = "POWDER COAT";
-      lastUpdate = fabricationEnd.toISOString();
-    } else if (nowTime >= fabricationStart.getTime()) {
-      currentStage = "FABRICATION";
-      lastUpdate = fabricationStart.toISOString();
-    } else {
-      currentStage = "NOT STARTED";
-      lastUpdate = poDate.toISOString();
-    }
+    // Determine current stage based on dates
+    const { stage: currentStage, lastUpdate } = determineCurrentStage(
+      stageTransitions,
+      now.getTime(),
+      poDate,
+      testingEnd
+    );
+    const scheduledEnd = testingEnd.toISOString();
 
     pumps.push({
       id: nanoid(),
