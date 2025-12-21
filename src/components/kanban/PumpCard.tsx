@@ -44,7 +44,7 @@ export function PumpCard({
     [pump.model]
   );
 
-  const { isSandbox, originalSnapshot, isPumpLocked } = useApp();
+  const { isSandbox, originalSnapshot, isPumpLocked, capacityConfig } = useApp();
 
   const isLocked = useMemo(() => isPumpLocked(pump.id), [isPumpLocked, pump.id]);
 
@@ -52,6 +52,17 @@ export function PumpCard({
     if (!isSandbox || !originalSnapshot) return false;
     return !originalSnapshot.some(p => p.id === pump.id);
   }, [isSandbox, originalSnapshot, pump.id]);
+
+  const shouldShowVendor =
+    pump.stage === "STAGED_FOR_POWDER" || pump.stage === "POWDER_COAT";
+  const vendorName = useMemo(() => {
+    if (!shouldShowVendor) return null;
+    if (!pump.powderCoatVendorId) return null;
+    const vendor = capacityConfig.powderCoat.vendors.find(
+      (v) => v.id === pump.powderCoatVendorId
+    );
+    return vendor?.name ?? null;
+  }, [capacityConfig.powderCoat.vendors, pump.powderCoatVendorId, shouldShowVendor]);
 
   const style = transform
     ? {
@@ -134,6 +145,11 @@ export function PumpCard({
               {pump.model}
             </span>
           </div>
+          {shouldShowVendor && (
+            <div className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-foreground/80">
+              {vendorName ? `🎨 ${vendorName}` : '🎨 Unassigned'}
+            </div>
+          )}
           <div className="text-xs text-muted-foreground">
             <span className="block truncate" title={pump.customer}>
               {pump.customer}
@@ -189,4 +205,3 @@ export function PumpCard({
     </div>
   );
 }
-

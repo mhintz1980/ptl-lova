@@ -7,6 +7,12 @@ import {
 import type { Pump, Stage, CapacityConfig } from '../types'
 import { PRODUCTION_STAGES } from './stage-constants'
 import { getModelWorkHours } from './seed'
+import { countWorkingDays } from './working-days'
+import {
+  getPumpStageMoveEvents,
+  getStagedForPowderHistory,
+  type StagedForPowderHistory,
+} from './stage-history'
 
 // Constitution §2.1: Canonical stage keys for duration lookup
 type StageKey = 'fabrication' | 'powder_coat' | 'assembly' | 'ship'
@@ -58,7 +64,8 @@ export interface BuildCalendarEventsOptions {
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max)
 
-const normalizeDays = (value?: number) => Math.max(1, Math.ceil(value ?? 0))
+const normalizeDays = (value?: number, min = 1) =>
+  Math.max(min, Math.ceil(value ?? 0))
 
 export interface ScheduleWindow {
   startISO: string
@@ -77,24 +84,32 @@ export function isValidScheduleDate(
 
 // Constitution \u00a72.1: deriveShippingDays removed - ship duration is now direct from StageDurations
 
-function sanitizeDurations(raw: StageDurations) {
-  // Constitution §2.1: Canonical stages from Fabrication to Ship
-  const stageKeys: Array<{
-    stage: Exclude<Stage, 'QUEUE' | 'STAGED_FOR_POWDER' | 'CLOSED'>
-    key: StageKey
-  }> = [
-    { stage: 'FABRICATION', key: 'fabrication' },
-    { stage: 'POWDER_COAT', key: 'powder_coat' },
-    { stage: 'ASSEMBLY', key: 'assembly' },
-    { stage: 'SHIP', key: 'ship' },
-  ]
+function sanitizeDurations(
+  raw: StageDurations,
+  capacityConfig?: CapacityConfig,
+  stageHistory?: StagedForPowderHistory,
+  currentStage?: Stage
+) {
+  const bufferDays = normalizeDays(
+    capacityConfig?.stagedForPowderBufferDays ?? 1,
+    0
+  )
+  let stagedDays = bufferDays
 
-  return stageKeys.map(({ stage, key }) => ({
-    stage,
-    days: normalizeDays(
-      (raw as Record<StageKey, number | undefined>)[key] as number | undefined
-    ),
-  }))
+  if (currentStage === 'STAGED_FOR_POWDER' && stageHistory?.lastEnteredAt) {
+    const elapsed = countWorkingDays(stageHistory.lastEnteredAt, new Date())
+    stagedDays = Math.max(0, bufferDays - elapsed)
+  } else if (stageHistory?.completed) {
+    stagedDays = 0
+  }
+
+  return [
+    { stage: 'FABRICATION' as const, days: normalizeDays(raw.fabrication) },
+    { stage: 'STAGED_FOR_POWDER' as const, days: normalizeDays(stagedDays, 0) },
+    { stage: 'POWDER_COAT' as const, days: normalizeDays(5) },
+    { stage: 'ASSEMBLY' as const, days: normalizeDays(raw.assembly) },
+    { stage: 'SHIP' as const, days: normalizeDays(raw.ship) },
+  ]
 }
 
 function resolveScheduleStart(pump: Pump, totalDays: number): Date {
@@ -112,13 +127,22 @@ function resolveScheduleStart(pump: Pump, totalDays: number): Date {
 export function buildStageTimeline(
   pump: Pump,
   leadTimes: StageDurations,
-  options?: { startDate?: Date; capacityConfig?: CapacityConfig }
+  options?: {
+    startDate?: Date
+    capacityConfig?: CapacityConfig
+    stageHistory?: StagedForPowderHistory
+  }
 ): StageBlock[] {
   // Helper to round to nearest hour (1/24 of a day)
   const roundToHour = (value: number) => Math.round(value * 24) / 24
 
   // If capacity config and work hours are present, recalculate durations
-  let durations = sanitizeDurations(leadTimes)
+  let durations = sanitizeDurations(
+    leadTimes,
+    options?.capacityConfig,
+    options?.stageHistory,
+    pump.stage
+  )
 
   if (options?.capacityConfig) {
     const { capacityConfig } = options
@@ -188,11 +212,16 @@ export function buildStageTimeline(
   const addFractionalDays = (date: Date, days: number): Date => {
     return new Date(date.getTime() + days * MS_PER_DAY)
   }
+  const addWorkingDays = (date: Date, days: number): Date =>
+    addBusinessDays(date, Math.ceil(days))
 
   let cursor = timelineStart
   return filteredDurations.map((entry) => {
     const start = cursor
-    const end = addFractionalDays(start, entry.days)
+    const end =
+      entry.stage === 'STAGED_FOR_POWDER' || entry.stage === 'POWDER_COAT'
+        ? addWorkingDays(start, entry.days)
+        : addFractionalDays(start, entry.days)
     cursor = end
     return { stage: entry.stage, start, end, days: entry.days, pump }
   })
@@ -270,7 +299,13 @@ export function buildCalendarEvents({
     if (!leadTimes) {
       return []
     }
-    const timeline = buildStageTimeline(pump, leadTimes, { capacityConfig })
+    const stageHistory = getStagedForPowderHistory(
+      getPumpStageMoveEvents(pump.id)
+    )
+    const timeline = buildStageTimeline(pump, leadTimes, {
+      capacityConfig,
+      stageHistory,
+    })
     return timeline.flatMap((block) =>
       buildEventSegments(pump, block, viewStartDay, days)
     )

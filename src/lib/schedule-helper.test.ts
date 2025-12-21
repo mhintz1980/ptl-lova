@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { addDays, startOfWeek } from 'date-fns'
 import { buildCapacityAwareTimelines } from './schedule-helper'
 import { DEFAULT_CAPACITY_CONFIG } from './capacity'
 import { Pump } from '../types'
@@ -93,5 +94,55 @@ describe('Schedule Helper - Dynamic Durations', () => {
         new Date(testBlock!.start).getTime()) /
       3600000
     expect(testDurationHours).toBe(24)
+  })
+
+  it('extends staged buffer when vendor weekly capacity is exceeded', () => {
+    const monday = new Date('2025-01-06T00:00:00.000Z') // Monday
+    const pumps: Pump[] = [
+      {
+        ...mockPump,
+        id: 'p1',
+        forecastStart: monday.toISOString(),
+        powderCoatVendorId: 'pc-1',
+      },
+      {
+        ...mockPump,
+        id: 'p2',
+        forecastStart: monday.toISOString(),
+        powderCoatVendorId: 'pc-1',
+      },
+    ]
+
+    const leadTimeLookup = () => ({
+      fabrication: 1,
+      powder_coat: 5,
+      assembly: 1,
+      ship: 1,
+    })
+
+    const config = {
+      ...DEFAULT_CAPACITY_CONFIG,
+      stagedForPowderBufferDays: 1,
+      powderCoat: {
+        vendors: [{ id: 'pc-1', name: 'PC-1', maxPumpsPerWeek: 1 }],
+      },
+    }
+
+    const timelines = buildCapacityAwareTimelines(
+      pumps,
+      config,
+      leadTimeLookup
+    )
+
+    const p1Powder = timelines['p1'].find((b) => b.stage === 'POWDER_COAT')
+    const p2Powder = timelines['p2'].find((b) => b.stage === 'POWDER_COAT')
+    expect(p1Powder).toBeDefined()
+    expect(p2Powder).toBeDefined()
+
+    const firstWeekStart = startOfWeek(p1Powder!.start, { weekStartsOn: 1 })
+    const nextWeekStart = addDays(firstWeekStart, 7)
+    expect(p2Powder!.start.getTime()).toBeGreaterThanOrEqual(
+      nextWeekStart.getTime()
+    )
   })
 })

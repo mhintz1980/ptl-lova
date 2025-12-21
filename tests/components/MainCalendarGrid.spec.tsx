@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MainCalendarGrid } from "../../src/components/scheduling/MainCalendarGrid";
 import type { Pump } from "../../src/types";
+import { DEFAULT_CAPACITY_CONFIG } from "../../src/lib/capacity";
 
 const pumps: Pump[] = [
   {
@@ -29,9 +30,12 @@ const mockGetModelLeadTimes = vi.fn().mockReturnValue({
 
 vi.mock("../../src/store", () => {
   const mockUseApp = (() => ({ filters: {} })) as (() => { filters: Record<string, unknown> }) & {
-    getState: () => { getModelLeadTimes: typeof mockGetModelLeadTimes };
+    getState: () => { getModelLeadTimes: typeof mockGetModelLeadTimes; capacityConfig: typeof DEFAULT_CAPACITY_CONFIG };
   };
-  mockUseApp.getState = () => ({ getModelLeadTimes: mockGetModelLeadTimes });
+  mockUseApp.getState = () => ({
+    getModelLeadTimes: mockGetModelLeadTimes,
+    capacityConfig: DEFAULT_CAPACITY_CONFIG,
+  });
   return { useApp: mockUseApp };
 });
 

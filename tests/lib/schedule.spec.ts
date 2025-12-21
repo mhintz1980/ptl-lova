@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { startOfDay } from 'date-fns'
+import { addBusinessDays, startOfDay } from 'date-fns'
 import {
   buildCalendarEvents,
   buildStageTimeline,
@@ -8,6 +8,7 @@ import {
   isValidScheduleDate,
   type StageDurations,
 } from '../../src/lib/schedule'
+import { DEFAULT_CAPACITY_CONFIG } from '../../src/lib/capacity'
 import type { Pump } from '../../src/types'
 
 const pump: Pump = {
@@ -34,11 +35,14 @@ const leadTimes: StageDurations = {
 
 describe('schedule utilities', () => {
   it('builds sequential stage blocks using lead times', () => {
-    const blocks = buildStageTimeline(pump, leadTimes)
+    const blocks = buildStageTimeline(pump, leadTimes, {
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
+    })
     // Constitution §2.1: 4 canonical stages in timeline
-    expect(blocks).toHaveLength(4)
+    expect(blocks).toHaveLength(5)
     expect(blocks.map((b) => b.stage)).toEqual([
       'FABRICATION',
+      'STAGED_FOR_POWDER',
       'POWDER_COAT',
       'ASSEMBLY',
       'SHIP',
@@ -55,6 +59,7 @@ describe('schedule utilities', () => {
       viewStart: new Date('2025-11-10T00:00:00.000Z'),
       days: 28,
       leadTimeLookup: () => leadTimes,
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
     })
 
     // Constitution §2.1: Use canonical POWDER_COAT
@@ -67,7 +72,9 @@ describe('schedule utilities', () => {
   })
 
   it('returns ISO window boundaries for a timeline', () => {
-    const blocks = buildStageTimeline(pump, leadTimes)
+    const blocks = buildStageTimeline(pump, leadTimes, {
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
+    })
     const window = getScheduleWindow(blocks)
     expect(window).toEqual({
       startISO: blocks[0].start.toISOString(),
@@ -90,9 +97,56 @@ describe('schedule utilities', () => {
 
   it('derives schedule windows from calendar drops', () => {
     const dropDate = new Date('2025-11-15T00:00:00.000Z')
-    const result = deriveScheduleWindow(pump, leadTimes, dropDate)
+    const result = deriveScheduleWindow(
+      pump,
+      leadTimes,
+      dropDate,
+      DEFAULT_CAPACITY_CONFIG
+    )
     expect(result).not.toBeNull()
     expect(result?.window.startISO).toBe(startOfDay(dropDate).toISOString())
     expect(result?.timeline.length).toBeGreaterThan(0)
+  })
+
+  it('applies staged-for-powder buffer days from capacity config', () => {
+    const blocks = buildStageTimeline(pump, leadTimes, {
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
+    })
+    const staged = blocks.find((b) => b.stage === 'STAGED_FOR_POWDER')
+    expect(staged).toBeDefined()
+    expect(staged?.days).toBe(DEFAULT_CAPACITY_CONFIG.stagedForPowderBufferDays)
+  })
+
+  it('keeps powder coat duration at 5 working days', () => {
+    const blocks = buildStageTimeline(pump, leadTimes, {
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
+    })
+    const powder = blocks.find((b) => b.stage === 'POWDER_COAT')
+    expect(powder).toBeDefined()
+    expect(powder?.days).toBe(5)
+  })
+
+  it('counts staged-for-powder buffer in working days', () => {
+    const friday = new Date('2025-11-14T00:00:00.000Z') // Friday
+    const stagedPump: Pump = {
+      ...pump,
+      id: 'pump-2',
+      stage: 'STAGED_FOR_POWDER',
+      forecastStart: friday.toISOString(),
+    }
+
+    const blocks = buildStageTimeline(stagedPump, leadTimes, {
+      startDate: friday,
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
+    })
+    const staged = blocks.find((b) => b.stage === 'STAGED_FOR_POWDER')
+    expect(staged).toBeDefined()
+    const expectedEnd = addBusinessDays(
+      friday,
+      DEFAULT_CAPACITY_CONFIG.stagedForPowderBufferDays
+    )
+    expect(startOfDay(staged!.end).toISOString()).toBe(
+      startOfDay(expectedEnd).toISOString()
+    )
   })
 })

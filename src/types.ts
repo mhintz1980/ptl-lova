@@ -41,7 +41,7 @@ export interface Pump {
     assembly: number
     ship: number // Constitution §2.1: Merged testing+shipping
   }
-  powderCoatVendorId?: string // Constitution §5.3: Vendor assignment
+  powderCoatVendorId?: string | null // Constitution §5.3: Vendor assignment
 }
 
 export interface PoLine {
@@ -110,6 +110,7 @@ export interface CapacityConfig {
   powderCoat: {
     vendors: PowderCoatVendor[]
   }
+  stagedForPowderBufferDays: number
 }
 
 export interface Milestone {

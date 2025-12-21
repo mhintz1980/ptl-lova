@@ -56,6 +56,11 @@
 **Implementation notes**
 - (To be filled if code changes diverge from spec expectations)
 
+**What changed / why compliant**
+- Projection timeline now inserts `STAGED_FOR_POWDER` buffer days (working-day math) and extends waiting time when vendor weekly capacity blocks entry.
+- Forecast hints and calendar timelines are recomputed from settings + event history; Kanban stage moves remain the only truth mutations.
+- UI surfaces buffer planning (Settings + Pump Details) and vendor assignment visibility without changing stage truth.
+
 ### Next Actions (in order)
 
 1. Complete Phase D: Wire vendor indicator on pump cards for powder stages

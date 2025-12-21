@@ -14,6 +14,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     capacityConfig,
     updateDepartmentStaffing,
     updatePowderCoatVendor,
+    updateStagedForPowderBufferDays,
     resetCapacityDefaults,
   } = useApp()
 
@@ -255,6 +256,42 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* Staged for Powder Buffer Section */}
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-foreground">
+                Staged for Powder Buffer
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Buffer time before powder pickup/acceptance
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card/50 p-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">
+                  Staged for Powder (buffer) — working days
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Buffer time before powder pickup/acceptance.
+                </p>
+              </div>
+              <input
+                type="number"
+                min="0"
+                max="30"
+                step="1"
+                className="h-8 w-20 rounded-md border border-border bg-background px-2 text-right text-sm"
+                value={capacityConfig.stagedForPowderBufferDays}
+                onChange={(e) =>
+                  updateStagedForPowderBufferDays(
+                    Math.max(0, parseInt(e.target.value) || 0)
+                  )
+                }
+              />
             </div>
           </section>
 

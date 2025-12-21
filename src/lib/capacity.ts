@@ -46,6 +46,7 @@ export const DEFAULT_CAPACITY_CONFIG: CapacityConfig = {
       { id: 'pc-3', name: 'PC-3', maxPumpsPerWeek: 3 },
     ],
   },
+  stagedForPowderBufferDays: 1,
 }
 
 /**

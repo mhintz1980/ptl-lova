@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { PumpDetailModal } from './PumpDetailModal'
 import { useApp } from '../../store'
 import { Pump } from '../../types'
+import { DEFAULT_CAPACITY_CONFIG } from '../../lib/capacity'
 
 // Mock the store
 vi.mock('../../store', () => ({
@@ -11,6 +12,8 @@ vi.mock('../../store', () => ({
 
 describe('PumpDetailModal', () => {
   const mockUpdatePump = vi.fn()
+  const mockPausePump = vi.fn()
+  const mockResumePump = vi.fn()
   const mockGetModelLeadTimes = vi.fn().mockReturnValue({
     fabrication: 1.5,
     powder_coat: 2,
@@ -34,8 +37,11 @@ describe('PumpDetailModal', () => {
   beforeEach(() => {
     ;(useApp as unknown as Mock).mockReturnValue({
       updatePump: mockUpdatePump,
+      pausePump: mockPausePump,
+      resumePump: mockResumePump,
       getModelLeadTimes: mockGetModelLeadTimes,
       pumps: [],
+      capacityConfig: DEFAULT_CAPACITY_CONFIG,
     })
   })
 
