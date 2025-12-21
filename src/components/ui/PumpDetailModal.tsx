@@ -9,6 +9,11 @@ import { useApp } from "../../store";
 import { cn } from "../../lib/utils";
 import { getCatalogData } from "../../lib/seed";
 import { buildStageTimeline, StageBlock } from "../../lib/schedule";
+import { countWorkingDays } from "../../lib/working-days";
+import {
+    getPumpStageMoveEvents,
+    getStagedForPowderHistory,
+} from "../../lib/stage-history";
 
 // Constitution §2.1: Canonical production stages for progress bar
 const PROGRESS_STAGES: Stage[] = [
@@ -228,6 +233,24 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     const pcDays = getLeadTime('powder_coat_days', 'powder_coat');
     const assemblyDays = getLeadTime('assembly_days', 'assembly');
     const testingDays = getLeadTime('testing_days', 'ship');  // Constitution §2.1: ship replaces testing
+    const stagedBufferDays = capacityConfig.stagedForPowderBufferDays;
+    const stagedHistory = getStagedForPowderHistory(
+        getPumpStageMoveEvents(currentPump.id)
+    );
+    const stagedActualDays = stagedHistory.lastEnteredAt
+        ? countWorkingDays(
+            stagedHistory.lastEnteredAt,
+            stagedHistory.lastExitedAt ?? new Date()
+        )
+        : undefined;
+
+    const stageRows = [
+        { key: 'fabrication_days', label: 'Fabrication', kind: 'work', days: fabDays, stage: 'fabrication' as const },
+        { key: 'staged_for_powder', label: 'Staged for Powder', kind: 'buffer', plannedDays: stagedBufferDays, actualDays: stagedActualDays },
+        { key: 'powder_coat_days', label: 'Powder Coat', kind: 'vendor', days: pcDays },
+        { key: 'assembly_days', label: 'Assembly', kind: 'work', days: assemblyDays, stage: 'assembly' as const },
+        { key: 'testing_days', label: 'Testing/Ship', kind: 'work', days: testingDays, stage: 'ship' as const },
+    ] as const;
 
     // Update handler for these specific "extra" fields
     // Update handler for these specific "extra" fields
@@ -392,7 +415,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         <div className="relative pt-6 px-1">
                             <TimelineProgress
                                 pump={currentPump}
-                                blocks={buildStageTimeline(currentPump, catalogLeadTimes || { fabrication: 0, powder_coat: 0, assembly: 0, ship: 0 }, { capacityConfig })}
+                                blocks={buildStageTimeline(currentPump, catalogLeadTimes || { fabrication: 0, powder_coat: 0, assembly: 0, ship: 0 }, { capacityConfig, stageHistory: stagedHistory })}
                             />
                         </div>
 
@@ -678,33 +701,42 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                                     <div className="mt-8">
                                         <h4 className="text-[10px] font-black text-blue-400/60 uppercase tracking-[0.2em] mb-4">Department Work Content</h4>
                                         <div className="space-y-1">
-                                            {[
-                                                { label: 'Fabrication', days: fabDays, key: 'fabrication_days', stage: 'fabrication' as const },
-                                                { label: 'Powder Coat', days: pcDays, key: 'powder_coat_days', stage: null },
-                                                { label: 'Assembly', days: assemblyDays, key: 'assembly_days', stage: 'assembly' as const },
-                                                { label: 'Testing/Ship', days: testingDays, key: 'testing_days', stage: 'ship' as const },
-                                            ].map((dept) => (
-                                                <div key={dept.key} className="flex items-center justify-between py-2 border-b border-white/5 group hover:bg-white/5 transition-colors px-2 rounded">
-                                                    <div className="text-xs font-medium text-muted-foreground uppercase">{dept.label}</div>
+                                            {stageRows.map((row) => (
+                                                <div key={row.key} className="flex items-center justify-between py-2 border-b border-white/5 group hover:bg-white/5 transition-colors px-2 rounded">
+                                                    <div className="text-xs font-medium text-muted-foreground uppercase">{row.label}</div>
                                                     <div className="flex items-center gap-6">
                                                         <div className="text-right">
-                                                            {isEditing ? (
+                                                            {row.kind === 'buffer' ? (
+                                                                <span className="font-bold text-foreground text-sm">
+                                                                    {row.plannedDays ?? '-'}
+                                                                    <span className="text-[10px] ml-0.5 text-muted-foreground">D</span>
+                                                                </span>
+                                                            ) : isEditing ? (
                                                                 <div className="flex items-center gap-1">
                                                                     <Input
                                                                         type="number"
                                                                         step="0.1"
                                                                         className="h-7 w-16 text-right bg-background/40 text-xs"
-                                                                        value={dept.days}
-                                                                        onChange={(e) => handleExtraChange(dept.key, parseFloat(e.target.value))}
+                                                                        value={row.days}
+                                                                        onChange={(e) => handleExtraChange(row.key, parseFloat(e.target.value))}
                                                                     />
                                                                     <span className="text-[10px] text-muted-foreground uppercase font-bold">d</span>
                                                                 </div>
                                                             ) : (
-                                                                <span className="font-bold text-foreground text-sm">{dept.days}<span className="text-[10px] ml-0.5 text-muted-foreground">D</span></span>
+                                                                <span className="font-bold text-foreground text-sm">
+                                                                    {row.days ?? '-'}
+                                                                    <span className="text-[10px] ml-0.5 text-muted-foreground">D</span>
+                                                                </span>
                                                             )}
                                                         </div>
                                                         <div className="w-24 text-[10px] font-mono text-muted-foreground/60 text-right">
-                                                            {dept.stage ? `${calculateManHours(dept.days, dept.stage)}H` : 'VENDOR'}
+                                                            {row.kind === 'work' && row.stage
+                                                                ? `${calculateManHours(row.days, row.stage)}H`
+                                                                : row.kind === 'vendor'
+                                                                    ? 'WORK DAYS'
+                                                                    : row.actualDays !== undefined
+                                                                        ? `Actual: ${row.actualDays}D`
+                                                                        : 'Actual: -'}
                                                         </div>
                                                     </div>
                                                 </div>

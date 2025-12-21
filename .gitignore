@@ -36,3 +36,8 @@ test_failure.txt
 playwright-report/
 test-results/
 master-agents/openai.chatgpt-0.5.52.vsix
+
+# Folders
+.agent/
+.claude/
+.gemini/

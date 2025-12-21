@@ -92,8 +92,9 @@ test.describe('Dashboard E2E', () => {
     await firstLegendItem.locator('.chart-legend-row__label').click({ force: true });
 
     // Verify Breadcrumb appears
-    await expect(page.getByRole('button').filter({ hasText: 'Dashboard' })).toBeVisible();
-    await expect(page.getByRole('button').filter({ hasText: customerName! })).toBeVisible();
+    const breadcrumbNav = page.getByRole('navigation');
+    await expect(breadcrumbNav.getByRole('button', { name: 'Dashboard' })).toBeVisible();
+    await expect(breadcrumbNav.getByRole('button', { name: customerName! })).toBeVisible();
 
     // Verify view changed to "Pumps by Model" (next in sequence)
     await expect(page.getByRole('heading', { name: 'Pumps by Model' })).toBeVisible();
@@ -113,10 +114,10 @@ test.describe('Dashboard E2E', () => {
     await expect(page.getByRole('table')).toBeVisible();
 
     // Click Dashboard breadcrumb to go back
-    await page.getByRole('button').filter({ hasText: 'Dashboard' }).click();
+    await breadcrumbNav.getByRole('button', { name: 'Dashboard' }).click();
 
     // Verify back to original view
     await expect(page.getByRole('heading', { name: 'Sales & Customers' })).toBeVisible();
-    await expect(page.getByRole('button').filter({ hasText: 'Dashboard' })).not.toBeVisible();
+    await expect(breadcrumbNav.getByRole('button', { name: 'Dashboard' })).not.toBeVisible();
   });
 });

@@ -1,5 +1,5 @@
 // src/components/kanban/KanbanBoard.tsx
-import { useState, useMemo } from "react";
+import { useState, useMemo } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -8,32 +8,36 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
-import { Pump, Stage } from "../../types";
-import { StageColumn } from "./StageColumn";
-import { PumpCard } from "./PumpCard";
-import { useApp } from "../../store";
-import { toast } from "sonner";
+} from '@dnd-kit/core'
+import { Pump, Stage } from '../../types'
+import { StageColumn } from './StageColumn'
+import { PumpCard } from './PumpCard'
+import { useApp } from '../../store'
+import { toast } from 'sonner'
 
 const STAGES: Stage[] = [
-  "QUEUE",
-  "FABRICATION",
-  "POWDER_COAT",
-  "ASSEMBLY",
-  "SHIP",
-  "SHIP",
-  "CLOSED",
-];
+  'QUEUE',
+  'FABRICATION',
+  'STAGED_FOR_POWDER',
+  'POWDER_COAT',
+  'ASSEMBLY',
+  'SHIP',
+  'CLOSED',
+]
 
 interface KanbanBoardProps {
-  pumps: Pump[];
-  collapsed: boolean;
-  onCardClick?: (pump: Pump) => void;
+  pumps: Pump[]
+  collapsed: boolean
+  onCardClick?: (pump: Pump) => void
 }
 
-export function KanbanBoard({ pumps, collapsed, onCardClick }: KanbanBoardProps) {
-  const moveStage = useApp((state) => state.moveStage);
-  const [activePump, setActivePump] = useState<Pump | null>(null);
+export function KanbanBoard({
+  pumps,
+  collapsed,
+  onCardClick,
+}: KanbanBoardProps) {
+  const moveStage = useApp((state) => state.moveStage)
+  const [activePump, setActivePump] = useState<Pump | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -41,35 +45,40 @@ export function KanbanBoard({ pumps, collapsed, onCardClick }: KanbanBoardProps)
         distance: 8,
       },
     })
-  );
+  )
 
   const pumpsByStage = useMemo(() => {
-    return STAGES.reduce((acc, stage) => {
-      acc[stage] = pumps.filter((pump) => pump.stage === stage);
-      return acc;
-    }, {} as Record<Stage, Pump[]>);
-  }, [pumps]);
+    return STAGES.reduce(
+      (acc, stage) => {
+        acc[stage] = pumps.filter((pump) => pump.stage === stage)
+        return acc
+      },
+      {} as Record<Stage, Pump[]>
+    )
+  }, [pumps])
 
   const handleDragStart = (event: DragStartEvent) => {
-    const pump = pumps.find((p) => p.id === event.active.id);
-    setActivePump(pump ?? null);
-  };
+    const pump = pumps.find((p) => p.id === event.active.id)
+    setActivePump(pump ?? null)
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActivePump(null);
+    setActivePump(null)
 
-    const { active, over } = event;
-    if (!over) return;
+    const { active, over } = event
+    if (!over) return
 
-    const pumpId = active.id as string;
-    const nextStage = (over.data?.current?.stage as Stage) ?? (over.id as Stage);
-    const pump = pumps.find((p) => p.id === pumpId);
+    const pumpId = active.id as string
+    const nextStage = (over.data?.current?.stage as Stage) ?? (over.id as Stage)
+    const pump = pumps.find((p) => p.id === pumpId)
 
     if (pump && pump.stage !== nextStage) {
-      moveStage(pumpId, nextStage);
-      toast.success(`Moved ${pump.model} (Serial #${pump.serial}) to ${nextStage}`);
+      moveStage(pumpId, nextStage)
+      toast.success(
+        `Moved ${pump.model} (Serial #${pump.serial}) to ${nextStage}`
+      )
     }
-  };
+  }
 
   return (
     <DndContext
@@ -96,5 +105,5 @@ export function KanbanBoard({ pumps, collapsed, onCardClick }: KanbanBoardProps)
         ) : null}
       </DragOverlay>
     </DndContext>
-  );
+  )
 }

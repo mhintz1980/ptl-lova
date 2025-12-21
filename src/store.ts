@@ -19,6 +19,7 @@ import {
   type StageDurations,
   type StageBlock,
 } from './lib/schedule'
+import { buildCapacityAwareTimelines } from './lib/schedule-helper'
 import { applyFilters, genSerial } from './lib/utils'
 import { sortPumps, SortDirection, SortField } from './lib/sort'
 import type {
@@ -91,6 +92,7 @@ export interface AppState {
     vendorId: string,
     config: Partial<PowderCoatVendor>
   ) => void
+  updateStagedForPowderBufferDays: (days: number) => void
   resetCapacityDefaults: () => void
 
   // Sandbox Actions
@@ -359,15 +361,21 @@ export const useApp = create<AppState>()(
 
         const capacityConfig = get().capacityConfig
 
-        // Use buildStageTimeline to calculate total duration with capacity
         // Parse dropDate as local date (YYYY-MM-DD)
         const parsedDate = parse(dropDate, 'yyyy-MM-dd', new Date())
-        const timeline = leadTimes
-          ? buildStageTimeline(pump, leadTimes, {
-              startDate: startOfDay(parsedDate),
+        const updatedPumps = get().pumps.map((p) =>
+          p.id === id
+            ? { ...p, forecastStart: startOfDay(parsedDate).toISOString() }
+            : p
+        )
+        const timelines = leadTimes
+          ? buildCapacityAwareTimelines(
+              updatedPumps,
               capacityConfig,
-            })
-          : []
+              get().getModelLeadTimes
+            )
+          : {}
+        const timeline = timelines[id] ?? []
         const end =
           timeline.length > 0
             ? timeline[timeline.length - 1].end
@@ -488,6 +496,7 @@ export const useApp = create<AppState>()(
         })
 
         let scheduledCount = 0
+        const forecastStarts: Record<string, string> = {}
         const today = new Date()
 
         // Determine start date for autoscheduling
@@ -522,30 +531,42 @@ export const useApp = create<AppState>()(
           }
 
           if (foundDate) {
-            // Calculate end date
-            const leadTimes = getModelLeadTimes(pump.model)
-            const start = startOfDay(new Date(targetDateStr))
+            forecastStarts[pump.id] = targetDateStr
+            scheduledCount++
+          }
+        })
 
-            // Use buildStageTimeline to calculate proper end date with capacity
-            const timeline = leadTimes
-              ? buildStageTimeline(pump, leadTimes, {
-                  startDate: start,
-                  capacityConfig,
-                })
-              : []
-            const end =
-              timeline.length > 0
-                ? timeline[timeline.length - 1].end
-                : addDays(start, 1)
+        if (scheduledCount > 0) {
+          const updatedPumps = pumps.map((pump) =>
+            forecastStarts[pump.id]
+              ? {
+                  ...pump,
+                  forecastStart: startOfDay(
+                    new Date(forecastStarts[pump.id])
+                  ).toISOString(),
+                }
+              : pump
+          )
 
-            updatePump(pump.id, {
+          const timelines = buildCapacityAwareTimelines(
+            updatedPumps,
+            capacityConfig,
+            getModelLeadTimes
+          )
+
+          Object.entries(forecastStarts).forEach(([pumpId, startISO]) => {
+            const timeline = timelines[pumpId]
+            if (!timeline || timeline.length === 0) return
+            const start = timeline[0].start
+            const end = timeline[timeline.length - 1].end
+
+            updatePump(pumpId, {
               forecastStart: start.toISOString(),
               forecastEnd: end.toISOString(),
               last_update: new Date().toISOString(),
             })
-            scheduledCount++
-          }
-        })
+          })
+        }
 
         return scheduledCount
       },
@@ -655,6 +676,41 @@ export const useApp = create<AppState>()(
           },
         })),
 
+      updateStagedForPowderBufferDays: (days) => {
+        const normalized = Math.max(0, Math.floor(days))
+        const nextCapacityConfig = {
+          ...get().capacityConfig,
+          stagedForPowderBufferDays: normalized,
+        }
+
+        set({ capacityConfig: nextCapacityConfig })
+
+        const { pumps, getModelLeadTimes } = get()
+        const timelines = buildCapacityAwareTimelines(
+          pumps,
+          nextCapacityConfig,
+          getModelLeadTimes
+        )
+
+        pumps.forEach((pump) => {
+          if (!pump.forecastStart) return
+          const timeline = timelines[pump.id]
+          if (!timeline || timeline.length === 0) return
+
+          const startISO = timeline[0].start.toISOString()
+          const endISO = timeline[timeline.length - 1].end.toISOString()
+
+          if (pump.forecastStart === startISO && pump.forecastEnd === endISO) {
+            return
+          }
+
+          get().updatePump(pump.id, {
+            forecastStart: startISO,
+            forecastEnd: endISO,
+          })
+        })
+      },
+
       resetCapacityDefaults: () =>
         set({ capacityConfig: DEFAULT_CAPACITY_CONFIG }),
 
@@ -751,12 +807,12 @@ export const useApp = create<AppState>()(
         const pump = get().pumps.find((p) => p.id === id)
         if (!pump || !pump.forecastStart) return undefined
 
-        const leadTimes = get().getModelLeadTimes(pump.model)
-        if (!leadTimes) return undefined
-
-        return buildStageTimeline(pump, leadTimes, {
-          capacityConfig: get().capacityConfig,
-        })
+        const timelines = buildCapacityAwareTimelines(
+          get().pumps,
+          get().capacityConfig,
+          get().getModelLeadTimes
+        )
+        return timelines[id]
       },
 
       isPumpLocked: (id) => {
@@ -790,6 +846,21 @@ export const useApp = create<AppState>()(
     }),
     {
       name: 'pumptracker-storage',
+      merge: (persisted, current) => {
+        const persistedState = (persisted as Partial<AppState>) ?? {}
+        const persistedCapacity = persistedState.capacityConfig
+        return {
+          ...current,
+          ...persistedState,
+          capacityConfig: {
+            ...current.capacityConfig,
+            ...(persistedCapacity ?? {}),
+            stagedForPowderBufferDays:
+              persistedCapacity?.stagedForPowderBufferDays ??
+              current.capacityConfig.stagedForPowderBufferDays,
+          },
+        }
+      },
       partialize: (state) => ({
         filters: state.filters,
         collapsedStages: state.collapsedStages,

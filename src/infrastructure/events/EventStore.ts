@@ -9,7 +9,7 @@
 
 import type { DomainEvent } from '../../domain/production/events/DomainEvent';
 
-const EVENTS_STORAGE_KEY = 'pumptracker-events';
+export const EVENTS_STORAGE_KEY = 'pumptracker-events';
 
 export interface EventStore {
   append(event: DomainEvent): Promise<void>;
