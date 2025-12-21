@@ -1,28 +1,28 @@
-import { useState } from "react";
-import { BacklogDock } from "./BacklogDock";
-import { DragAndDropContext } from "./DragAndDropContext";
-import { CalendarHeader } from "./CalendarHeader";
-import { MainCalendarGrid } from "./MainCalendarGrid";
-import { PumpDetailModal } from "../ui/PumpDetailModal";
-import type { Pump } from "../../types";
-import { useApp } from "../../store";
-import type { CalendarStageEvent } from "../../lib/schedule";
+import { useState } from 'react'
+import { BacklogDock } from './BacklogDock'
+import { DragAndDropContext } from './DragAndDropContext'
+import { CalendarHeader } from './CalendarHeader'
+import { MainCalendarGrid } from './MainCalendarGrid'
+import { PumpDetailModal } from '../ui/PumpDetailModal'
+import type { Pump } from '../../types'
+import { useApp } from '../../store'
+import type { CalendarStageEvent } from '../../lib/projection-engine'
 
 interface SchedulingViewProps {
-  pumps: Pump[];
+  pumps: Pump[]
 }
 
 export function SchedulingView({ pumps }: SchedulingViewProps) {
-  const collapsedCards = useApp((state) => state.collapsedCards);
-  const schedulingStageFilters = useApp((state) => state.schedulingStageFilters);
-  const [selectedPump, setSelectedPump] = useState<Pump | null>(null);
+  const collapsedCards = useApp((state) => state.collapsedCards)
+  const schedulingStageFilters = useApp((state) => state.schedulingStageFilters)
+  const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
 
   const handleEventDoubleClick = (event: CalendarStageEvent) => {
-    const pump = pumps.find((p) => p.id === event.pumpId);
+    const pump = pumps.find((p) => p.id === event.pumpId)
     if (pump) {
-      setSelectedPump(pump);
+      setSelectedPump(pump)
     }
-  };
+  }
 
   return (
     <DragAndDropContext pumps={pumps}>
@@ -45,5 +45,5 @@ export function SchedulingView({ pumps }: SchedulingViewProps) {
         />
       </div>
     </DragAndDropContext>
-  );
+  )
 }

@@ -1,25 +1,25 @@
 // src/components/scheduling/EventDetailPanel.tsx
-import { format } from "date-fns";
-import { X } from "lucide-react";
-import { Button } from "../ui/Button";
-import { Badge } from "../ui/Badge";
-import { cn } from "../../lib/utils";
-import type { CalendarStageEvent } from "../../lib/schedule";
-import { STAGE_LABELS, STAGE_COLORS } from "../../lib/stage-constants";
+import { format } from 'date-fns'
+import { X } from 'lucide-react'
+import { Button } from '../ui/Button'
+import { Badge } from '../ui/Badge'
+import { cn } from '../../lib/utils'
+import type { CalendarStageEvent } from '../../lib/projection-engine'
+import { STAGE_LABELS, STAGE_COLORS } from '../../lib/stage-constants'
 
 interface EventDetailPanelProps {
-  event: CalendarStageEvent | null;
-  onClose: () => void;
+  event: CalendarStageEvent | null
+  onClose: () => void
 }
 
 export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
-  if (!event) return null;
+  if (!event) return null
 
-  const stageLabel = STAGE_LABELS[event.stage] ?? event.stage;
-  const dateRange = `${format(event.startDate, "MMM d")} → ${format(
+  const stageLabel = STAGE_LABELS[event.stage] ?? event.stage
+  const dateRange = `${format(event.startDate, 'MMM d')} → ${format(
     event.endDate,
-    "MMM d"
-  )}`;
+    'MMM d'
+  )}`
 
   return (
     <div
@@ -60,8 +60,9 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
             <Badge
               variant="outline"
               className={cn(
-                STAGE_COLORS[event.stage] ?? "stage-color stage-color-unscheduled",
-                "border-none text-xs font-semibold"
+                STAGE_COLORS[event.stage] ??
+                  'stage-color stage-color-unscheduled',
+                'border-none text-xs font-semibold'
               )}
             >
               {stageLabel}
@@ -100,5 +101,5 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
         </Button>
       </div>
     </div>
-  );
+  )
 }

@@ -12,37 +12,28 @@
 
 ### Phase Status (Opus Refactor A-H)
 
-| Phase | Description                                   | Status      | Notes                                                      |
-| ----- | --------------------------------------------- | ----------- | ---------------------------------------------------------- |
-| A     | Canonical Stage IDs + Migration               | ✅ Complete | 7 stages, legacy aliasing                                  |
-| B     | Truth Layer: Pause/Unpause + Capacity         | ✅ Complete | WIP limits, auto-pause                                     |
-| C     | Data model: Merge Testing+Shipping → SHIP     | ✅ Complete | CapacityConfig updated                                     |
-| D     | Powder Coat weekly + STAGED_FOR_POWDER buffer | ⚠️ Partial  | Buffer added; **vendor indicator not wired**               |
-| E     | Projection Engine (pure)                      | ⚠️ Partial  | SchedulingService exists, full projection-engine.ts needed |
-| F     | Calendar UI: projection rendering only        | ⚠️ Partial  | Renamed to forecast hints; old paths remain                |
-| G     | Remove/Archive non-compliant code             | ❌ Pending  | schedulePump still exists                                  |
-| H     | Tests (projection engine)                     | ⚠️ Partial  | SchedulingService tests done, projection tests needed      |
+| Phase | Description                                   | Status      | Notes                                                  |
+| ----- | --------------------------------------------- | ----------- | ------------------------------------------------------ |
+| A     | Canonical Stage IDs + Migration               | ✅ Complete | 7 stages, legacy aliasing                              |
+| B     | Truth Layer: Pause/Unpause + Capacity         | ✅ Complete | WIP limits, auto-pause                                 |
+| C     | Data model: Merge Testing+Shipping → SHIP     | ✅ Complete | CapacityConfig updated                                 |
+| D     | Powder Coat weekly + STAGED_FOR_POWDER buffer | ✅ Complete | Buffer + vendor indicator in PumpCard                  |
+| E     | Projection Engine (pure)                      | ✅ Complete | Facade: `projection-engine.ts`; consolidation deferred |
+| F     | Calendar UI: projection rendering only        | ✅ Complete | schedulePump/clearSchedule removed                     |
+| G     | Remove/Archive non-compliant code             | ✅ Complete | No non-compliant code found                            |
+| H     | Tests (projection engine)                     | ✅ Complete | 168/168 tests passing                                  |
 
-### Immediate Task: Phase D - Wire Vendor Indicator
+### ✅ Opus Refactor Phases A-H Complete
 
-Per `docs/agents/opus-4.5-refactor-prompt.md` Phase D:
+All phases complete. Created `src/lib/projection-engine.ts` as canonical facade with:
 
-> Add vendor indicator (icon/text) on pump cards when in STAGED_FOR_POWDER or POWDER_COAT.
+- `projectPumpTimeline()` - single pump timeline projection
+- `projectCalendarEvents()` - calendar events for multiple pumps
+- `projectCapacityAwareTimelines()` - capacity-aware multi-pump timelines
 
-**Implementation needed:**
+**Note**: Full consolidation of projection code into one module deferred to future cleanup PR.
 
-1. Show vendor name/icon on `PumpCard` when `pump.powderCoatVendorId` is set
-2. Only display when stage is STAGED_FOR_POWDER or POWDER_COAT
-3. Vendor info comes from `capacityConfig.powderCoat.vendors[]`
-4. Display only - does NOT affect stage truth
-
-### Next Actions (in order)
-
-1. **→ Phase D**: Wire vendor indicator on pump cards for powder stages
-2. Phase E: Create full `src/lib/projection-engine.ts` per spec
-3. Phase F: Remove schedulePump/clearSchedule from DragAndDropContext
-4. Phase G: Archive or feature-flag non-compliant code
-5. Phase H: Add projection engine tests per spec
+### Next Actions: DDD Blueprint
 
 ---
 

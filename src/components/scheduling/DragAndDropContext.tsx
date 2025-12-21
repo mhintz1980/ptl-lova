@@ -15,7 +15,10 @@ import { useApp } from '../../store'
 import { PumpCard } from '../kanban/PumpCard'
 import { CalendarEvent } from './CalendarEvent'
 import { Pump } from '../../types'
-import { isValidScheduleDate, CalendarStageEvent } from '../../lib/schedule'
+import {
+  isValidScheduleDate,
+  type CalendarStageEvent,
+} from '../../lib/projection-engine'
 import { toast } from 'sonner'
 import { startOfDay, format, parse } from 'date-fns'
 
