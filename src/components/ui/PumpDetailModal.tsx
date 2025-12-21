@@ -707,8 +707,9 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                                                     <div className="flex items-center gap-6">
                                                         <div className="text-right">
                                                             {row.kind === 'buffer' ? (
-                                                                <span className="font-semibold text-foreground text-xs">
-                                                                    Planned: {row.plannedDays} working days
+                                                                <span className="font-bold text-foreground text-sm">
+                                                                    {row.plannedDays ?? '-'}
+                                                                    <span className="text-[10px] ml-0.5 text-muted-foreground">D</span>
                                                                 </span>
                                                             ) : isEditing ? (
                                                                 <div className="flex items-center gap-1">
@@ -734,7 +735,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                                                                 : row.kind === 'vendor'
                                                                     ? 'WORK DAYS'
                                                                     : row.actualDays !== undefined
-                                                                        ? `Actual: ${row.actualDays} days`
+                                                                        ? `Actual: ${row.actualDays}D`
                                                                         : 'Actual: -'}
                                                         </div>
                                                     </div>
