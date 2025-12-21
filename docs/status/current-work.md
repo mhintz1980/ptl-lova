@@ -1,8 +1,8 @@
 # Current Work Status
 
 > **Last Updated**: 2025-12-21
-> **Active Branch**: `refactor/constitution-projection` → tracking `origin/refactor/constitution-projection`
-> **PR**: [#8](https://github.com/mhintz1980/ptl-lova/pull/8) (open, ready for review)
+> **Active Branch**: `main` @ `611ec60`
+> **Last PR**: [#8](https://github.com/mhintz1980/ptl-lova/pull/8) ✅ Merged
 
 ---
 
@@ -17,57 +17,32 @@
 | A     | Canonical Stage IDs + Migration               | ✅ Complete | 7 stages, legacy aliasing                                  |
 | B     | Truth Layer: Pause/Unpause + Capacity         | ✅ Complete | WIP limits, auto-pause                                     |
 | C     | Data model: Merge Testing+Shipping → SHIP     | ✅ Complete | CapacityConfig updated                                     |
-| D     | Powder Coat weekly + STAGED_FOR_POWDER buffer | ⚠️ Partial  | Buffer added; vendor indicator not wired                   |
+| D     | Powder Coat weekly + STAGED_FOR_POWDER buffer | ⚠️ Partial  | Buffer added; **vendor indicator not wired**               |
 | E     | Projection Engine (pure)                      | ⚠️ Partial  | SchedulingService exists, full projection-engine.ts needed |
 | F     | Calendar UI: projection rendering only        | ⚠️ Partial  | Renamed to forecast hints; old paths remain                |
 | G     | Remove/Archive non-compliant code             | ❌ Pending  | schedulePump still exists                                  |
 | H     | Tests (projection engine)                     | ⚠️ Partial  | SchedulingService tests done, projection tests needed      |
 
+### Immediate Task: Phase D - Wire Vendor Indicator
 
-### Design section 1: Data model + configuration
+Per `docs/agents/opus-4.5-refactor-prompt.md` Phase D:
 
-**A. Default + persistence behavior (avoid surprise writes)**
-- The setting `stagedForPowderBufferDays` defaults to **1 working day**.
-- If the value is missing in persisted settings, treat it as **1 in memory**.
-- Do **not** automatically write the default back to storage on load; only persist when the user explicitly saves Settings.
+> Add vendor indicator (icon/text) on pump cards when in STAGED_FOR_POWDER or POWDER_COAT.
 
-**B. Truth metadata vs stage progress (avoid semantic bleed)**
-- `powderCoatVendorId?: string | null` is **truth metadata** about assignment/location, but it **does not** imply stage progress.
-- Stage progress remains **only** the result of Kanban stage moves (event history).
+**Implementation needed:**
 
-**C. Definition: “Completed STAGED_FOR_POWDER” (unambiguous)**
-- A pump has completed this stage if it has ever transitioned **out of `STAGED_FOR_POWDER` into `POWDER_COAT` (or beyond)**.
-- Do not rely only on “current stage ordering.”
-
-**D. Pumps currently in STAGED_FOR_POWDER (remaining buffer, not re-applying full)**
-- If a pump is currently **in** `STAGED_FOR_POWDER`, projection should apply **remaining** buffer time:
-  `remainingDays = max(0, bufferDays - elapsedWorkingDaysSinceStageEntry)`
-- If the buffer setting changes, projections update accordingly without double counting.
-
-**E. Input constraints**
-- `stagedForPowderBufferDays` is an **integer working-days** value, min **0**.
-- Weekends count as 0 for working-day math.
-
-**Why this is constitution-compliant**
-- Truth: Kanban stage moves only
-- Projection: settings-driven dwell + vendor throughput gating
-- No projection setting ever mutates truth
-
-**Implementation notes**
-- (To be filled if code changes diverge from spec expectations)
-
-**What changed / why compliant**
-- Projection timeline now inserts `STAGED_FOR_POWDER` buffer days (working-day math) and extends waiting time when vendor weekly capacity blocks entry.
-- Forecast hints and calendar timelines are recomputed from settings + event history; Kanban stage moves remain the only truth mutations.
-- UI surfaces buffer planning (Settings + Pump Details) and vendor assignment visibility without changing stage truth.
+1. Show vendor name/icon on `PumpCard` when `pump.powderCoatVendorId` is set
+2. Only display when stage is STAGED_FOR_POWDER or POWDER_COAT
+3. Vendor info comes from `capacityConfig.powderCoat.vendors[]`
+4. Display only - does NOT affect stage truth
 
 ### Next Actions (in order)
 
-1. Complete Phase D: Wire vendor indicator on pump cards for powder stages
-2. Complete Phase E: Create full `src/lib/projection-engine.ts` per spec
-3. Complete Phase F: Remove schedulePump/clearSchedule from DragAndDropContext
-4. Complete Phase G: Archive or feature-flag non-compliant code
-5. Complete Phase H: Add projection engine tests per spec
+1. **→ Phase D**: Wire vendor indicator on pump cards for powder stages
+2. Phase E: Create full `src/lib/projection-engine.ts` per spec
+3. Phase F: Remove schedulePump/clearSchedule from DragAndDropContext
+4. Phase G: Archive or feature-flag non-compliant code
+5. Phase H: Add projection engine tests per spec
 
 ---
 
@@ -75,37 +50,23 @@
 
 **Reference**: [`DDD_BLUEPRINT-OPUS.md`](../../DDD_BLUEPRINT-OPUS.md)
 
-After Opus refactor phases complete, continue with:
-
-| Phase | Description                   | Status                              |
-| ----- | ----------------------------- | ----------------------------------- |
-| 1     | Domain Core Extraction        | ⚠️ Partial (some entities exist)    |
-| 2     | Application Layer & Services  | ⚠️ Partial (command handlers exist) |
-| 3     | Infrastructure & Persistence  | ❌ Pending                          |
-| 4     | Verification & UI Integration | ❌ Pending                          |
+After Opus refactor phases complete, continue with DDD phases 1-4.
 
 ---
 
 ## Test Status
 
-- **Unit Tests**: 162/162 passing
+- **Unit Tests**: 168/168 passing
 - **Gate Script**: `bash scripts/constitution-gate.sh` passes
-- **E2E**: Not currently run (TODO)
 
 ---
 
 ## Quick Commands
 
 ```bash
-# Development
-pnpm dev
-pnpm test --run
-
-# Verify constitution compliance
-bash scripts/constitution-gate.sh
-
-# Check PR status
-gh pr view 8 --repo mhintz1980/ptl-lova
+pnpm dev              # Start dev server
+pnpm test --run       # Run tests (168/168)
+bash scripts/constitution-gate.sh  # Verify compliance
 ```
 
 ---
