@@ -23,6 +23,39 @@
 | G     | Remove/Archive non-compliant code             | ❌ Pending  | schedulePump still exists                                  |
 | H     | Tests (projection engine)                     | ⚠️ Partial  | SchedulingService tests done, projection tests needed      |
 
+
+### Design section 1: Data model + configuration
+
+**A. Default + persistence behavior (avoid surprise writes)**
+- The setting `stagedForPowderBufferDays` defaults to **1 working day**.
+- If the value is missing in persisted settings, treat it as **1 in memory**.
+- Do **not** automatically write the default back to storage on load; only persist when the user explicitly saves Settings.
+
+**B. Truth metadata vs stage progress (avoid semantic bleed)**
+- `powderCoatVendorId?: string | null` is **truth metadata** about assignment/location, but it **does not** imply stage progress.
+- Stage progress remains **only** the result of Kanban stage moves (event history).
+
+**C. Definition: “Completed STAGED_FOR_POWDER” (unambiguous)**
+- A pump has completed this stage if it has ever transitioned **out of `STAGED_FOR_POWDER` into `POWDER_COAT` (or beyond)**.
+- Do not rely only on “current stage ordering.”
+
+**D. Pumps currently in STAGED_FOR_POWDER (remaining buffer, not re-applying full)**
+- If a pump is currently **in** `STAGED_FOR_POWDER`, projection should apply **remaining** buffer time:
+  `remainingDays = max(0, bufferDays - elapsedWorkingDaysSinceStageEntry)`
+- If the buffer setting changes, projections update accordingly without double counting.
+
+**E. Input constraints**
+- `stagedForPowderBufferDays` is an **integer working-days** value, min **0**.
+- Weekends count as 0 for working-day math.
+
+**Why this is constitution-compliant**
+- Truth: Kanban stage moves only
+- Projection: settings-driven dwell + vendor throughput gating
+- No projection setting ever mutates truth
+
+**Implementation notes**
+- (To be filled if code changes diverge from spec expectations)
+
 ### Next Actions (in order)
 
 1. Complete Phase D: Wire vendor indicator on pump cards for powder stages
