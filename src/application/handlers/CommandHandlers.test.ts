@@ -163,7 +163,7 @@ describe('SetForecastHintHandler', () => {
         });
 
         const result = await handler.execute({
-            type: 'SchedulePump',
+            type: 'SetForecastHint',
             pumpId: 'pump-001',
             forecastStart: '2025-01-15T00:00:00.000Z',
             forecastEnd: '2025-01-20T00:00:00.000Z',

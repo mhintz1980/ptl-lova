@@ -69,7 +69,7 @@ export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
             {sortedPumps.length > 0 && (
               <button
                 onClick={() => {
-                  const count = useApp.getState().autoSchedule();
+                  const count = useApp.getState().autoSetForecastHints();
                   if (count > 0) {
                     toast.success(`Autoscheduled ${count} jobs`);
                   } else {
