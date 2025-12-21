@@ -1,5 +1,22 @@
 # Project: PumpTracker Lite
 
+## ⚠️ IMPORTANT: Check Current Work Status First
+
+**Before starting any work**, read [`docs/status/current-work.md`](docs/status/current-work.md) to understand:
+
+- Active branch and PR status
+- Current phase in the refactor plan
+- Completed vs remaining tasks
+- Next actions to take
+
+**Key Reference Documents**:
+
+- Refactor phases: [`docs/agents/opus-4.5-refactor-prompt.md`](docs/agents/opus-4.5-refactor-prompt.md)
+- DDD Blueprint: [`DDD_BLUEPRINT-OPUS.md`](DDD_BLUEPRINT-OPUS.md)
+- Constitution: [`docs/constitution/pumptracker-constitution.md`](docs/constitution/pumptracker-constitution.md)
+
+---
+
 ## Project Overview
 
 This project is a modern, responsive production management system for tracking pump manufacturing orders. It's a lightweight yet powerful web application designed to help manufacturing teams manage pump production orders efficiently. It provides real-time visibility into production status, KPI tracking, and intuitive drag-and-drop Kanban board management.
@@ -12,30 +29,30 @@ The project is structured with a clear separation of concerns, with components o
 
 ### Client Surfaces
 
--   **Dashboard** (`src/components/dashboard`) surfaces KPIs, value charts, and the master order table. Data comes directly from the filtered pump array.
--   **Kanban** (`src/components/kanban`) renders fixed-width stage columns. Each column receives the globally sorted pump list, and `StageColumn` applies the default ordering (priority → promise date → last update) before rendering `PumpCard`.
--   **Scheduling** (`src/components/scheduling`) stitches together three layers:
-    -   `BacklogDock` reuses `PumpCard` for the unscheduled pump queue.
-    -   `MainCalendarGrid` builds stage timelines from `buildStageTimeline` and trims them according to the legend filters.
-    -   `DragAndDropContext` coordinates dnd-kit operations for dropping backlog pumps on the calendar grid.
+- **Dashboard** (`src/components/dashboard`) surfaces KPIs, value charts, and the master order table. Data comes directly from the filtered pump array.
+- **Kanban** (`src/components/kanban`) renders fixed-width stage columns. Each column receives the globally sorted pump list, and `StageColumn` applies the default ordering (priority → promise date → last update) before rendering `PumpCard`.
+- **Scheduling** (`src/components/scheduling`) stitches together three layers:
+  - `BacklogDock` reuses `PumpCard` for the unscheduled pump queue.
+  - `MainCalendarGrid` builds stage timelines from `buildStageTimeline` and trims them according to the legend filters.
+  - `DragAndDropContext` coordinates dnd-kit operations for dropping backlog pumps on the calendar grid.
 
 ### State and Data Flow
 
--   **Zustand Store** (`src/store.ts`)
-    -   Persists pump data, filter selections, WIP limits, and UI toggles.
-    -   `sortField`/`sortDirection` control the canonical ordering for both Kanban and Scheduling.
-    -   `schedulingStageFilters` tracks the quick-filter state from the legend buttons; only the scheduling view reads this array.
-    -   `levelNotStartedSchedules` and `clearNotStartedSchedules` return counts so the UI can show toasts.
--   **Seed Data** (`src/lib/seed.ts`)
-    -   Generates deterministic pumps from `src/data/pumptracker-data.json` for the local adapter.
-    -   `getModelLeadTimes` supplies fabrication/powder/assembly/testing durations to both the store and calendar timelines.
--   **Sorting Helpers** (`src/lib/sort.ts`)
-    -   Exposes `sortPumps`, `SortField`, and `SortDirection` so different features reuse the same ordering rules.
+- **Zustand Store** (`src/store.ts`)
+  - Persists pump data, filter selections, WIP limits, and UI toggles.
+  - `sortField`/`sortDirection` control the canonical ordering for both Kanban and Scheduling.
+  - `schedulingStageFilters` tracks the quick-filter state from the legend buttons; only the scheduling view reads this array.
+  - `levelNotStartedSchedules` and `clearNotStartedSchedules` return counts so the UI can show toasts.
+- **Seed Data** (`src/lib/seed.ts`)
+  - Generates deterministic pumps from `src/data/pumptracker-data.json` for the local adapter.
+  - `getModelLeadTimes` supplies fabrication/powder/assembly/testing durations to both the store and calendar timelines.
+- **Sorting Helpers** (`src/lib/sort.ts`)
+  - Exposes `sortPumps`, `SortField`, and `SortDirection` so different features reuse the same ordering rules.
 
 ### Styling & Theming
 
--   `src/index.css` defines shared design tokens, neon shadows, stage color variables, header animations, scrollbars, and the new weekend theme variables.
--   Reusable UI primitives live in `src/components/ui` (Button, Badge, Card, etc.).
+- `src/index.css` defines shared design tokens, neon shadows, stage color variables, header animations, scrollbars, and the new weekend theme variables.
+- Reusable UI primitives live in `src/components/ui` (Button, Badge, Card, etc.).
 
 ### File Organization Cheatsheet
 
@@ -85,6 +102,7 @@ src/
 ```
 
 **Key Invariants Enforced**:
+
 - Stage transitions must be sequential (QUEUE → FABRICATION → POWDER_COAT → ...)
 - CLOSED is a terminal stage (no transitions allowed)
 - Serial numbers are immutable after creation
@@ -95,8 +113,8 @@ src/
 
 ### Prerequisites
 
-*   Node.js 18+
-*   pnpm (or npm/yarn)
+- Node.js 18+
+- pnpm (or npm/yarn)
 
 ### Development
 
@@ -130,16 +148,16 @@ Use **pnpm** for scripts. The dev server will warn if the port is taken; adjust 
 
 ### Coding Conventions
 
--   **Components**: colocate feature-specific components under `src/components/<feature>`. Shared primitives belong in `src/components/ui`.
--   **State**: extend `src/store.ts` with new selectors/actions rather than adding ad-hoc React state. Persisted settings belong in the Zustand partializer.
--   **Styling**: Tailwind for layout + utilities. If a style is reused, promote it to `src/index.css` (see `.header-button`, `.stage-color-*`, `.scrollbar-themed`).
--   **Data**: `PumpCard` is the canonical representation of a pump, now reused on both Kanban and Scheduling. If you need different drag behavior, adjust the `draggableConfig` prop instead of duplicating markup.
+- **Components**: colocate feature-specific components under `src/components/<feature>`. Shared primitives belong in `src/components/ui`.
+- **State**: extend `src/store.ts` with new selectors/actions rather than adding ad-hoc React state. Persisted settings belong in the Zustand partializer.
+- **Styling**: Tailwind for layout + utilities. If a style is reused, promote it to `src/index.css` (see `.header-button`, `.stage-color-*`, `.scrollbar-themed`).
+- **Data**: `PumpCard` is the canonical representation of a pump, now reused on both Kanban and Scheduling. If you need different drag behavior, adjust the `draggableConfig` prop instead of duplicating markup.
 
 ### Feature Tips
 
--   **Legend Filters**: `schedulingStageFilters` should only influence the scheduling view. If you need a new quick filter, keep it scoped and let the global `filters` state continue to affect every page.
--   **Sorting**: Respect `sortField` + `sortDirection` when listing pumps. Import `sortPumps` rather than rolling custom sorts.
--   **Calendar Layout**: `MainCalendarGrid` assumes six weeks of data and uses the stage filter set to drop non-selected events. When modifying the timeline, ensure `projectSegmentsToWeek` remains pure.
+- **Legend Filters**: `schedulingStageFilters` should only influence the scheduling view. If you need a new quick filter, keep it scoped and let the global `filters` state continue to affect every page.
+- **Sorting**: Respect `sortField` + `sortDirection` when listing pumps. Import `sortPumps` rather than rolling custom sorts.
+- **Calendar Layout**: `MainCalendarGrid` assumes six weeks of data and uses the stage filter set to drop non-selected events. When modifying the timeline, ensure `projectSegmentsToWeek` remains pure.
 
 ### How to Add a Feature
 
@@ -171,9 +189,9 @@ PLAYWRIGHT_TEST_BASE_URL=http://localhost:5173 pnpm playwright test
 
 Useful scripts:
 
--   `pnpm playwright test tests/e2e/scheduling-enhanced.spec.ts --project=chromium`
--   `pnpm playwright test --headed --project=chromium` (interactive)
--   `pnpm playwright test --ui` (Playwright Test UI)
+- `pnpm playwright test tests/e2e/scheduling-enhanced.spec.ts --project=chromium`
+- `pnpm playwright test --headed --project=chromium` (interactive)
+- `pnpm playwright test --ui` (Playwright Test UI)
 
 ### Verifying the Stage Legend Filters
 
@@ -184,14 +202,14 @@ Useful scripts:
 
 The `stage legend filters calendar events` test inside `tests/e2e/scheduling-enhanced.spec.ts` automates this workflow. If it fails, confirm:
 
--   `schedulingStageFilters` is wired through `SchedulingView` to `MainCalendarGrid`.
--   Legend buttons have the `data-stage-filter` attribute and call `toggleSchedulingStageFilter`.
--   Playwright is pointed at the correct dev server port.
+- `schedulingStageFilters` is wired through `SchedulingView` to `MainCalendarGrid`.
+- Legend buttons have the `data-stage-filter` attribute and call `toggleSchedulingStageFilter`.
+- Playwright is pointed at the correct dev server port.
 
 ### Linting & Type Checking
 
--   `pnpm lint`
--   `pnpm tsc --noEmit`
+- `pnpm lint`
+- `pnpm tsc --noEmit`
 
 Run these before publishing a PR.
 
@@ -199,10 +217,10 @@ Run these before publishing a PR.
 
 ### Prerequisites
 
--   Node.js 18+ installed locally
--   pnpm package manager
--   Git repository access
--   Hosting platform account
+- Node.js 18+ installed locally
+- pnpm package manager
+- Git repository access
+- Hosting platform account
 
 ### Building for Production
 
@@ -223,60 +241,63 @@ pnpm build
 Vercel provides the easiest deployment with automatic builds and deployments.
 
 1.  **Push to GitHub**
+
     ```bash
     git push origin main
     ```
 
 2.  **Connect to Vercel**
-    -   Go to https://vercel.com
-    -   Click "New Project"
-    -   Select your GitHub repository
-    -   Vercel auto-detects Vite configuration
-    -   Click "Deploy"
+    - Go to https://vercel.com
+    - Click "New Project"
+    - Select your GitHub repository
+    - Vercel auto-detects Vite configuration
+    - Click "Deploy"
 
 3.  **Environment Variables** (if using Supabase)
-    -   In Vercel dashboard, go to Settings > Environment Variables
-    -   Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
-    -   Redeploy
+    - In Vercel dashboard, go to Settings > Environment Variables
+    - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+    - Redeploy
 
 #### Option 2: Netlify
 
 1.  **Push to GitHub**
+
     ```bash
     git push origin main
     ```
 
 2.  **Connect to Netlify**
-    -   Go to https://app.netlify.com
-    -   Click "New site from Git"
-    -   Select your GitHub repository
-    -   Build command: `pnpm build`
-    -   Publish directory: `dist`
-    -   Click "Deploy site"
+    - Go to https://app.netlify.com
+    - Click "New site from Git"
+    - Select your GitHub repository
+    - Build command: `pnpm build`
+    - Publish directory: `dist`
+    - Click "Deploy site"
 
 3.  **Environment Variables**
-    -   Go to Site settings > Build & deploy > Environment
-    -   Add required variables
-    -   Trigger redeploy
+    - Go to Site settings > Build & deploy > Environment
+    - Add required variables
+    - Trigger redeploy
 
 #### Option 3: AWS S3 + CloudFront
 
 1.  **Build the application**
+
     ```bash
     pnpm build
     ```
 
 2.  **Create S3 bucket**
-    -   Go to AWS S3 console
-    -   Create new bucket (e.g., `pumptracker-lite`)
-    -   Enable static website hosting
-    -   Upload contents of `dist/` folder
+    - Go to AWS S3 console
+    - Create new bucket (e.g., `pumptracker-lite`)
+    - Enable static website hosting
+    - Upload contents of `dist/` folder
 
 3.  **Set up CloudFront**
-    -   Create CloudFront distribution
-    -   Point origin to S3 bucket
-    -   Set default root object to `index.html`
-    -   Configure error handling for SPA
+    - Create CloudFront distribution
+    - Point origin to S3 bucket
+    - Set default root object to `index.html`
+    - Configure error handling for SPA
 
 4.  **Deploy**
     ```bash
@@ -286,6 +307,7 @@ Vercel provides the easiest deployment with automatic builds and deployments.
 #### Option 4: Docker
 
 1.  **Create Dockerfile**
+
     ```dockerfile
     FROM node:18-alpine AS builder
     WORKDIR /app
@@ -302,6 +324,7 @@ Vercel provides the easiest deployment with automatic builds and deployments.
     ```
 
 2.  **Create nginx.conf**
+
     ```nginx
     server {
       listen 80;
@@ -323,16 +346,19 @@ Vercel provides the easiest deployment with automatic builds and deployments.
 #### Option 5: Traditional Web Server (Apache/Nginx)
 
 1.  **Build the application**
+
     ```bash
     pnpm build
     ```
 
 2.  **Copy dist folder to server**
+
     ```bash
     scp -r dist/ user@server:/var/www/pumptracker-lite/
     ```
 
 3.  **Configure Nginx**
+
     ```nginx
     server {
       listen 80;
@@ -359,6 +385,7 @@ Vercel provides the easiest deployment with automatic builds and deployments.
     ```
 
 4.  **Configure Apache**
+
     ```apache
     <VirtualHost *:80>
       ServerName pumptracker.example.com
@@ -380,24 +407,25 @@ Vercel provides the easiest deployment with automatic builds and deployments.
 
 ### Post-Deployment Checklist
 
--   [ ] Test application in production environment
--   [ ] Verify all routes work correctly
--   [ ] Check console for errors
--   [ ] Test filters and search functionality
--   [ ] Test Kanban drag-and-drop
--   [ ] Verify data persistence in local storage
--   [ ] Test on multiple browsers (Chrome, Firefox, Safari, Edge)
--   [ ] Test on mobile devices
--   [ ] Set up monitoring/error tracking
--   [ ] Configure backups if using cloud storage
--   [ ] Set up SSL/TLS certificate
--   [ ] Configure domain DNS records
+- [ ] Test application in production environment
+- [ ] Verify all routes work correctly
+- [ ] Check console for errors
+- [ ] Test filters and search functionality
+- [ ] Test Kanban drag-and-drop
+- [ ] Verify data persistence in local storage
+- [ ] Test on multiple browsers (Chrome, Firefox, Safari, Edge)
+- [ ] Test on mobile devices
+- [ ] Set up monitoring/error tracking
+- [ ] Configure backups if using cloud storage
+- [ ] Set up SSL/TLS certificate
+- [ ] Configure domain DNS records
 
 ### Performance Optimization
 
 #### Enable Gzip Compression
 
 **Nginx:**
+
 ```nginx
 gzip on;
 gzip_types text/plain text/css application/json application/javascript;
@@ -405,6 +433,7 @@ gzip_min_length 1000;
 ```
 
 **Apache:**
+
 ```apache
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
@@ -417,10 +446,10 @@ Set appropriate cache headers for static assets (already configured in examples 
 
 #### Monitor Performance
 
--   Use Lighthouse for performance audits
--   Monitor Core Web Vitals
--   Set up error tracking (e.g., Sentry)
--   Monitor uptime with services like Pingdom
+- Use Lighthouse for performance audits
+- Monitor Core Web Vitals
+- Set up error tracking (e.g., Sentry)
+- Monitor uptime with services like Pingdom
 
 ### Troubleshooting
 
@@ -447,10 +476,12 @@ Set appropriate cache headers for static assets (already configured in examples 
 ### Rollback Procedure
 
 #### Vercel/Netlify
--   Go to deployments history
--   Click "Redeploy" on previous version
+
+- Go to deployments history
+- Click "Redeploy" on previous version
 
 #### Manual Deployment
+
 ```bash
 # Keep previous version backup
 mv /var/www/pumptracker-lite /var/www/pumptracker-lite.backup
@@ -471,14 +502,16 @@ cp -r /var/www/pumptracker-lite.backup /var/www/pumptracker-lite
 ### Monitoring & Maintenance
 
 #### Regular Tasks
--   Monitor error logs
--   Check performance metrics
--   Update dependencies monthly
--   Review security advisories
--   Backup data regularly
+
+- Monitor error logs
+- Check performance metrics
+- Update dependencies monthly
+- Review security advisories
+- Backup data regularly
 
 #### Recommended Tools
--   **Error Tracking**: Sentry, Rollbar
--   **Performance**: New Relic, Datadog
--   **Monitoring**: Uptime Robot, Pingdom
--   **Analytics**: Google Analytics, Plausible
+
+- **Error Tracking**: Sentry, Rollbar
+- **Performance**: New Relic, Datadog
+- **Monitoring**: Uptime Robot, Pingdom
+- **Analytics**: Google Analytics, Plausible
