@@ -140,9 +140,9 @@ export function buildStageTimeline(
           )
         } else if (d.stage === 'SHIP' && work_hours.ship) {
           // Constitution §2.1: ship replaces testing+shipping
-          days = roundToHour(
-            work_hours.ship / capacityConfig.ship.dailyManHours
-          )
+          // Fallback for stale localStorage missing 'ship' key
+          const shipManHours = capacityConfig?.ship?.dailyManHours ?? 4
+          days = roundToHour(work_hours.ship / shipManHours)
         }
         // Powder Coat remains fixed as it's a vendor lead time
 
