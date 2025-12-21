@@ -6,22 +6,22 @@ import { DomainEvent } from './DomainEvent';
 export interface PumpScheduled extends DomainEvent {
     readonly eventType: 'PumpScheduled';
     readonly pumpId: string;
-    readonly forecastStart: string; // ISO string
-    readonly forecastEnd: string; // ISO string
+    readonly scheduledStart: string; // ISO string
+    readonly scheduledEnd: string; // ISO string
 }
 
 export function pumpScheduled(
     pumpId: string,
-    forecastStart: string,
-    forecastEnd: string
+    scheduledStart: string,
+    scheduledEnd: string
 ): PumpScheduled {
     return {
         eventType: 'PumpScheduled',
         aggregateId: pumpId,
         occurredAt: new Date(),
         pumpId,
-        forecastStart,
-        forecastEnd,
+        scheduledStart,
+        scheduledEnd,
     };
 }
 
