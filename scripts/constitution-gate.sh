@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pnpm test
+pnpm test --run
 
 # -----------------------------------------------------------------------------
 # 1) Forbidden scheduling truth mutations (must not exist anywhere)
@@ -47,7 +47,7 @@ fi
 violations="$matches"
 for allowed in "${ALLOWLIST[@]}"; do
   # Remove lines that start with allowed file paths
-  violations="$(echo "$violations" | rg -v "^${allowed}:" || true)"
+  violations="$(echo "$violations" | rg -v "^${allowed}" || true)"
 done
 
 if [[ -n "$violations" ]]; then
