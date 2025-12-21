@@ -1,7 +1,7 @@
 # Current Work Status
 
 > **Last Updated**: 2025-12-21
-> **Active Branch**: `refactor/constitution-projection` → tracking `target/refactor/constitution-projection`
+> **Active Branch**: `refactor/constitution-projection` → tracking `origin/refactor/constitution-projection`
 > **PR**: [#8](https://github.com/mhintz1980/ptl-lova/pull/8) (open, ready for review)
 
 ---
@@ -72,9 +72,8 @@ gh pr view 8 --repo mhintz1980/ptl-lova
 
 ---
 
-## Remotes
+## Remote
 
-| Name     | URL            | Purpose               |
-| -------- | -------------- | --------------------- |
-| `origin` | ptl-lova-90860 | Secondary workspace   |
-| `target` | ptl-lova       | Main repo (PR target) |
+| Name     | URL                 | Purpose   |
+| -------- | ------------------- | --------- |
+| `origin` | mhintz1980/ptl-lova | Main repo |
