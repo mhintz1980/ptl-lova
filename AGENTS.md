@@ -15,6 +15,12 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 - Vertical slice > sprawling architecture
 - "Because it's cleaner" is not a sufficient reason (it's a vibe, not a requirement)
 
+> [!CAUTION]
+> **BETA PROTOCOL IN EFFECT**
+> The application is in **Cloud Mode** using a shared Supabase database.
+> **DO NOT** reset data, clear tables, or run seed scripts without explicit user authorization.
+> Read [`docs/status/current-work.md`](docs/status/current-work.md) before starting any task.
+
 ---
 
 ## Project Structure & Module Organization

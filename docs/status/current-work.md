@@ -1,8 +1,19 @@
 # Current Work Status
 
-> **Last Updated**: 2025-12-21
+> **Last Updated**: 2025-12-22
 > **Active Branch**: `main`
-> **Last PR**: [#8](https://github.com/mhintz1980/ptl-lova/pull/8) ✅ Merged
+> **Deployment Status**: 🚀 **BETA** (Cloud Mode Active)
+> **Data Strategy**: **Supabase** (Shared) or Local (Fallback)
+
+> [!IMPORTANT]
+> **BETA PROTOCOL IN EFFECT**
+>
+> 1.  **Architecture**: The app is now configured for **Cloud Mode** using `SupabaseAdapter`.
+> 2.  **Deployment**: `main` branch is deployed to Vercel.
+> 3.  **Data Reset**: Beta testers are using a fresh, shared database. Do not reset/seed without explicit user authorization.
+> 4.  **Guides**:
+>     - Deployment: [`docs/process/BETA_DEPLOYMENT.md`](../process/BETA_DEPLOYMENT.md)
+>     - Domain Rules: [`docs/constitution/pumptracker-constitution.md`](../constitution/pumptracker-constitution.md)
 
 ---
 
@@ -58,11 +69,11 @@ New storage key: `pumptracker-stage-ledger` (localStorage)
 
 ## Next Actions
 
-### Priority 1: Dashboard Redesign (1-2 days)
+### Priority 1: Polishing Beta Experience (Immediate)
 
-- [ ] Implement dashboard modes (Operations, Value, Production)
-- [ ] Add drill-down functionality
-- [ ] Build new KPI cards with trends
+- [ ] Monitor Beta feedback
+- [ ] Fix any Cloud Mode sync issues reported
+- [ ] Refine mobile responsiveness
 
 ---
 
