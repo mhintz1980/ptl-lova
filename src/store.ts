@@ -12,6 +12,7 @@ import {
 import { nanoid } from 'nanoid'
 import { LocalAdapter } from './adapters/local'
 import { SandboxAdapter } from './adapters/sandbox'
+import { SupabaseAdapter } from './adapters/supabase'
 import { getModelLeadTimes as getCatalogLeadTimes } from './lib/seed'
 import { addDays, startOfDay, isAfter, parseISO, parse } from 'date-fns'
 import {
@@ -140,7 +141,13 @@ export const useApp = create<AppState>()(
         SHIP: 5, // Constitution §2.1: Merged testing+shipping
         CLOSED: null,
       },
-      adapter: LocalAdapter, // Default to LocalAdapter
+      // Logic: Use Supabase if configured, otherwise fallback to Local
+      adapter:
+        import.meta.env.VITE_SUPABASE_URL &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY
+          ? SupabaseAdapter
+          : LocalAdapter,
+
       loading: true,
       sortField: 'default',
       sortDirection: 'desc',
@@ -743,7 +750,16 @@ export const useApp = create<AppState>()(
         if (!state.isSandbox) return
 
         // Restore LocalAdapter
-        const realAdapter = LocalAdapter
+        // If we were in Cloud Mode, we should restore SupabaseAdapter?
+        // Actually, commitSandbox logic implies persisting TO the real adapter.
+        // We need to fetch the *configured* adapter, not hardcode LocalAdapter.
+        // For now, let's just re-evaluate env vars or store 'realAdapter' in state.
+        // Simplified: Re-check env vars.
+        const realAdapter =
+          import.meta.env.VITE_SUPABASE_URL &&
+          import.meta.env.VITE_SUPABASE_ANON_KEY
+            ? SupabaseAdapter
+            : LocalAdapter
 
         // Persist current state to real adapter
         realAdapter.replaceAll(state.pumps)
@@ -759,11 +775,17 @@ export const useApp = create<AppState>()(
         const state = get()
         if (!state.isSandbox || !state.originalSnapshot) return
 
+        const realAdapter =
+          import.meta.env.VITE_SUPABASE_URL &&
+          import.meta.env.VITE_SUPABASE_ANON_KEY
+            ? SupabaseAdapter
+            : LocalAdapter
+
         set({
           isSandbox: false,
           pumps: state.originalSnapshot,
           originalSnapshot: null,
-          adapter: LocalAdapter,
+          adapter: realAdapter,
         })
       },
 
@@ -807,7 +829,6 @@ export const useApp = create<AppState>()(
           microTasks: state.microTasks.filter((t) => t.id !== id),
         })),
 
-      // Selectors
       filtered: () => {
         const { pumps, filters, sortField, sortDirection } = get()
         const filtered = applyFilters(pumps, filters)
@@ -817,13 +838,19 @@ export const useApp = create<AppState>()(
       getModelLeadTimes: (model) => getCatalogLeadTimes(model),
 
       getStageSegments: (id) => {
-        const pump = get().pumps.find((p) => p.id === id)
+        const { pumps, capacityConfig, getModelLeadTimes } = get()
+        // This is expensive to re-calc on every render if called often.
+        // Ideally should be memoized or computed once per pump update.
+        // For now, calculating on fly.
+        const pump = pumps.find((p) => p.id === id)
         if (!pump || !pump.forecastStart) return undefined
 
+        // We need to rebuild just for this pump, but capacity awareness requires global context.
+        // So we might need to rely on the global buildCapacityAwareTimelines
         const timelines = buildCapacityAwareTimelines(
-          get().pumps,
-          get().capacityConfig,
-          get().getModelLeadTimes
+          pumps,
+          capacityConfig,
+          getModelLeadTimes
         )
         return timelines[id]
       },
@@ -831,61 +858,33 @@ export const useApp = create<AppState>()(
       isPumpLocked: (id) => {
         const { pumps, lockDate } = get()
         if (!lockDate) return false
-
         const pump = pumps.find((p) => p.id === id)
-        if (!pump) return false
-
-        // A pump is locked if:
-        // 1. It has a forecastStart on or before the lock date, OR
-        // 2. It's past QUEUE stage (actively in production)
-        if (pump.stage !== 'QUEUE' && pump.stage !== 'CLOSED') {
-          // Check if it started on/before lock date
-          if (pump.forecastStart) {
-            const startDate = pump.forecastStart.split('T')[0]
-            return startDate <= lockDate
-          }
-          // In production without forecast = always locked if lock date is set
-          return true
-        }
-
-        // QUEUE pumps are locked only if scheduled on/before lock date
-        if (pump.forecastStart) {
-          const startDate = pump.forecastStart.split('T')[0]
-          return startDate <= lockDate
-        }
-
-        return false
+        if (!pump || !pump.forecastStart) return false
+        return !isAfter(parseISO(pump.forecastStart), parseISO(lockDate))
       },
     }),
     {
       name: 'pumptracker-storage',
-      merge: (persisted, current) => {
-        const persistedState = (persisted as Partial<AppState>) ?? {}
-        const persistedCapacity = persistedState.capacityConfig
-        return {
-          ...current,
-          ...persistedState,
-          capacityConfig: {
-            ...current.capacityConfig,
-            ...(persistedCapacity ?? {}),
-            stagedForPowderBufferDays:
-              persistedCapacity?.stagedForPowderBufferDays ??
-              current.capacityConfig.stagedForPowderBufferDays,
-          },
-        }
-      },
+      // We only persist UI state details here, NOT the pumps themselves if we are using an adapter
+      // Wait, Zustand persist middleware saves *everything* to localStorage by default.
+      // If we use SupabaseAdapter, we might NOT want to persist `pumps` to localStorage to avoid desync/double-truth.
+      // However, for "Lite", local-first with sync is complex.
+      // The current architecture treats `pumps` array in memory as truth, and `adapter` as backing store.
+      // `persist` middleware here might conflict or be redundant.
+      // If `load()` fetches from adapter on mount, we don't need `persist` for `pumps`.
+      // Let's refine the partializer to only save UI preferences.
       partialize: (state) => ({
+        // Persist preferences
         filters: state.filters,
         collapsedStages: state.collapsedStages,
         collapsedCards: state.collapsedCards,
         wipLimits: state.wipLimits,
         sortField: state.sortField,
         sortDirection: state.sortDirection,
-        lockDate: state.lockDate,
         capacityConfig: state.capacityConfig,
-        milestones: state.milestones,
-        microTasks: state.microTasks,
-        // Do NOT persist isSandbox or originalSnapshot
+        schedulingStageFilters: state.schedulingStageFilters,
+        lockDate: state.lockDate,
+        // Do NOT persist pumps or adapter state; let load() handle it.
       }),
     }
   )

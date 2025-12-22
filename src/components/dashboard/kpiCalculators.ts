@@ -147,7 +147,7 @@ function calculateAvgLeadTime(pumps: Pump[]): KpiValue {
 }
 
 // Throughput: Closed pumps in last 30 days
-function calculateThroughput(pumps: Pump[]): KpiValue {
+export function calculateThroughput(pumps: Pump[]): KpiValue {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const recent = pumps.filter(
@@ -191,4 +191,109 @@ function formatCurrency(value: number): string {
     return `$${(value / 1_000).toFixed(0)}K`
   }
   return `$${value.toFixed(0)}`
+}
+
+// ---- Chart Data Helpers ----
+
+export function getWorkloadByStage(
+  pumps: Pump[]
+): { name: string; value: number; id: string }[] {
+  const counts: Record<string, number> = {}
+  pumps.forEach((p) => {
+    if (p.stage === 'CLOSED') return
+    counts[p.stage] = (counts[p.stage] || 0) + 1
+  })
+  return Object.entries(counts).map(([name, value]) => ({
+    name,
+    value,
+    id: name,
+  }))
+}
+
+export function getPumpsByCustomer(
+  pumps: Pump[]
+): { name: string; value: number }[] {
+  const counts: Record<string, number> = {}
+  pumps.forEach((p) => {
+    if (p.stage === 'CLOSED') return
+    if (p.customer) counts[p.customer] = (counts[p.customer] || 0) + 1
+  })
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, value]) => ({ name, value }))
+}
+
+export function getCapacityByDept(
+  pumps: Pump[]
+): { name: string; value: number; limit: number }[] {
+  const counts = {
+    Fabrication: 0,
+    'Powder Coat': 0,
+    Assembly: 0,
+    'Testing & Shipping': 0,
+  }
+
+  pumps.forEach((p) => {
+    if (p.stage === 'FABRICATION') counts['Fabrication']++
+    if (p.stage === 'STAGED_FOR_POWDER' || p.stage === 'POWDER_COAT')
+      counts['Powder Coat']++
+    if (p.stage === 'ASSEMBLY') counts['Assembly']++
+    if (p.stage === 'SHIP') counts['Testing & Shipping']++
+  })
+
+  // Mock limits for now
+  const limits = {
+    Fabrication: 20,
+    'Powder Coat': 25,
+    Assembly: 15,
+    'Testing & Shipping': 10,
+  }
+
+  return Object.entries(counts).map(([name, value]) => ({
+    name,
+    value,
+    limit: limits[name as keyof typeof limits],
+  }))
+}
+
+export function getWeeklyThroughput(pumps: Pump[]): number {
+  return calculateThroughput(pumps).value
+}
+
+export function getAverageStageAge(
+  pumps: Pump[]
+): { stage: string; age: number }[] {
+  const active = pumps.filter(
+    (p) => p.stage !== 'CLOSED' && p.stage !== 'QUEUE'
+  )
+  const totals: Record<string, { days: number; count: number }> = {}
+
+  active.forEach((p) => {
+    if (!p.last_update) return
+    const days =
+      Math.abs(new Date().getTime() - new Date(p.last_update).getTime()) /
+      (1000 * 60 * 60 * 24)
+
+    if (!totals[p.stage]) totals[p.stage] = { days: 0, count: 0 }
+    totals[p.stage].days += days
+    totals[p.stage].count += 1
+  })
+
+  // Canonical order
+  const stages = [
+    'FABRICATION',
+    'STAGED_FOR_POWDER',
+    'POWDER_COAT',
+    'ASSEMBLY',
+    'SHIP',
+  ]
+
+  return stages.map((stage) => {
+    const data = totals[stage] || { days: 0, count: 0 }
+    return {
+      stage,
+      age: data.count > 0 ? data.days / data.count : 0,
+    }
+  })
 }

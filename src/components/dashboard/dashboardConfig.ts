@@ -25,16 +25,22 @@ export type KpiId =
 
 export type ChartId =
   | 'wipByStage'
+  | 'wipDonut'
   | 'capacityByDept'
   | 'lateOrders'
+  | 'lateOrdersList' // New
   | 'leadTimeTrend'
   | 'pumpsByCustomer'
   | 'pumpsByModel'
   | 'reworkRate'
   | 'valueByCustomer'
+  | 'valueTrend'
   | 'treemap'
   | 'pumpTable'
   | 'totalPoValue'
+  | 'throughputTrend'
+  | 'stageGenericPipeline'
+  | 'cycleTimeBreakdown' // New
 
 // ---- Shared filters for drilldown ----
 export interface DashboardFilters {
@@ -108,20 +114,27 @@ export const MODE_CONFIGS: ModeConfig[] = [
     label: 'Operations',
     icon: 'activity',
     kpis: ['activeWip', 'lateOrders', 'capacityUtil'],
-    chartIds: ['wipByStage', 'lateOrders', 'capacityByDept'],
+    // Use LateOrdersList instead of Chart here? Maybe keep both or swap.
+    // Plan: "Operations: WIP Cycling Donut, Late Orders List, Workload Proportional Bars"
+    chartIds: ['wipByStage', 'lateOrdersList', 'capacityByDept'],
   },
   {
     id: 'value',
     label: 'Value',
     icon: 'dollar-sign',
     kpis: ['totalValue', 'avgOrderValue', 'topCustomer'],
-    chartIds: ['totalPoValue', 'valueByCustomer', 'pumpsByCustomer'],
+    chartIds: ['totalPoValue', 'treemap', 'valueByCustomer'],
   },
   {
     id: 'production',
     label: 'Production',
     icon: 'bar-chart-2',
     kpis: ['avgLeadTime', 'throughput', 'onTimeRate'],
-    chartIds: ['leadTimeTrend', 'treemap', 'pumpsByModel'],
+    chartIds: [
+      'throughputTrend',
+      'stageGenericPipeline',
+      'cycleTimeBreakdown',
+      'lateOrders',
+    ],
   },
 ]
