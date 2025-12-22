@@ -1,11 +1,11 @@
 // src/pages/Dashboard.tsx
-import React from "react";
-import { Pump } from "../types";
-import { DashboardEngine } from "../components/dashboard/DashboardEngine";
+import React from 'react'
+import { Pump } from '../types'
+import { DashboardEngine } from '../components/dashboard/DashboardEngine'
 
 interface DashboardProps {
-  pumps: Pump[];
-  onSelectPump: (pump: Pump) => void;
+  pumps: Pump[]
+  onSelectPump: (pump: Pump) => void
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -51,28 +51,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-6" data-testid="dashboard-view">
-      {/* We can keep the KPI strip at the top as a global summary */}
-      {/* Or we can move it into the engine. Let's keep it here for now. */}
-      {/* Actually, let's import it. */}
-      <GlobalKpiWrapper pumps={pumps} />
-
+      {/* DashboardEngine now includes mode-specific KPIs */}
       <DashboardEngine />
 
       {/* Table is useful, let's keep it */}
       <PumpTableWrapper pumps={pumps} onSelectPump={onSelectPump} />
     </div>
-  );
-};
-
-// Wrappers to lazy load or just keep imports clean
-import { KpiStrip } from "../components/dashboard/KpiStrip";
-import { PumpTable } from "../components/dashboard/PumpTable";
-
-
-const GlobalKpiWrapper = ({ pumps }: { pumps: Pump[] }) => {
-  return <KpiStrip pumps={pumps} />;
+  )
 }
 
-const PumpTableWrapper = ({ pumps, onSelectPump }: { pumps: Pump[], onSelectPump: (p: Pump) => void }) => {
-  return <PumpTable pumps={pumps} onSelectPump={onSelectPump} />;
+// Wrappers to lazy load or just keep imports clean
+import { PumpTable } from '../components/dashboard/PumpTable'
+
+const PumpTableWrapper = ({
+  pumps,
+  onSelectPump,
+}: {
+  pumps: Pump[]
+  onSelectPump: (p: Pump) => void
+}) => {
+  return <PumpTable pumps={pumps} onSelectPump={onSelectPump} />
 }
