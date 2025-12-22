@@ -205,7 +205,7 @@ export const useApp = create<AppState>()(
             powder_color: line.color,
             last_update: new Date().toISOString(),
             value: line.valueEach || 0,
-            promiseDate: promiseDate || line.promiseDate,
+            promiseDate: line.promiseDate || promiseDate,
           }))
         )
 
