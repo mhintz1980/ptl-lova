@@ -826,24 +826,26 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                     </div>
                     <div className="flex items-center justify-between py-2 border-b border-white/5">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Lead Days
+                        Promise Date
                       </label>
                       <div className="text-right">
                         {isEditing ? (
                           <Input
-                            type="number"
-                            value={safeFormData.total_lead_days || 0}
+                            type="date"
+                            value={formatDateForInput(formData.promiseDate)}
                             onChange={(e) =>
-                              handleExtraChange(
-                                'total_lead_days',
-                                parseFloat(e.target.value)
-                              )
+                              handleDateChange('promiseDate', e.target.value)
                             }
                             className="bg-background/40 h-8 text-right"
                           />
                         ) : (
                           <p className="font-bold text-foreground">
-                            {safeFormData.total_lead_days || '-'}
+                            {formData.promiseDate
+                              ? format(
+                                  parseISO(formData.promiseDate),
+                                  'MMM d, yyyy'
+                                )
+                              : '-'}
                           </p>
                         )}
                       </div>

@@ -149,6 +149,25 @@ Pause and ask for a decision when:
 
 ---
 
+## Agent Browser Instructions
+
+AI agents with built-in browser capabilities can view the running app:
+
+1. **Start the dev server**:
+
+   ```bash
+   pnpm dev
+   ```
+
+2. **Use `browser_subagent`** to navigate to `http://localhost:8080/`
+
+3. **Available views**:
+   - Dashboard: `/` (default) — KPIs, charts, order table
+   - Kanban: Click Kanban icon in header — drag-and-drop stage columns
+   - Scheduling: Click calendar icon — backlog dock + calendar grid
+
+---
+
 ## Agent-Specific Notes
 
 Key references:

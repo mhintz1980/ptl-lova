@@ -134,13 +134,30 @@ pnpm build
 
 The production-ready files will be in the `dist/` directory.
 
+## Agent Browser Instructions
+
+AI agents with built-in browser capabilities can view the running app:
+
+1. **Start the dev server**:
+
+   ```bash
+   pnpm dev
+   ```
+
+2. **Use `browser_subagent`** to navigate to `http://localhost:8080/`
+
+3. **Available views**:
+   - Dashboard: `/` (default) — KPIs, charts, order table
+   - Kanban: Click Kanban icon in header — drag-and-drop stage columns
+   - Scheduling: Click calendar icon — backlog dock + calendar grid
+
 ## Development Conventions
 
 ### Environment Setup
 
 ```bash
 pnpm install          # install dependencies
-pnpm dev              # start Vite on http://localhost:5173
+pnpm dev              # start Vite on http://localhost:8080
 PNPM_TEST_BASE_URL=http://localhost:5173 pnpm playwright test  # see testing.md for details
 ```
 
@@ -183,8 +200,8 @@ Vitest covers hooks, the Zustand store, scheduling helpers, and core components.
 Playwright tests live in `tests/e2e`. The config expects a running dev server; set the base URL with an environment variable:
 
 ```bash
-pnpm dev --port 5173 &           # start Vite
-PLAYWRIGHT_TEST_BASE_URL=http://localhost:5173 pnpm playwright test
+pnpm dev &           # start Vite on port 8080
+PLAYWRIGHT_TEST_BASE_URL=http://localhost:8080 pnpm playwright test
 ```
 
 Useful scripts:

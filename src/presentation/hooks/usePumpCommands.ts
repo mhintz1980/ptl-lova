@@ -13,20 +13,20 @@ import {
 } from '../../application/handlers/CommandHandlers'
 import { PumpRepository } from '../../infrastructure/persistence/repositories/PumpRepository'
 import { OrderRepository } from '../../infrastructure/persistence/repositories/OrderRepository'
-import { InMemoryAdapter } from '../../infrastructure/persistence/adapters/InMemoryAdapter'
+import { LocalStorageAdapter } from '../../infrastructure/persistence/adapters/LocalStorageAdapter'
 import { getEventBus } from '../../infrastructure/eventBus/EventBus'
 import { Stage } from '../../domain/production/value-objects/Stage'
 import { LineItemProps } from '../../domain/sales/entities/LineItem'
 
 // Feature flag - set to true to use new domain layer
-const USE_NEW_DOMAIN = false
+const USE_NEW_DOMAIN = true
 
-// Singleton adapter instance (will be replaced with LocalStorageAdapter in production)
-let adapterInstance: InMemoryAdapter | null = null
+// Singleton adapter instance using LocalStorage for persistence
+let adapterInstance: LocalStorageAdapter | null = null
 
-function getAdapter(): InMemoryAdapter {
+function getAdapter(): LocalStorageAdapter {
   if (!adapterInstance) {
-    adapterInstance = new InMemoryAdapter()
+    adapterInstance = new LocalStorageAdapter('pumptracker-domain')
   }
   return adapterInstance
 }

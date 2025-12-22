@@ -1,19 +1,19 @@
 ---
-title: "PumpTracker Lite"
-doc_type: "project_readme"
-app_name: "PumpTracker Lite"
-version: "1.0.0"
-status: "active"
+title: 'PumpTracker Lite'
+doc_type: 'project_readme'
+app_name: 'PumpTracker Lite'
+version: '1.0.0'
+status: 'active'
 entrypoint: true
 related_docs:
-  - "Architecture Overview"
-  - "PumpTracker Lite – Development Guide"
-  - "PumpTracker Lite – Testing Guide"
-  - "PumpTracker Lite – Deployment Guide"
+  - 'Architecture Overview'
+  - 'PumpTracker Lite – Development Guide'
+  - 'PumpTracker Lite – Testing Guide'
+  - 'PumpTracker Lite – Deployment Guide'
 ---
 
 # PumpTracker Lite
- 
+
 A modern, responsive production management system for tracking pump manufacturing orders through their complete lifecycle. Built with React, TypeScript, Tailwind CSS, and Recharts for data visualization.
 
 ## 🎯 Overview
@@ -36,6 +36,7 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
 ## ✨ Features
 
 ### Dashboard View
+
 - **KPI Strip**: Real-time metrics including average build time, shop efficiency, on-time orders, and late orders
 - **Workload Distribution**: Donut charts showing workload breakdown by customer and pump model
 - **Build Time Trend**: Area chart tracking average build times over the past 12 weeks
@@ -43,6 +44,7 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
 - **Order Details Table**: Comprehensive sortable table with all pump order information
 
 ### Kanban Board View
+
 - **8-Stage Production Pipeline**: UNSCHEDULED → NOT STARTED → FABRICATION → POWDER COAT → ASSEMBLY → TESTING → SHIPPING → CLOSED
 - **Drag-and-Drop Interface**: Move pumps between stages with intuitive drag-and-drop functionality
 - **Smart Card Display**: Each pump card shows essential information including:
@@ -54,6 +56,7 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
   - Color-Coded Priority Indicators
 
 ### Scheduling View
+
 - **Unscheduled Queue**: Sidebar showing all pumps in "UNSCHEDULED" stage ready for scheduling
 - **Drag-and-Drop Calendar**: Intuitive 4-week calendar grid where pumps can be dropped to assign dates
 - **Automatic Stage Progression**: When a pump is scheduled, it automatically moves from "UNSCHEDULED" to "NOT STARTED"
@@ -62,11 +65,13 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
 - **Empty State Management**: Helpful messaging when all pumps are scheduled with navigation to upcoming work
 
 ### Filtering & Search
+
 - **Multi-Criteria Filtering**: Filter by PO, Customer, Model, Priority, and Stage
 - **Full-Text Search**: Search across all pump data
 - **Quick Clear**: Reset all filters with one click
 
 ### Data Management
+
 - **Add PO Modal**: Create new purchase orders with multi-line item support
 - **Bulk CSV Import**: Upload pump data from CSV files
 - **Local Storage**: Automatic data persistence in browser
@@ -75,6 +80,7 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 - **Frontend Framework**: React 18 with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS 3.4 with custom design tokens
@@ -87,6 +93,7 @@ Historical context and older migration notes were moved to [`docs/archive/`](doc
 - **CSV Parsing**: PapaParse
 
 ### Project Structure
+
 ```text
 src/
 ├── components/
@@ -128,29 +135,36 @@ src/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm (or npm/yarn)
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd pumptracker-lite
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Start the development server**
+
    ```bash
    pnpm dev
    ```
 
 4. **Open in browser**
-   Navigate to `http://localhost:5173/`
+   Navigate to `http://localhost:8080/`
+
+5. **AI Agent Browser** (optional)
+   Agents with built-in browsers can use `browser_subagent` to navigate to `http://localhost:8080/` after starting the dev server.
 
 ### Build for Production
 
@@ -177,20 +191,25 @@ This keeps the largest chunk under ~275 kB in development builds and removes the
 ## 📊 Key Metrics Explained
 
 ### Average Build Time
+
 The mean number of days between order creation and completion for all closed orders.
 
 ### Shop Efficiency
+
 The percentage of orders completed on or before their scheduled end date.
 
 ### On-Time Orders
+
 The count of orders that were completed by their scheduled end date.
 
 ### Late Orders
+
 The count of orders that were completed after their scheduled end date.
 
 ## 🎨 Design System
 
 ### Color Palette
+
 - **Primary**: Blue (#2563eb)
 - **Success**: Green (#16a34a)
 - **Warning**: Yellow (#ca8a04)
@@ -198,6 +217,7 @@ The count of orders that were completed after their scheduled end date.
 - **Neutral**: Gray scale for backgrounds and text
 
 ### Priority Color Coding
+
 - **Urgent**: Red border and background
 - **Rush**: Orange border and background
 - **High**: Yellow border and background
@@ -226,6 +246,7 @@ All charts are responsive and include tooltips, legends, and custom styling.
 ## ♿ Accessibility
 
 The application follows WCAG 2.1 guidelines:
+
 - Semantic HTML structure
 - ARIA labels for interactive elements
 - Keyboard navigation support
@@ -235,6 +256,7 @@ The application follows WCAG 2.1 guidelines:
 ## 📱 Responsive Design
 
 The application is fully responsive and tested on:
+
 - Desktop (1920px, 1440px, 1024px)
 - Tablet (768px, 810px)
 - Mobile (375px, 414px)

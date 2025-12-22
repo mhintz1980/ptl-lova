@@ -50,6 +50,13 @@ export function getModelLeadTimes(
   }
 }
 
+// Get model price from catalog (for AddPoModal value auto-population)
+export function getModelPrice(modelCode: string): number {
+  const model = CATALOG_MODELS.find((m) => m.model === modelCode)
+  if (!model) return 0
+  return getEffectivePrice(model.price, model.model)
+}
+
 // Constitution §2.1: Transform legacy work_hours to canonical format
 export function getModelWorkHours(
   modelCode: string
