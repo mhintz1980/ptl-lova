@@ -45,16 +45,20 @@ Domain layer active with `USE_NEW_DOMAIN=true` and `LocalStorageAdapter`.
 
 ---
 
+## Completed: Historical Ledger ✅
+
+- [x] Created `StageMoveRecord` interface with enriched fields
+- [x] Enriched `PumpStageMoved` events with context (model, customer, po, serial)
+- [x] Calculate `daysInPreviousStage` at write time
+- [x] Built EventBus subscriber to write to ledger
+
+New storage key: `pumptracker-stage-ledger` (localStorage)
+
+---
+
 ## Next Actions
 
-### Priority 1: Historical Ledger (2-3 hrs)
-
-- [ ] Create `stage_moves` ledger schema
-- [ ] Enrich `PumpStageMoved` events with context (model, customer, po)
-- [ ] Calculate `daysInPreviousStage` at write time
-- [ ] Build EventBus subscriber to write to ledger
-
-### Priority 3: Dashboard Redesign (1-2 days)
+### Priority 1: Dashboard Redesign (1-2 days)
 
 - [ ] Implement dashboard modes (Operations, Value, Production)
 - [ ] Add drill-down functionality
@@ -64,7 +68,7 @@ Domain layer active with `USE_NEW_DOMAIN=true` and `LocalStorageAdapter`.
 
 ## Test Status
 
-- **Unit Tests**: 172/172 passing
+- **Unit Tests**: 182/182 passing
 - **Gate Script**: `bash scripts/constitution-gate.sh` passes
 
 ---

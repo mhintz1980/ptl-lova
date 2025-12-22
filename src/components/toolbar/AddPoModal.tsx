@@ -1,12 +1,12 @@
 // src/components/toolbar/AddPoModal.tsx
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useApp } from '../../store'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { PoLine, Priority } from '../../types'
 import { X, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { getModelPrice } from '../../lib/seed'
+import { getModelPrice, getCatalogData } from '../../lib/seed'
 
 interface AddPoModalProps {
   isOpen: boolean
@@ -15,7 +15,6 @@ interface AddPoModalProps {
 
 export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
   const addPO = useApp((state) => state.addPO)
-  const pumps = useApp((state) => state.pumps)
   const [po, setPo] = useState('')
   const [customer, setCustomer] = useState('')
   const [dateReceived, setDateReceived] = useState('')
@@ -38,10 +37,12 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     'Rush',
     'Urgent',
   ]
+
+  // Source models from catalog data (not existing pumps) to ensure getModelPrice always matches
   const availableModels = useMemo(() => {
-    const models = pumps.map((pump) => pump.model)
-    return Array.from(new Set(models)).sort()
-  }, [pumps])
+    const catalog = getCatalogData()
+    return catalog.models.map((m) => m.model).sort()
+  }, [])
 
   const handleAddLine = () => {
     setLines([
@@ -104,6 +105,12 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     )
 
     // Reset and close
+    resetForm()
+    onClose()
+  }
+
+  // Reset form to initial state
+  const resetForm = useCallback(() => {
     setPo('')
     setCustomer('')
     setDateReceived('')
@@ -118,8 +125,13 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         priority: 'Normal',
       },
     ])
+  }, [])
+
+  // Handle cancel: reset form and close modal
+  const handleCancel = useCallback(() => {
+    resetForm()
     onClose()
-  }
+  }, [resetForm, onClose])
 
   // Computed totals for PO summary
   const { totalPumps, totalValue } = useMemo(() => {
@@ -161,7 +173,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="h-5 w-5" />
@@ -435,7 +447,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
               type="button"
               variant="outline"
               className="rounded-full"
-              onClick={onClose}
+              onClick={handleCancel}
             >
               Cancel
             </Button>

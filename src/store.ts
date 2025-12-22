@@ -29,6 +29,7 @@ import type {
 } from './types'
 import { DEFAULT_CAPACITY_CONFIG, getStageCapacity } from './lib/capacity'
 import { eventStore } from './infrastructure/events/EventStore'
+import { getEventBus } from './infrastructure/eventBus/EventBus'
 import { pumpStageMoved } from './domain/production/events/PumpStageMoved'
 import { pumpPaused } from './domain/production/events/PumpPaused'
 import { pumpResumed } from './domain/production/events/PumpResumed'
@@ -225,11 +226,23 @@ export const useApp = create<AppState>()(
 
         const now = new Date().toISOString()
 
-        // 1. Create and persist domain event (TRUTH)
-        const event = pumpStageMoved(id, fromStage, to)
+        // 1. Create and persist domain event (TRUTH) with context for ledger
+        const event = pumpStageMoved(id, fromStage, to, {
+          serial: pump.serial,
+          model: pump.model,
+          customer: pump.customer,
+          po: pump.po,
+        })
         eventStore.append(event).catch((err) => {
           console.error('Failed to persist stage move event:', err)
         })
+
+        // Publish to EventBus for subscribers (ledger, etc.)
+        getEventBus()
+          .publish(event)
+          .catch((err) => {
+            console.error('Failed to publish stage move event:', err)
+          })
 
         // 2. Check if entering a full WORK stage -> auto-pause (Constitution §3.3)
         let shouldAutoPause = false
