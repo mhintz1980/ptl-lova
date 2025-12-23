@@ -300,7 +300,7 @@ export function DashboardEngine() {
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 ${isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-3'}`}
+        className={`grid gap-6 grid-flow-dense ${isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-3'}`}
       >
         <AnimatePresence mode="popLayout">
           {chartIdsToRender.map((chartId) => {
@@ -352,8 +352,8 @@ export function DashboardEngine() {
                 <div
                   className={
                     isDrillMode
-                      ? 'h-[calc(100%-60px)] w-full'
-                      : 'h-[300px] w-full'
+                      ? 'h-[calc(100%-60px)] w-full relative'
+                      : 'h-[300px] w-full relative'
                   }
                 >
                   <ChartComponent

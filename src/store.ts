@@ -13,7 +13,10 @@ import { nanoid } from 'nanoid'
 import { LocalAdapter } from './adapters/local'
 import { SandboxAdapter } from './adapters/sandbox'
 import { SupabaseAdapter } from './adapters/supabase'
-import { getModelLeadTimes as getCatalogLeadTimes } from './lib/seed'
+import {
+  getModelLeadTimes as getCatalogLeadTimes,
+  getModelPrice,
+} from './lib/seed'
 import { addDays, startOfDay, isAfter, parseISO, parse } from 'date-fns'
 import {
   buildStageTimeline,
@@ -170,14 +173,30 @@ export const useApp = create<AppState>()(
         // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
         let migrated = false
         const migratedRows = rows.map((p) => {
+          let modified = false
+          let next = { ...p }
+
+          // Migration 1: Convert UNSCHEDULED/NOT STARTED to QUEUE
           if (
-            (p.stage as string) === 'UNSCHEDULED' ||
-            (p.stage as string) === 'NOT STARTED'
+            (next.stage as string) === 'UNSCHEDULED' ||
+            (next.stage as string) === 'NOT STARTED'
           ) {
+            next.stage = 'QUEUE' as Stage
+            modified = true
             migrated = true
-            return { ...p, stage: 'QUEUE' as Stage }
           }
-          return p
+
+          // Migration 2: Backfill missing values
+          if (!next.value || next.value === 0) {
+            const price = getModelPrice(next.model)
+            if (price > 0) {
+              next.value = price
+              modified = true
+              migrated = true
+            }
+          }
+
+          return next
         })
 
         if (migrated) {
@@ -873,6 +892,17 @@ export const useApp = create<AppState>()(
       // `persist` middleware here might conflict or be redundant.
       // If `load()` fetches from adapter on mount, we don't need `persist` for `pumps`.
       // Let's refine the partializer to only save UI preferences.
+      merge: (persistedState, currentState) => {
+        const parsed = persistedState as Partial<AppState>
+        return {
+          ...currentState,
+          ...parsed,
+          capacityConfig: {
+            ...currentState.capacityConfig,
+            ...(parsed.capacityConfig || {}),
+          },
+        }
+      },
       partialize: (state) => ({
         // Persist preferences
         filters: state.filters,

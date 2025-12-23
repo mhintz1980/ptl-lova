@@ -1,19 +1,41 @@
 # Project: PumpTracker Lite
 
-## ⚠️ IMPORTANT: Check Current Work Status First
+## 🤖 Agent Bootloader / Start Here
 
-**Before starting any work**, read [`docs/status/current-work.md`](docs/status/current-work.md) to understand:
+**You are working on PumpTracker Lite.** This file (`GEMINI.md`) is your primary context injection.
 
-- Active branch and PR status
-- Current phase in the refactor plan
-- Completed vs remaining tasks
-- Next actions to take
+### 1. The Prime Directive: "Where is the work?"
 
-**Key Reference Documents**:
+**Always** read [`docs/status/current-work.md`](docs/status/current-work.md) first.
 
-- Refactor phases: [`docs/agents/opus-4.5-refactor-prompt.md`](docs/agents/opus-4.5-refactor-prompt.md)
-- DDD Blueprint: [`DDD_BLUEPRINT-OPUS.md`](DDD_BLUEPRINT-OPUS.md)
-- Constitution: [`docs/constitution/pumptracker-constitution.md`](docs/constitution/pumptracker-constitution.md)
+- It tells you the active branch, deployment status, and the immediate **Next Actions**.
+- **Do not** hallucinate next steps. Trust this file.
+
+### 2. The Documentation Map: "Where do I look/write?"
+
+| If you need to...             | Go to...                                                     |
+| :---------------------------- | :----------------------------------------------------------- |
+| **Check Rules & Philosophy**  | [`AGENTS.md`](AGENTS.md) (The Constitution)                  |
+| **Track Tasks / Status**      | [`docs/status/current-work.md`](docs/status/current-work.md) |
+| **Read/Write Design Specs**   | [`docs/plans/`](docs/plans/)                                 |
+| **Find Technical Deep Dives** | [`docs/process/`](docs/process/)                             |
+| **Learn Agent Skills**        | [`docs/agent-skills/`](docs/agent-skills/)                   |
+
+### 3. Your First 5 Minutes
+
+1.  Read `docs/status/current-work.md`.
+2.  Check for active terminal processes (is `pnpm dev` running?).
+3.  Assume `main` is the production branch and you are on a feature branch (or should check `git status`).
+
+---
+
+## ⚠️ Important Context
+
+- **Refactor Status**: We recently completed a major "Constitution Refactor" and "DDD implementation".
+- **Deployment**: We are in **BETA** (Cloud Mode). Shared data. Do not reset without asking.
+- **Key Docs**:
+  - Refactor History: [`docs/agents/opus-4.5-refactor-prompt.md`](docs/agents/opus-4.5-refactor-prompt.md)
+  - Domain Logic: [`DDD_BLUEPRINT-OPUS.md`](DDD_BLUEPRINT-OPUS.md)
 
 ---
 

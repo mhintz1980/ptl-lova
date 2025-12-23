@@ -132,9 +132,9 @@ export const MODE_CONFIGS: ModeConfig[] = [
     kpis: ['avgLeadTime', 'throughput', 'onTimeRate'],
     chartIds: [
       'throughputTrend',
+      'lateOrders',
       'stageGenericPipeline',
       'cycleTimeBreakdown',
-      'lateOrders',
     ],
   },
 ]

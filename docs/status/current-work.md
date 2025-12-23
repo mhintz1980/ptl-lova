@@ -75,6 +75,11 @@ New storage key: `pumptracker-stage-ledger` (localStorage)
 - [ ] Fix any Cloud Mode sync issues reported
 - [ ] Refine mobile responsiveness
 
+### Future Features (Backlog)
+
+- [ ] **KPI Drill-down**: Clicking KPI cards (e.g. "Late Orders") filters the dashboard or opens a list view.
+- [ ] **Drag-and-Drop Charts**: Allow users to reorder dashboard widgets using `dnd-kit`.
+
 ---
 
 ## Test Status
