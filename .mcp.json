@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "quint-code": {
+      "command": "/home/markimus/.local/bin/quint-code",
+      "args": [
+        "serve"
+      ],
+      "cwd": "/home/markimus/projects/ptl-lova",
+      "env": {
+        "QUINT_PROJECT_ROOT": "/home/markimus/projects/ptl-lova"
+      }
+    }
+  }
+}
