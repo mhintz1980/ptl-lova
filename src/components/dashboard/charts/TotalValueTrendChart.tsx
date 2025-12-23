@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   BarChart,
   Bar,
@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  ReferenceLine,
 } from 'recharts'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
@@ -37,7 +36,7 @@ const getPumpColor = (po: string) => {
   return COLORS[index]
 }
 
-export function TotalValueTrendChart({ filters, onDrilldown }: ChartProps) {
+export function TotalValueTrendChart({ filters }: ChartProps) {
   const { pumps } = useApp()
 
   // Prepare data: Stacked Bars by Pump

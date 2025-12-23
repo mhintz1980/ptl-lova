@@ -14,8 +14,8 @@ import {
   type StagedForPowderHistory,
 } from './stage-history'
 
-// Constitution §2.1: Canonical stage keys for duration lookup
-type StageKey = 'fabrication' | 'powder_coat' | 'assembly' | 'ship'
+// Constitution §2.1: Canonical stage keys for duration lookup (used in _STAGE_TO_KEY below)
+// type StageKey = 'fabrication' | 'powder_coat' | 'assembly' | 'ship'
 
 export interface StageDurations {
   fabrication: number

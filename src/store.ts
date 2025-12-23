@@ -18,11 +18,7 @@ import {
   getModelPrice,
 } from './lib/seed'
 import { addDays, startOfDay, isAfter, parseISO, parse } from 'date-fns'
-import {
-  buildStageTimeline,
-  type StageDurations,
-  type StageBlock,
-} from './lib/schedule'
+import { type StageDurations, type StageBlock } from './lib/schedule'
 import { buildCapacityAwareTimelines } from './lib/schedule-helper'
 import { applyFilters, genSerial } from './lib/utils'
 import { sortPumps, SortDirection, SortField } from './lib/sort'
@@ -173,7 +169,6 @@ export const useApp = create<AppState>()(
         // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
         let migrated = false
         const migratedRows = rows.map((p) => {
-          let modified = false
           let next = { ...p }
 
           // Migration 1: Convert UNSCHEDULED/NOT STARTED to QUEUE
@@ -182,7 +177,6 @@ export const useApp = create<AppState>()(
             (next.stage as string) === 'NOT STARTED'
           ) {
             next.stage = 'QUEUE' as Stage
-            modified = true
             migrated = true
           }
 
@@ -191,7 +185,6 @@ export const useApp = create<AppState>()(
             const price = getModelPrice(next.model)
             if (price > 0) {
               next.value = price
-              modified = true
               migrated = true
             }
           }
@@ -593,7 +586,7 @@ export const useApp = create<AppState>()(
             getModelLeadTimes
           )
 
-          Object.entries(forecastStarts).forEach(([pumpId, startISO]) => {
+          Object.entries(forecastStarts).forEach(([pumpId]) => {
             const timeline = timelines[pumpId]
             if (!timeline || timeline.length === 0) return
             const start = timeline[0].start

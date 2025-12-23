@@ -1,9 +1,14 @@
 {
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "types": [],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -24,6 +29,5 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  },
-  "include": ["src"]
+  }
 }

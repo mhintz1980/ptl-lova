@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getAverageStageAge } from '../kpiCalculators'
-import { ArrowRight } from 'lucide-react'
 import { Stage } from '../../../types'
 
 export function CycleTimeBreakdownChart({ onDrilldown }: ChartProps) {
