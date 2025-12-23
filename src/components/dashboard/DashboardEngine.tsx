@@ -6,7 +6,7 @@ import {
   MODE_CONFIGS,
 } from './dashboardConfig'
 import { CHART_REGISTRY } from './chartRegistry'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import {
   Star,
   FilterX,
@@ -189,7 +189,11 @@ export function DashboardEngine() {
                     <BreadcrumbSeparator className="h-4 w-4 mx-1 opacity-50" />
                     <button
                       onClick={() => handleBreadcrumbClick(idx)}
-                      className={`hover:text-foreground transition-colors ${idx === drillStack.length - 1 ? 'text-foreground font-semibold' : ''}`}
+                      className={`hover:text-foreground transition-colors ${
+                        idx === drillStack.length - 1
+                          ? 'text-foreground font-semibold'
+                          : ''
+                      }`}
                       disabled={idx === drillStack.length - 1}
                     >
                       {step.label}
@@ -300,7 +304,9 @@ export function DashboardEngine() {
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 grid-flow-dense ${isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-3'}`}
+        className={`grid gap-6 grid-flow-dense ${
+          isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-3'
+        }`}
       >
         <AnimatePresence mode="popLayout">
           {chartIdsToRender.map((chartId) => {
@@ -312,8 +318,8 @@ export function DashboardEngine() {
             const colSpan = isDrillMode
               ? 'col-span-1'
               : cfg.defaultSize === 'lg'
-                ? 'md:col-span-2 xl:col-span-2'
-                : 'col-span-1'
+              ? 'md:col-span-2 xl:col-span-2'
+              : 'col-span-1'
 
             return (
               <motion.div
@@ -323,7 +329,9 @@ export function DashboardEngine() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group ${colSpan} ${isDrillMode ? 'h-[calc(100vh-200px)]' : ''}`}
+                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group ${colSpan} ${
+                  isDrillMode ? 'h-[calc(100vh-200px)]' : ''
+                }`}
               >
                 <div className="mb-4 flex items-start justify-between">
                   <div>
@@ -339,7 +347,11 @@ export function DashboardEngine() {
                   {!isDrillMode && (
                     <button
                       onClick={() => toggleFavorite(chartId)}
-                      className={`p-1.5 rounded-full transition-colors ${isFav ? 'text-yellow-400 bg-yellow-400/10' : 'text-muted-foreground/30 hover:text-yellow-400 hover:bg-yellow-400/10'}`}
+                      className={`p-1.5 rounded-full transition-colors ${
+                        isFav
+                          ? 'text-yellow-400 bg-yellow-400/10'
+                          : 'text-muted-foreground/30 hover:text-yellow-400 hover:bg-yellow-400/10'
+                      }`}
                       aria-label="Toggle favorite"
                     >
                       <Star

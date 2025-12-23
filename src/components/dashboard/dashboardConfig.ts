@@ -28,7 +28,7 @@ export type ChartId =
   | 'wipDonut'
   | 'capacityByDept'
   | 'lateOrders'
-  | 'lateOrdersList' // New
+  | 'lateOrdersList'
   | 'leadTimeTrend'
   | 'pumpsByCustomer'
   | 'pumpsByModel'
@@ -40,7 +40,8 @@ export type ChartId =
   | 'totalPoValue'
   | 'throughputTrend'
   | 'stageGenericPipeline'
-  | 'cycleTimeBreakdown' // New
+  | 'cycleTimeBreakdown'
+  | 'drilldownCharts'
 
 // ---- Shared filters for drilldown ----
 export interface DashboardFilters {
@@ -132,7 +133,7 @@ export const MODE_CONFIGS: ModeConfig[] = [
     kpis: ['avgLeadTime', 'throughput', 'onTimeRate'],
     chartIds: [
       'throughputTrend',
-      'lateOrders',
+      'drilldownCharts',
       'stageGenericPipeline',
       'cycleTimeBreakdown',
     ],

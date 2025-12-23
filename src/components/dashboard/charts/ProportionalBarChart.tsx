@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { Badge } from '../../ui/Badge'
 import { Stage } from '../../../types'
@@ -76,7 +76,9 @@ export function ProportionalBarChart({
               )}
 
               <motion.div
-                className={`h-full rounded-full ${isOverLimit ? 'bg-red-500' : 'bg-cyan-500'}`}
+                className={`h-full rounded-full ${
+                  isOverLimit ? 'bg-red-500' : 'bg-cyan-500'
+                }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${(item.value / maxValue) * 100}%` }}
                 transition={{ duration: 1, delay: idx * 0.1 }}

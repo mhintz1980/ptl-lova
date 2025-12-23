@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { motion } from 'motion/react'
 import {
   AreaChart,
   Area,
@@ -36,7 +37,12 @@ export function TrendAreaChart({
   const gradientId = `colorGradient-${color.replace('#', '')}`
 
   return (
-    <div className="w-full h-full relative">
+    <motion.div
+      className="w-full h-full relative"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
@@ -99,6 +105,6 @@ export function TrendAreaChart({
           />
         </AreaChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   )
 }

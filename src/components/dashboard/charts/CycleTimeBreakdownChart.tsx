@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getAverageStageAge } from '../kpiCalculators'
@@ -43,7 +43,9 @@ export function CycleTimeBreakdownChart({ onDrilldown }: ChartProps) {
                   initial={{ width: 0 }}
                   animate={{ width: `${widthPercent}%` }}
                   transition={{ duration: 0.8, delay: idx * 0.1 }}
-                  className={`h-full absolute left-0 top-0 ${isBottleneck ? 'bg-red-500/60' : 'bg-cyan-500/40'}`}
+                  className={`h-full absolute left-0 top-0 ${
+                    isBottleneck ? 'bg-red-500/60' : 'bg-cyan-500/40'
+                  }`}
                 />
 
                 {/* Overlay Content */}

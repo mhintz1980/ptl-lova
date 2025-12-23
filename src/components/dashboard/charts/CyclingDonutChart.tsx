@@ -7,7 +7,7 @@ import {
   Tooltip,
   Sector,
 } from 'recharts'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { Pause, Play } from 'lucide-react'
 
@@ -234,7 +234,11 @@ export function CyclingDonutChart({
             onClick={() => setActiveIndex(idx)}
             className={`
               h-2 rounded-full transition-all duration-300
-              ${idx === activeIndex ? 'w-8 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'}
+              ${
+                idx === activeIndex
+                  ? 'w-8 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]'
+                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+              }
             `}
             title={p.label}
           />

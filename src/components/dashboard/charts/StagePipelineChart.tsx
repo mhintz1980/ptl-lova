@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getWorkloadByStage } from '../kpiCalculators'
@@ -59,7 +59,9 @@ export function StagePipelineChart({ onDrilldown }: ChartProps) {
                  text-center p-2
                `}
               style={{
-                boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 0 1px ${stage.value > 0 ? stage.color + '40' : 'transparent'}`,
+                boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 0 1px ${
+                  stage.value > 0 ? stage.color + '40' : 'transparent'
+                }`,
               }}
             >
               {/* Neon Glow on hover */}

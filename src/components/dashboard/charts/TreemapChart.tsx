@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { ResponsiveContainer, Treemap, Tooltip } from 'recharts'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { applyDashboardFilters } from '../utils'

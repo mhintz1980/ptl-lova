@@ -15,6 +15,7 @@ import { TotalValueTrendChart } from './charts/TotalValueTrendChart'
 import { StagePipelineChart } from './charts/StagePipelineChart'
 import { CycleTimeBreakdownChart } from './charts/CycleTimeBreakdownChart'
 import { LateOrdersList } from './LateOrdersList'
+import { DrilldownChartsPanelWrapper } from './charts/DrilldownChartsPanel'
 
 export const CHART_REGISTRY: Record<string, ChartConfig> = {
   wipByStage: {
@@ -144,5 +145,13 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Average age of active inventory by stage',
     component: CycleTimeBreakdownChart,
     defaultSize: 'md',
+  },
+  drilldownCharts: {
+    id: 'drilldownCharts',
+    title: '3D Drill-Down Analysis',
+    description: 'Interactive multi-level drill-down with 3D visualizations',
+    component: DrilldownChartsPanelWrapper,
+    defaultSize: 'lg',
+    drillDownSequence: ['pumpTable'],
   },
 }
