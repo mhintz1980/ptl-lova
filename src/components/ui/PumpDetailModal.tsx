@@ -100,8 +100,8 @@ function TimelineProgress({
                     isCompleted
                       ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]}`
                       : isCurrent
-                        ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]} animate-pulse`
-                        : 'bg-transparent'
+                      ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]} animate-pulse`
+                      : 'bg-transparent'
                   )}
                   style={{ width: fillWidth }}
                 />
@@ -375,7 +375,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     >
       <div
         className={cn(
-          'relative border-border rounded-2xl w-full max-w-3xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200',
+          'relative border-border rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200',
           'bg-background/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_20px_rgba(34,211,238,0.1)]',
           currentPump.isPaused && 'grayscale-[50%]'
         )}
@@ -443,7 +443,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                     variant="outline"
                     size="sm"
                     onClick={handleCancel}
-                    className="font-semibold"
+                    className="font-semibold border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </Button>
@@ -709,8 +709,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                               formData.priority === 'Rush'
                               ? 'text-rose-500 bg-rose-500/10 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]'
                               : formData.priority === 'High'
-                                ? 'text-orange-500 bg-orange-500/10 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.15)]'
-                                : 'text-muted-foreground/60 bg-muted/20 border-white/5'
+                              ? 'text-orange-500 bg-orange-500/10 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.15)]'
+                              : 'text-muted-foreground/60 bg-muted/20 border-white/5'
                           )}
                         >
                           {formData.priority}
@@ -967,10 +967,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                               {row.kind === 'work' && row.stage
                                 ? `${calculateManHours(row.days, row.stage)}H`
                                 : row.kind === 'vendor'
-                                  ? 'WORK DAYS'
-                                  : row.actualDays !== undefined
-                                    ? `Actual: ${row.actualDays}D`
-                                    : 'Actual: -'}
+                                ? 'WORK DAYS'
+                                : row.actualDays !== undefined
+                                ? `Actual: ${row.actualDays}D`
+                                : 'Actual: -'}
                             </div>
                           </div>
                         </div>

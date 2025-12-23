@@ -1,44 +1,44 @@
-import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { UnscheduledJobCard } from "./UnscheduledJobCard";
-import { useDroppable } from "@dnd-kit/core";
-import { toast } from "sonner";
-import { cn } from "../../lib/utils";
-import type { Pump } from "../../types";
-import { useApp } from "../../store";
-import { sortPumps } from "../../lib/sort";
+import { useMemo, useState } from 'react'
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { UnscheduledJobCard } from './UnscheduledJobCard'
+import { useDroppable } from '@dnd-kit/core'
+import { toast } from 'sonner'
+import { cn } from '../../lib/utils'
+import type { Pump } from '../../types'
+import { useApp } from '../../store'
+import { sortPumps } from '../../lib/sort'
 
 interface BacklogDockProps {
-  pumps: Pump[];
-  collapsed: boolean;
+  pumps: Pump[]
+  collapsed: boolean
 }
 
 export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
-  const [open, setOpen] = useState(true);
-  const sortField = useApp((state) => state.sortField);
-  const sortDirection = useApp((state) => state.sortDirection);
+  const [open, setOpen] = useState(true)
+  const sortField = useApp((state) => state.sortField)
+  const sortDirection = useApp((state) => state.sortDirection)
 
   const { setNodeRef, isOver } = useDroppable({
-    id: "backlog-dock",
-    data: { type: "BACKLOG" },
-  });
+    id: 'backlog-dock',
+    data: { type: 'BACKLOG' },
+  })
 
   const unscheduledPumps = useMemo(
-    () => pumps.filter((pump) => pump.stage === "QUEUE" && !pump.forecastStart),
+    () => pumps.filter((pump) => pump.stage === 'QUEUE' && !pump.forecastStart),
     [pumps]
-  );
+  )
   const sortedPumps = useMemo(
     () => sortPumps(unscheduledPumps, sortField, sortDirection),
     [unscheduledPumps, sortField, sortDirection]
-  );
+  )
 
   return (
     <aside
       ref={setNodeRef}
       className={cn(
-        "relative flex h-full flex-col border-r border-border/60 bg-card/85 text-foreground shadow-inner transition-all duration-300",
-        open ? "w-[260px] flex-shrink-0" : "w-10",
-        isOver && "bg-primary/10 ring-2 ring-inset ring-primary/50"
+        'relative flex h-full flex-col border-r border-border/60 bg-card/85 text-foreground shadow-inner transition-all duration-300',
+        open ? 'w-[260px] flex-shrink-0' : 'w-10',
+        isOver && 'bg-primary/10 ring-2 ring-inset ring-primary/50'
       )}
       data-testid="backlog-dock"
     >
@@ -66,23 +66,6 @@ export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
                 {sortedPumps.length} jobs
               </h3>
             </div>
-            {sortedPumps.length > 0 && (
-              <button
-                onClick={() => {
-                  const count = useApp.getState().autoSetForecastHints();
-                  if (count > 0) {
-                    toast.success(`Autoscheduled ${count} jobs`);
-                  } else {
-                    toast.info("No slots available or backlog empty");
-                  }
-                }}
-                className="flex h-7 items-center gap-1.5 rounded-md bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
-                title="Automatically schedule jobs based on priority and capacity"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Auto
-              </button>
-            )}
           </header>
 
           <div className="flex-1 overflow-hidden px-4 py-4">
@@ -97,7 +80,9 @@ export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
 
               {sortedPumps.length === 0 && (
                 <div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-center text-xs text-muted-foreground">
-                  {isOver ? "Drop to unschedule" : "Nothing matches the current filters."}
+                  {isOver
+                    ? 'Drop to unschedule'
+                    : 'Nothing matches the current filters.'}
                 </div>
               )}
             </div>
@@ -110,5 +95,5 @@ export function BacklogDock({ pumps, collapsed }: BacklogDockProps) {
         </div>
       )}
     </aside>
-  );
+  )
 }

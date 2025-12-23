@@ -1,5 +1,5 @@
 // src/components/toolbar/AddPoModal.tsx
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApp } from '../../store'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
@@ -44,6 +44,23 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     return catalog.models.map((m) => m.model).sort()
   }, [])
 
+  // Get existing customers from pumps for dropdown
+  const { pumps } = useApp()
+  const availableCustomers = useMemo(() => {
+    return [...new Set(pumps.map((p) => p.customer))].filter(Boolean).sort()
+  }, [pumps])
+
+  // Inherit PO promise date to line items when PO date changes
+  useEffect(() => {
+    if (promiseDate) {
+      setLines((prevLines) =>
+        prevLines.map((line) =>
+          line.promiseDate ? line : { ...line, promiseDate }
+        )
+      )
+    }
+  }, [promiseDate])
+
   const handleAddLine = () => {
     setLines([
       ...lines,
@@ -51,7 +68,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         model: '',
         quantity: 1,
         color: '',
-        promiseDate: '',
+        promiseDate: promiseDate || '', // Inherit PO promise date
         valueEach: 0,
         priority: 'Normal',
       },
@@ -101,7 +118,10 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     // Submit
     addPO({ po, customer, dateReceived, promiseDate, lines: validLines })
     toast.success(
-      `Added ${validLines.reduce((sum, l) => sum + l.quantity, 0)} pumps to ${po}`
+      `Added ${validLines.reduce(
+        (sum, l) => sum + l.quantity,
+        0
+      )} pumps to ${po}`
     )
 
     // Reset and close
@@ -197,12 +217,21 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
               <label className="text-sm font-medium text-muted-foreground">
                 Customer *
               </label>
-              <Input
-                value={customer}
-                onChange={(e) => setCustomer(e.target.value)}
-                placeholder="Acme Manufacturing"
-                required
-              />
+              <div className="relative">
+                <input
+                  list="customer-options"
+                  value={customer}
+                  onChange={(e) => setCustomer(e.target.value)}
+                  placeholder="Select or type customer name"
+                  required
+                  className="flex h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <datalist id="customer-options">
+                  {availableCustomers.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">
@@ -320,6 +349,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                             Math.max(1, parseInt(e.target.value) || 1)
                           )
                         }
+                        onFocus={(e) => e.target.select()}
                         min={1}
                         required
                       />
@@ -352,6 +382,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                             Math.max(0, parseFloat(e.target.value) || 0)
                           )
                         }
+                        onFocus={(e) => e.target.select()}
                         min={0}
                         step={0.01}
                       />

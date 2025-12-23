@@ -260,9 +260,7 @@ export function DashboardEngine() {
                 <Star
                   className={`h-4 w-4 ${showFavorites ? 'fill-current' : ''}`}
                 />
-                <span className="hidden sm:inline">
-                  {showFavorites ? 'Show Mode View' : 'Favorites'}
-                </span>
+                <span className="hidden sm:inline">Favorites</span>
               </Button>
             </>
           )}
@@ -338,11 +336,6 @@ export function DashboardEngine() {
                     <h2 className="text-lg font-semibold tracking-tight">
                       {cfg.title}
                     </h2>
-                    {cfg.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {cfg.description}
-                      </p>
-                    )}
                   </div>
                   {!isDrillMode && (
                     <button
