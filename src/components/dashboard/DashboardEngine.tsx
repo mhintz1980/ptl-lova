@@ -303,7 +303,7 @@ export function DashboardEngine() {
       {/* Charts grid */}
       <div
         className={`grid gap-6 grid-flow-dense ${
-          isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-3'
+          isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-4'
         }`}
       >
         <AnimatePresence mode="popLayout">
@@ -316,7 +316,7 @@ export function DashboardEngine() {
             const colSpan = isDrillMode
               ? 'col-span-1'
               : cfg.defaultSize === 'full'
-              ? 'md:col-span-2 xl:col-span-3'
+              ? 'md:col-span-2 xl:col-span-4'
               : cfg.defaultSize === 'lg'
               ? 'md:col-span-2 xl:col-span-2'
               : 'col-span-1'

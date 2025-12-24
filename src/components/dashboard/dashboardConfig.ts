@@ -132,8 +132,8 @@ export const MODE_CONFIGS: ModeConfig[] = [
     icon: 'bar-chart-2',
     kpis: ['avgLeadTime', 'throughput', 'onTimeRate'],
     chartIds: [
-      'throughputTrend',
       'drilldownCharts',
+      'throughputTrend',
       'stageGenericPipeline',
       'cycleTimeBreakdown',
     ],
