@@ -20,7 +20,7 @@ export const SupabaseAdapter: DataAdapter = {
     const backoffIntervals = [500, 1000, 1500]
 
     while (attempts < maxAttempts) {
-      const { data, error } = await supabase.from('pump_api').select('*')
+      const { data, error } = await supabase.from('pump').select('*')
 
       if (!error) {
         // Supabase returns snake_case, we assume the data is normalized to camelCase by the time it hits the store
@@ -51,7 +51,7 @@ export const SupabaseAdapter: DataAdapter = {
     // Delete all existing rows and then insert new ones
     // Note: This is a destructive operation for a full dataset replacement
     const { error: deleteError } = await supabase
-      .from('pump_api')
+      .from('pump')
       .delete()
       .neq('id', '0') // delete all
     if (deleteError) {
@@ -59,9 +59,7 @@ export const SupabaseAdapter: DataAdapter = {
       throw deleteError
     }
     if (rows.length) {
-      const { error: upsertError } = await supabase
-        .from('pump_api')
-        .upsert(rows)
+      const { error: upsertError } = await supabase.from('pump').upsert(rows)
       if (upsertError) {
         console.error('Supabase replaceAll upsert error:', upsertError)
         throw upsertError
@@ -71,7 +69,7 @@ export const SupabaseAdapter: DataAdapter = {
   async upsertMany(rows: Pump[]) {
     if (!supabase) return
     if (rows.length) {
-      const { error } = await supabase.from('pump_api').upsert(rows)
+      const { error } = await supabase.from('pump').upsert(rows)
       if (error) {
         console.error('Supabase upsertMany error:', error)
         throw error
@@ -80,7 +78,7 @@ export const SupabaseAdapter: DataAdapter = {
   },
   async update(id: string, patch: Partial<Pump>) {
     if (!supabase) return
-    const { error } = await supabase.from('pump_api').update(patch).eq('id', id)
+    const { error } = await supabase.from('pump').update(patch).eq('id', id)
     if (error) {
       console.error('Supabase update error:', error)
       throw error

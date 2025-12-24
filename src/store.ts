@@ -9,6 +9,7 @@ import {
   Milestone,
   MicroTask,
 } from './types'
+import { toast } from 'sonner'
 import { nanoid } from 'nanoid'
 import { LocalAdapter } from './adapters/local'
 import { SandboxAdapter } from './adapters/sandbox'
@@ -223,7 +224,14 @@ export const useApp = create<AppState>()(
 
         const newPumps = [...get().pumps, ...expanded]
         set({ pumps: newPumps })
-        get().adapter.upsertMany(expanded)
+        get()
+          .adapter.upsertMany(expanded)
+          .catch((err) => {
+            console.error('Failed to persist PO:', err)
+            toast.error(
+              'Failed to save data to cloud. Please refresh and try again.'
+            )
+          })
       },
 
       // Constitution §3: Kanban Truth Rules
@@ -300,7 +308,14 @@ export const useApp = create<AppState>()(
         set({ pumps: newPumps })
 
         // 4. Persist to adapter
-        get().adapter.update(id, patch)
+        get()
+          .adapter.update(id, patch)
+          .catch((err) => {
+            console.error('Failed to persist stage move:', err)
+            toast.error(
+              'Failed to save stage move. Data may be desynchronized.'
+            )
+          })
       },
 
       updatePump: (id, patch) => {
@@ -309,7 +324,12 @@ export const useApp = create<AppState>()(
           p.id === id ? { ...p, ...patch, last_update: now } : p
         )
         set({ pumps: newPumps })
-        get().adapter.update(id, { ...patch, last_update: now })
+        get()
+          .adapter.update(id, { ...patch, last_update: now })
+          .catch((err) => {
+            console.error('Failed to update pump:', err)
+            toast.error('Failed to save changes. Please check your connection.')
+          })
       },
 
       // Constitution §3.3: Pause is truth
