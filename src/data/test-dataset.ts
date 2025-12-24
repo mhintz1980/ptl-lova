@@ -91,7 +91,7 @@ export function getTestPumps(): Pump[] {
 
         pumps.push({
           id: nanoid(),
-          serial: String(serialCounter++),
+          serial: serialCounter++,
           po: order.po,
           customer: order.customer,
           model: item.model,

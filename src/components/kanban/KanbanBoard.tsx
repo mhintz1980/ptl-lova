@@ -78,7 +78,7 @@ export function KanbanBoard({
         'SHIP',
         'CLOSED',
       ]
-      const isUnassignedSerial = !pump.serial || pump.serial.startsWith('AUTO-')
+      const isUnassignedSerial = pump.serial === null
       if (REQUIRES_SERIAL_STAGES.includes(nextStage) && isUnassignedSerial) {
         // Don't show success toast - moveStage will show the error toast
         moveStage(pumpId, nextStage)

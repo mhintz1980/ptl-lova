@@ -56,7 +56,7 @@ export function CycleTimeBreakdownChart({ onDrilldown }: ChartProps) {
   return (
     <DrilldownDonutChart
       data={donutData}
-      title=""
+      title="Cycle Time By Stage"
       onSegmentClick={handleSegmentClick}
       valueFormatter={(v) => `${v.toFixed(1)} days`}
     />

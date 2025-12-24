@@ -10,7 +10,6 @@ import {
   MicroTask,
 } from './types'
 import { toast } from 'sonner'
-import { nanoid } from 'nanoid'
 import { LocalAdapter } from './adapters/local'
 import { SandboxAdapter } from './adapters/sandbox'
 import { SupabaseAdapter } from './adapters/supabase'
@@ -208,8 +207,8 @@ export const useApp = create<AppState>()(
       addPO: ({ po, customer, lines, promiseDate }) => {
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
-            id: nanoid(),
-            serial: `AUTO-${nanoid()}`, // Auto-generated, UI shows "Unassigned"
+            id: crypto.randomUUID(), // Use valid UUID format for Supabase
+            serial: null, // Null for unassigned (DB expects integer)
             po,
             customer,
             model: line.model,
@@ -252,7 +251,7 @@ export const useApp = create<AppState>()(
         }
 
         // SERIAL GATE: Require user-assigned serial for stages at or after STAGED_FOR_POWDER
-        // Auto-generated serials (AUTO-*) are treated as unassigned
+        // Null serials are treated as unassigned
         const REQUIRES_SERIAL_STAGES: Stage[] = [
           'STAGED_FOR_POWDER',
           'POWDER_COAT',
@@ -260,8 +259,7 @@ export const useApp = create<AppState>()(
           'SHIP',
           'CLOSED',
         ]
-        const isUnassignedSerial =
-          !pump.serial || pump.serial.startsWith('AUTO-')
+        const isUnassignedSerial = pump.serial === null
         if (REQUIRES_SERIAL_STAGES.includes(to) && isUnassignedSerial) {
           toast.error(
             'Serial number required! Click the pump card to assign a serial number before moving to this stage.',

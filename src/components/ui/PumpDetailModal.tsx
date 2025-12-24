@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Pump, Priority, Stage, STAGES } from '../../types'
 import {
   type StageDurations,
@@ -201,6 +201,27 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     }
   }, [currentPump?.id]) // Only reset when opening a different pump
 
+  // Focus management for accessibility
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+  
+  useEffect(() => {
+    if (currentPump) {
+      // Store the previously focused element
+      previousFocusRef.current = document.activeElement as HTMLElement
+      
+      // Focus the modal after it opens
+      requestAnimationFrame(() => {
+        modalRef.current?.focus()
+      })
+      
+      // Cleanup: restore focus when modal closes
+      return () => {
+        previousFocusRef.current?.focus()
+      }
+    }
+  }, [currentPump?.id])
+
   if (!currentPump || !formData) return null
 
   // Helper to handle input changes
@@ -372,14 +393,26 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
+      role="presentation"
     >
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pump-detail-title"
+        tabIndex={-1}
         className={cn(
-          'relative border-border rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200',
+          'relative border-border rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary',
           'bg-background/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_20px_rgba(34,211,238,0.1)]',
           currentPump.isPaused && 'grayscale-[50%]'
         )}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault()
+            onClose()
+          }
+        }}
       >
         {/* PAUSED stamp - large rubber stamp style */}
         {currentPump.isPaused && (
@@ -406,10 +439,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
           {/* Header */}
           <div className="mb-4 flex items-center justify-between relative z-10 border-b border-white/5 pb-4">
             <div>
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight">
+              <h2 id="pump-detail-title" className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight">
                 Pump Details
                 <span className="text-blue-400 font-mono text-lg ml-2">
-                  {currentPump.serial && !currentPump.serial.startsWith('AUTO-')
+                  {currentPump.serial !== null
                     ? `#${currentPump.serial}`
                     : 'No S/N'}
                 </span>
@@ -649,16 +682,16 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   <div className="text-right w-1/2">
                     {isEditing ? (
                       <Input
-                        type="text"
+                        type="number"
                         value={
-                          formData.serial?.startsWith('AUTO-')
+                          formData.serial === null
                             ? ''
-                            : formData.serial ?? ''
+                            : formData.serial
                         }
                         onChange={(e) =>
                           handleChange(
                             'serial',
-                            e.target.value || `AUTO-${formData.id}`
+                            e.target.value ? parseInt(e.target.value, 10) : null
                           )
                         }
                         placeholder="Assign before powder coat"
@@ -666,8 +699,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                       />
                     ) : (
                       <p className="font-bold text-foreground tracking-tight text-base">
-                        {formData.serial &&
-                        !formData.serial.startsWith('AUTO-') ? (
+                        {formData.serial !== null ? (
                           `#${formData.serial}`
                         ) : (
                           <span className="text-amber-500">Unassigned</span>

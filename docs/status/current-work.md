@@ -90,29 +90,44 @@
 - [x] **Drill-Downs**: All charts now drill to intermediate charts, not directly to PumpTable.
 - [x] **Overflow Fixes**: Added `overflow-hidden` to chart containers and StagePipeline.
 
-### 📦 Pack 5: Future Enhancements -> Available
+### 📦 Pack 5: Polish & Accessibility ✅ **COMPLETE** (2025-12-24)
 
-1.  Light mode contrast improvements.
-2.  Additional modal refinements.
-3.  Chart accessibility enhancements.
+- [x] **Light Mode Contrast**: Improved muted-foreground (28%), glass opacity (88%), chart text overrides.
+- [x] **Chart Accessibility**: Added ARIA roles, keyboard navigation, screen reader support to SparklineAreaChart, DrilldownDonutChart, CycleTimeBreakdownChart. Created ChartA11yWrapper component.
+- [x] **Modal Refinements**: PumpDetailModal now has focus management, aria-modal, ESC key handling, focus restoration.
 
 ---
 
-## Next: Agent Skills Integration - Phase 3 (Optional)
+## Chart Modernization - All Packs Complete ✅
+
+All 5 packs of chart modernization are now complete:
+- ✅ Pack 1: Core Engine (SparklineAreaChart, DrilldownDonutChart)
+- ✅ Pack 2: The Rings (WipCyclingDonut, CycleTimeBreakdown)
+- ✅ Pack 3: The Trends (TotalValueTrend, LeadTimeTrend)
+- ✅ Pack 4: Polish & Cleanup (sizing, drill-downs, overflow fixes)
+- ✅ Pack 5: Accessibility & Light Mode (ARIA, contrast, modal refinements)
+
+---
+
+## Next Available Work
+
+### Option 1: Agent Skills Phase 3 (Optional)
 
 **Plan**: [`docs/agent-skills/integration-plan.md`](../agent-skills/integration-plan.md)
 
-**Phases 1 & 2 Complete**:
+**Completed**:
 - ✅ Phase 1: Context Engineering (progressive disclosure, session tracking, memory)
 - ✅ Phase 2: Architectural Patterns (tool catalog, multi-agent documentation)
 
-**Phase 3 Available** (Operational Excellence):
+**Phase 3** (Operational Excellence):
 - Context optimization (compaction, masking, caching)
 - Evaluation framework (quality rubrics, metrics tracking)
 - Estimated: 10-12 hours
 - Expected: 30% token reduction, systematic quality measurement
 
-**Status**: Phases 1-2 complete, Phase 3 ready when needed
+### Option 2: New Feature Development
+
+No specific features currently planned. Ready for new product requirements.
 
 ---
 

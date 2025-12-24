@@ -141,7 +141,11 @@ export function DrilldownDonutChart({
                 height="300"
                 viewBox="0 0 400 400"
                 className="drop-shadow-2xl"
+                role="graphics-document"
+                aria-roledescription="donut chart"
+                aria-label={`${title} - showing ${data.length} segments totaling ${valueFormatter(total)}`}
               >
+                <title>{title}</title>
                 <defs>
                   {/* Gradients for each segment */}
                   {segments.map((segment) => (
@@ -226,6 +230,9 @@ export function DrilldownDonutChart({
                         filter="url(#donut-shadow)"
                         className={onSegmentClick ? 'cursor-pointer' : ''}
                         style={{ transformOrigin: '200px 200px' }}
+                        role="graphics-symbol"
+                        aria-label={`${segment.label}: ${valueFormatter(segment.value)} (${segment.percentage.toFixed(1)}%)`}
+                        tabIndex={onSegmentClick ? 0 : undefined}
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{
                           pathLength: 1,
@@ -240,6 +247,14 @@ export function DrilldownDonutChart({
                         onMouseEnter={() => setHoveredSegment(segment.id)}
                         onMouseLeave={() => setHoveredSegment(null)}
                         onClick={() => onSegmentClick?.(segment)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            onSegmentClick?.(segment)
+                          }
+                        }}
+                        onFocus={() => setHoveredSegment(segment.id)}
+                        onBlur={() => setHoveredSegment(null)}
                         whileHover={
                           onSegmentClick
                             ? {

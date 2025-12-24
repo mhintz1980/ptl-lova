@@ -177,12 +177,12 @@ export function PumpCard({
             <span
               className="block truncate"
               title={
-                pump.serial?.startsWith('AUTO-')
+                pump.serial === null
                   ? 'Unassigned'
                   : `Serial #${pump.serial}`
               }
             >
-              {pump.serial?.startsWith('AUTO-') ? (
+              {pump.serial === null ? (
                 <span className="text-amber-500">Serial # Unassigned</span>
               ) : (
                 <>Serial #{pump.serial}</>

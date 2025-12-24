@@ -16,6 +16,10 @@ interface SparklineAreaChartProps {
   onPointClick?: (point: SparklineDataPoint, index: number) => void
   showXAxis?: boolean
   showYAxis?: boolean
+  /** Chart title for accessibility (visible in tooltip on hover) */
+  title?: string
+  /** Externally controlled focused index for keyboard navigation */
+  focusedIndex?: number
 }
 
 // --- Utility: Catmull-Rom to Cubic Bezier ---
@@ -57,9 +61,14 @@ export function SparklineAreaChart({
   onPointClick,
   showXAxis = true,
   showYAxis = false,
+  title,
+  focusedIndex: externalFocusedIndex,
 }: SparklineAreaChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [mouseX, setMouseX] = useState<number | null>(null)
+
+  // Combine external focused index with internal hover
+  const activeIndex = externalFocusedIndex ?? hoveredIndex
 
   // Chart dimensions
   const padding = {
@@ -189,7 +198,11 @@ export function SparklineAreaChart({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
+        role="graphics-document"
+        aria-roledescription="line chart"
+        aria-label={title || 'Sparkline area chart'}
       >
+        {title && <title>{title}</title>}
         <defs>
           {/* Vertical gradient for area fill */}
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -340,16 +353,18 @@ export function SparklineAreaChart({
             key={i}
             cx={pt.x}
             cy={pt.y}
-            r={hoveredIndex === i ? 8 : 4}
-            fill={hoveredIndex === i ? color : 'hsl(var(--card))'}
+            r={activeIndex === i ? 8 : 4}
+            fill={activeIndex === i ? color : 'hsl(var(--card))'}
             stroke={color}
             strokeWidth="2"
             className={onPointClick ? 'cursor-pointer' : ''}
-            filter={hoveredIndex === i ? `url(#${glowFilterId})` : undefined}
+            filter={activeIndex === i ? `url(#${glowFilterId})` : undefined}
+            role="graphics-symbol"
+            aria-label={`${pt.data.label}: ${valueFormatter(pt.data.value)}`}
             initial={{ scale: 0, opacity: 0 }}
             animate={{
               scale: 1,
-              opacity: hoveredIndex === i ? 1 : 0.7,
+              opacity: activeIndex === i ? 1 : 0.7,
             }}
             transition={{
               scale: { delay: 0.8 + i * 0.05, duration: 0.3, type: 'spring' },

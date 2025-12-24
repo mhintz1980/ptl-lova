@@ -53,20 +53,16 @@
     --scroll-thumb: rgba(94, 234, 212, 0.4);
     --scroll-thumb-hover: rgba(94, 234, 212, 0.65);
 
-    --stage-unscheduled-bg: linear-gradient(
-      135deg,
-      rgba(148, 163, 184, 0.28),
-      rgba(148, 163, 184, 0.18)
-    );
+    --stage-unscheduled-bg: linear-gradient(135deg,
+        rgba(148, 163, 184, 0.28),
+        rgba(148, 163, 184, 0.18));
     --stage-unscheduled-solid: rgba(15, 23, 42, 0.85);
     --stage-unscheduled-border: rgba(226, 232, 240, 0.2);
     --stage-unscheduled-foreground: #e2e8f0;
 
-    --stage-not-started-bg: linear-gradient(
-      135deg,
-      rgba(148, 163, 184, 0.45),
-      rgba(148, 163, 184, 0.35)
-    );
+    --stage-not-started-bg: linear-gradient(135deg,
+        rgba(148, 163, 184, 0.45),
+        rgba(148, 163, 184, 0.35));
     --stage-not-started-solid: rgba(15, 23, 42, 0.85);
     --stage-not-started-border: rgba(226, 232, 240, 0.25);
     --stage-not-started-foreground: #f8fafc;
@@ -104,47 +100,33 @@
     --calendar-weekend-bg: rgba(20, 24, 38, 0.75);
     --calendar-weekend-header: rgba(59, 130, 246, 0.12);
 
-    --body-gradient: linear-gradient(
-      135deg,
-      rgba(5, 5, 10, 0.95) 0%,
-      rgba(15, 15, 24, 0.98) 50%,
-      rgba(5, 5, 10, 0.96) 100%
-    );
-    --ambient-gradient: linear-gradient(
-      135deg,
-      #050505 0%,
-      #0f0f18 60%,
-      #050505 100%
-    );
-    --ambient-overlay: radial-gradient(
-        circle at 20% 20%,
+    --body-gradient: linear-gradient(135deg,
+        rgba(5, 5, 10, 0.95) 0%,
+        rgba(15, 15, 24, 0.98) 50%,
+        rgba(5, 5, 10, 0.96) 100%);
+    --ambient-gradient: linear-gradient(135deg,
+        #050505 0%,
+        #0f0f18 60%,
+        #050505 100%);
+    --ambient-overlay: radial-gradient(circle at 20% 20%,
         rgba(59, 130, 246, 0.15),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 80% 0%,
+        transparent 55%),
+      radial-gradient(circle at 80% 0%,
         rgba(236, 72, 153, 0.15),
-        transparent 70%
-      );
-    --ambient-grid: repeating-linear-gradient(
-        0deg,
+        transparent 70%);
+    --ambient-grid: repeating-linear-gradient(0deg,
         rgba(94, 234, 212, 0.05) 0,
         rgba(94, 234, 212, 0.05) 1px,
         transparent 1px,
-        transparent 32px
-      ),
-      repeating-linear-gradient(
-        90deg,
+        transparent 32px),
+      repeating-linear-gradient(90deg,
         rgba(94, 234, 212, 0.05) 0,
         rgba(94, 234, 212, 0.05) 1px,
         transparent 1px,
-        transparent 32px
-      );
-    --layer-depth-bg: linear-gradient(
-      160deg,
-      rgba(15, 18, 28, 0.95),
-      rgba(5, 5, 10, 0.85)
-    );
+        transparent 32px);
+    --layer-depth-bg: linear-gradient(160deg,
+        rgba(15, 18, 28, 0.95),
+        rgba(5, 5, 10, 0.85));
     --layer-depth-shadow: var(--shadow-lg), 0 0 25px rgba(34, 211, 238, 0.2);
     --layer-l2-bg: rgba(12, 14, 22, 0.9);
     --layer-l2-shadow: var(--shadow-md), 0 0 35px rgba(236, 72, 153, 0.15);
@@ -164,7 +146,7 @@
     --secondary: 210 32% 94%;
     --secondary-foreground: 215 25% 15%;
     --muted: 210 28% 92%;
-    --muted-foreground: 215 18% 35%;
+    --muted-foreground: 215 20% 28%;
     --accent: 28 100% 56%;
     --accent-foreground: 215 25% 15%;
     --destructive: 0 84% 56%;
@@ -181,114 +163,86 @@
     --grid-color: rgba(15, 118, 110, 0.12);
     --grid-highlight: rgba(236, 72, 153, 0.12);
 
-    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-bg: rgba(255, 255, 255, 0.88);
     --glass-border: rgba(15, 23, 42, 0.08);
 
-    --body-gradient: linear-gradient(
-      135deg,
-      rgba(247, 247, 251, 0.98) 0%,
-      rgba(237, 240, 248, 0.98) 50%,
-      rgba(244, 247, 251, 0.98) 100%
-    );
-    --ambient-gradient: linear-gradient(
-      135deg,
-      #f7f7fb 0%,
-      #eef1fb 45%,
-      #f9f9ff 100%
-    );
-    --ambient-overlay: radial-gradient(
-        circle at 20% 20%,
+    --body-gradient: linear-gradient(135deg,
+        rgba(247, 247, 251, 0.98) 0%,
+        rgba(237, 240, 248, 0.98) 50%,
+        rgba(244, 247, 251, 0.98) 100%);
+    --ambient-gradient: linear-gradient(135deg,
+        #f7f7fb 0%,
+        #eef1fb 45%,
+        #f9f9ff 100%);
+    --ambient-overlay: radial-gradient(circle at 20% 20%,
         rgba(59, 130, 246, 0.12),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 80% 0%,
+        transparent 55%),
+      radial-gradient(circle at 80% 0%,
         rgba(236, 72, 153, 0.12),
-        transparent 70%
-      );
-    --ambient-grid: repeating-linear-gradient(
-        0deg,
+        transparent 70%);
+    --ambient-grid: repeating-linear-gradient(0deg,
         rgba(37, 99, 235, 0.08) 0,
         rgba(37, 99, 235, 0.08) 1px,
         transparent 1px,
-        transparent 32px
-      ),
-      repeating-linear-gradient(
-        90deg,
+        transparent 32px),
+      repeating-linear-gradient(90deg,
         rgba(37, 99, 235, 0.08) 0,
         rgba(37, 99, 235, 0.08) 1px,
         transparent 1px,
-        transparent 32px
-      );
+        transparent 32px);
 
-    --stage-unscheduled-bg: linear-gradient(
-      135deg,
-      rgba(226, 232, 240, 0.9),
-      rgba(203, 213, 225, 0.8)
-    );
+    --stage-unscheduled-bg: linear-gradient(135deg,
+        rgba(226, 232, 240, 0.9),
+        rgba(203, 213, 225, 0.8));
     --stage-unscheduled-solid: rgba(255, 255, 255, 0.95);
     --stage-unscheduled-border: rgba(148, 163, 184, 0.35);
     --stage-unscheduled-foreground: #1e293b;
 
-    --stage-not-started-bg: linear-gradient(
-      135deg,
-      rgba(203, 213, 225, 0.9),
-      rgba(226, 232, 240, 0.9)
-    );
+    --stage-not-started-bg: linear-gradient(135deg,
+        rgba(203, 213, 225, 0.9),
+        rgba(226, 232, 240, 0.9));
     --stage-not-started-solid: rgba(255, 255, 255, 0.96);
     --stage-not-started-border: rgba(148, 163, 184, 0.4);
     --stage-not-started-foreground: #0f172a;
 
-    --stage-fabrication-bg: linear-gradient(
-      135deg,
-      rgba(96, 165, 250, 0.85),
-      rgba(14, 165, 233, 0.85)
-    );
+    --stage-fabrication-bg: linear-gradient(135deg,
+        rgba(96, 165, 250, 0.85),
+        rgba(14, 165, 233, 0.85));
     --stage-fabrication-solid: rgba(239, 246, 255, 0.95);
     --stage-fabrication-border: rgba(59, 130, 246, 0.4);
     --stage-fabrication-foreground: #0f172a;
 
-    --stage-powder-bg: linear-gradient(
-      135deg,
-      rgba(196, 181, 253, 0.92),
-      rgba(248, 196, 249, 0.9)
-    );
+    --stage-powder-bg: linear-gradient(135deg,
+        rgba(196, 181, 253, 0.92),
+        rgba(248, 196, 249, 0.9));
     --stage-powder-solid: rgba(252, 245, 255, 0.96);
     --stage-powder-border: rgba(168, 85, 247, 0.35);
     --stage-powder-foreground: #211830;
 
-    --stage-assembly-bg: linear-gradient(
-      135deg,
-      rgba(253, 230, 138, 0.95),
-      rgba(254, 215, 170, 0.92)
-    );
+    --stage-assembly-bg: linear-gradient(135deg,
+        rgba(253, 230, 138, 0.95),
+        rgba(254, 215, 170, 0.92));
     --stage-assembly-solid: rgba(255, 248, 237, 0.96);
     --stage-assembly-border: rgba(245, 158, 11, 0.35);
     --stage-assembly-foreground: #422006;
 
-    --stage-testing-bg: linear-gradient(
-      135deg,
-      rgba(254, 202, 202, 0.95),
-      rgba(254, 240, 138, 0.9)
-    );
+    --stage-testing-bg: linear-gradient(135deg,
+        rgba(254, 202, 202, 0.95),
+        rgba(254, 240, 138, 0.9));
     --stage-testing-solid: rgba(255, 247, 237, 0.96);
     --stage-testing-border: rgba(248, 113, 113, 0.4);
     --stage-testing-foreground: #451a03;
 
-    --stage-shipping-bg: linear-gradient(
-      135deg,
-      rgba(187, 247, 208, 0.95),
-      rgba(190, 242, 100, 0.92)
-    );
+    --stage-shipping-bg: linear-gradient(135deg,
+        rgba(187, 247, 208, 0.95),
+        rgba(190, 242, 100, 0.92));
     --stage-shipping-solid: rgba(236, 253, 245, 0.96);
     --stage-shipping-border: rgba(34, 197, 94, 0.35);
     --stage-shipping-foreground: #14532d;
 
-    --stage-closed-bg: linear-gradient(
-      135deg,
-      rgba(191, 219, 254, 0.95),
-      rgba(199, 210, 254, 0.92)
-    );
+    --stage-closed-bg: linear-gradient(135deg,
+        rgba(191, 219, 254, 0.95),
+        rgba(199, 210, 254, 0.92));
     --stage-closed-solid: rgba(240, 249, 255, 0.96);
     --stage-closed-border: rgba(59, 130, 246, 0.35);
     --stage-closed-foreground: #172554;
@@ -299,15 +253,40 @@
     --scroll-track: rgba(241, 245, 249, 0.9);
     --scroll-thumb: rgba(148, 163, 184, 0.7);
     --scroll-thumb-hover: rgba(100, 116, 139, 0.8);
-    --layer-depth-bg: linear-gradient(
-      160deg,
-      rgba(255, 255, 255, 0.92),
-      rgba(239, 242, 250, 0.9)
-    );
+    --layer-depth-bg: linear-gradient(160deg,
+        rgba(255, 255, 255, 0.92),
+        rgba(239, 242, 250, 0.9));
     --layer-depth-shadow: 0 28px 80px rgba(15, 23, 42, 0.08),
       0 0 25px rgba(59, 130, 246, 0.15);
     --layer-l2-bg: rgba(255, 255, 255, 0.92);
     --layer-l2-shadow: var(--shadow-md), 0 0 35px rgba(59, 130, 246, 0.12);
+
+    /* Chart-specific light mode overrides */
+    --chart-text-primary: 215 25% 12%;
+    --chart-text-secondary: 215 18% 32%;
+    --chart-legend-chip-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+  }
+
+  /* Light mode chart enhancements */
+  .light .chart-callout__label-text {
+    fill: hsl(215 18% 38%);
+  }
+
+  .light .chart-callout__value-text {
+    fill: hsl(215 25% 12%);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+
+  .light .chart-legend-row__label {
+    color: hsl(215 25% 15%);
+  }
+
+  .light .chart-legend-row__value {
+    color: hsl(215 18% 35%);
+  }
+
+  .light .chart-legend-row__chip {
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
   }
 
   * {
@@ -336,11 +315,9 @@
     position: absolute;
     inset: -4px;
     border-radius: 999px;
-    background: radial-gradient(
-      circle,
-      rgba(59, 130, 246, 0.4),
-      transparent 65%
-    );
+    background: radial-gradient(circle,
+        rgba(59, 130, 246, 0.4),
+        transparent 65%);
     opacity: 0;
     transition: opacity 200ms ease;
     z-index: -1;
@@ -569,6 +546,7 @@
   .chart-card__content {
     padding-top: 0;
   }
+
   .chart-canvas {
     filter: drop-shadow(0 20px 45px rgba(5, 10, 20, 0.45));
     transition: transform 0.25s ease, filter 0.25s ease;
