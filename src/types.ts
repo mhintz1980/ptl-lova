@@ -17,7 +17,7 @@ export type Priority = 'Low' | 'Normal' | 'High' | 'Rush' | 'Urgent'
 
 export interface Pump {
   id: string // uuid
-  serial: number // 4-digit unique
+  serial: number | null // 4-digit unique, null until assigned after fabrication
   po: string
   customer: string
   model: string

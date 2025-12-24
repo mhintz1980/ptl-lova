@@ -5,7 +5,7 @@ import { DomainEvent } from './DomainEvent'
 import { Stage } from '../value-objects/Stage'
 
 export interface PumpStageMovedContext {
-  readonly serial: number
+  readonly serial: number | null
   readonly model: string
   readonly customer: string
   readonly po: string

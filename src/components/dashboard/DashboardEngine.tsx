@@ -315,6 +315,8 @@ export function DashboardEngine() {
             const isFav = favoriteChartIds.includes(chartId)
             const colSpan = isDrillMode
               ? 'col-span-1'
+              : cfg.defaultSize === 'full'
+              ? 'md:col-span-2 xl:col-span-3'
               : cfg.defaultSize === 'lg'
               ? 'md:col-span-2 xl:col-span-2'
               : 'col-span-1'
@@ -357,8 +359,8 @@ export function DashboardEngine() {
                 <div
                   className={
                     isDrillMode
-                      ? 'h-[calc(100%-60px)] w-full relative'
-                      : 'h-[300px] w-full relative'
+                      ? 'h-[calc(100%-60px)] w-full relative overflow-hidden'
+                      : 'h-[300px] w-full relative overflow-hidden'
                   }
                 >
                   <ChartComponent

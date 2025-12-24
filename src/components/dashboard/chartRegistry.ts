@@ -38,7 +38,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'Workload Distribution',
     description: 'Current load by department',
     component: WorkloadByDeptProportional,
-    defaultSize: 'lg',
+    defaultSize: 'md',
   },
   lateOrders: {
     id: 'lateOrders',
@@ -46,7 +46,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Orders past their promise date',
     component: LateOrdersChartWrapper,
     defaultSize: 'md',
-    drillDownSequence: ['pumpTable'],
+    drillDownSequence: ['pumpsByCustomer', 'pumpTable'],
   },
   lateOrdersList: {
     id: 'lateOrdersList',
@@ -61,7 +61,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Average build time over last 12 weeks',
     component: LeadTimeTrendChart,
     defaultSize: 'lg',
-    drillDownSequence: ['pumpTable'],
+    drillDownSequence: ['throughputTrend', 'pumpTable'],
   },
   pumpsByCustomer: {
     id: 'pumpsByCustomer',
@@ -92,7 +92,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Total order value by customer',
     component: ValueByCustomerChart,
     defaultSize: 'md',
-    drillDownSequence: ['pumpTable'],
+    drillDownSequence: ['pumpsByModel', 'pumpTable'],
   },
   treemap: {
     id: 'treemap',
@@ -100,7 +100,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Interactive value distribution',
     component: TreemapChart,
     defaultSize: 'lg',
-    drillDownSequence: ['pumpTable'],
+    drillDownSequence: ['valueByCustomer', 'pumpTable'],
   },
   pumpTable: {
     id: 'pumpTable',
@@ -114,7 +114,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'Total Value Trend',
     description: 'Value of active orders over time',
     component: TotalValueTrendChart,
-    defaultSize: 'sm',
+    defaultSize: 'lg',
     drillDownSequence: ['valueByCustomer', 'pumpTable'],
   },
   throughputTrend: {
@@ -137,7 +137,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Live 3D visualization of active pump flow',
     component: StagePipelineChart,
     defaultSize: 'lg',
-    drillDownSequence: ['pumpTable'],
+    drillDownSequence: ['wipByStage', 'pumpTable'],
   },
   cycleTimeBreakdown: {
     id: 'cycleTimeBreakdown',
@@ -151,7 +151,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: '3D Drill-Down Analysis',
     description: 'Interactive multi-level drill-down with 3D visualizations',
     component: DrilldownChartsPanelWrapper,
-    defaultSize: 'lg',
+    defaultSize: 'full',
     drillDownSequence: ['pumpTable'],
   },
 }

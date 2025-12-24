@@ -409,7 +409,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight">
                 Pump Details
                 <span className="text-blue-400 font-mono text-lg ml-2">
-                  #{currentPump.serial}
+                  {currentPump.serial ? `#${currentPump.serial}` : 'No S/N'}
                 </span>
               </h2>
             </div>
@@ -648,15 +648,23 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                     {isEditing ? (
                       <Input
                         type="number"
-                        value={formData.serial}
+                        value={formData.serial ?? ''}
                         onChange={(e) =>
-                          handleChange('serial', parseInt(e.target.value) || 0)
+                          handleChange(
+                            'serial',
+                            e.target.value ? parseInt(e.target.value) : null
+                          )
                         }
+                        placeholder="Assign after fabrication"
                         className="bg-background/40 h-8 text-right border-emerald-500/20 focus:border-emerald-500/50 text-sm"
                       />
                     ) : (
                       <p className="font-bold text-foreground tracking-tight text-base">
-                        #{formData.serial}
+                        {formData.serial ? (
+                          `#${formData.serial}`
+                        ) : (
+                          <span className="text-amber-500">Unassigned</span>
+                        )}
                       </p>
                     )}
                   </div>

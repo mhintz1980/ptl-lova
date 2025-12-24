@@ -36,7 +36,7 @@ export function StagePipelineChart({ onDrilldown }: ChartProps) {
   })
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4 overflow-x-auto relative z-10">
+    <div className="w-full h-full flex flex-col items-center justify-center p-4 overflow-hidden relative z-10">
       <div className="flex items-center gap-2 md:gap-4 perspective-1000">
         {mappedData.map((stage, idx) => (
           <div key={stage.id} className="flex items-center">

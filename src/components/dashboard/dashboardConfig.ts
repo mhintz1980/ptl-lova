@@ -63,7 +63,7 @@ export interface ChartConfig {
   title: string
   description?: string
   component: ComponentType<ChartProps>
-  defaultSize?: 'sm' | 'md' | 'lg'
+  defaultSize?: 'sm' | 'md' | 'lg' | 'full'
   drillDownSequence?: ChartId[]
 }
 

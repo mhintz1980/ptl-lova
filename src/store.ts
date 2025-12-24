@@ -21,7 +21,7 @@ import {
 import { addDays, startOfDay, isAfter, parseISO, parse } from 'date-fns'
 import { type StageDurations, type StageBlock } from './lib/schedule'
 import { buildCapacityAwareTimelines } from './lib/schedule-helper'
-import { applyFilters, genSerial } from './lib/utils'
+import { applyFilters } from './lib/utils'
 import { sortPumps, SortDirection, SortField } from './lib/sort'
 import type {
   CapacityConfig,
@@ -209,11 +209,11 @@ export const useApp = create<AppState>()(
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: nanoid(),
-            serial: genSerial(get().pumps),
+            serial: null, // Unassigned - will be set before moving to POWDER_COAT
             po,
             customer,
             model: line.model,
-            stage: 'QUEUE',
+            stage: 'QUEUE' as Stage,
             priority: line.priority ?? 'Normal',
             powder_color: line.color,
             last_update: new Date().toISOString(),
@@ -249,6 +249,23 @@ export const useApp = create<AppState>()(
         // Skip if already in target stage
         if (fromStage === to) {
           return
+        }
+
+        // SERIAL GATE: Require serial number for stages at or after STAGED_FOR_POWDER
+        // Production flow: QUEUE -> FABRICATION -> STAGED_FOR_POWDER -> POWDER_COAT -> ASSEMBLY -> SHIP -> CLOSED
+        const REQUIRES_SERIAL_STAGES: Stage[] = [
+          'STAGED_FOR_POWDER',
+          'POWDER_COAT',
+          'ASSEMBLY',
+          'SHIP',
+          'CLOSED',
+        ]
+        if (REQUIRES_SERIAL_STAGES.includes(to) && pump.serial === null) {
+          toast.error(
+            'Serial number required! Click the pump card to assign a serial number before moving to this stage.',
+            { duration: 5000 }
+          )
+          return // Block the move
         }
 
         const now = new Date().toISOString()

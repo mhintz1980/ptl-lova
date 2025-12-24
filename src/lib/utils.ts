@@ -21,7 +21,7 @@ export function applyFilters(rows: Pump[], f: Filters): Pump[] {
         r.po,
         r.customer,
         r.model,
-        r.serial.toString(),
+        r.serial?.toString() ?? '',
         r.powder_color,
       ]
         .join(' ')

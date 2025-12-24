@@ -48,13 +48,10 @@ export function KanbanBoard({
   )
 
   const pumpsByStage = useMemo(() => {
-    return STAGES.reduce(
-      (acc, stage) => {
-        acc[stage] = pumps.filter((pump) => pump.stage === stage)
-        return acc
-      },
-      {} as Record<Stage, Pump[]>
-    )
+    return STAGES.reduce((acc, stage) => {
+      acc[stage] = pumps.filter((pump) => pump.stage === stage)
+      return acc
+    }, {} as Record<Stage, Pump[]>)
   }, [pumps])
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -73,9 +70,25 @@ export function KanbanBoard({
     const pump = pumps.find((p) => p.id === pumpId)
 
     if (pump && pump.stage !== nextStage) {
+      // Serial gate: check if moving to a stage that requires serial
+      const REQUIRES_SERIAL_STAGES: Stage[] = [
+        'STAGED_FOR_POWDER',
+        'POWDER_COAT',
+        'ASSEMBLY',
+        'SHIP',
+        'CLOSED',
+      ]
+      if (REQUIRES_SERIAL_STAGES.includes(nextStage) && pump.serial === null) {
+        // Don't show success toast - moveStage will show the error toast
+        moveStage(pumpId, nextStage)
+        return
+      }
+
       moveStage(pumpId, nextStage)
       toast.success(
-        `Moved ${pump.model} (Serial #${pump.serial}) to ${nextStage}`
+        `Moved ${pump.model} (Serial #${
+          pump.serial ?? 'pending'
+        }) to ${nextStage}`
       )
     }
   }
