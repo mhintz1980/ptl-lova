@@ -31,7 +31,7 @@ export function initLedgerSubscriber(
 
     const record = createStageMoveRecord({
       pumpId: event.pumpId,
-      serial: event.context?.serial ?? 0,
+      serial: event.context?.serial ?? '',
       model: event.context?.model ?? 'Unknown',
       customer: event.context?.customer ?? 'Unknown',
       po: event.context?.po ?? 'Unknown',

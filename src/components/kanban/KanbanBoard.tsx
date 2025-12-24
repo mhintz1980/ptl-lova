@@ -78,17 +78,17 @@ export function KanbanBoard({
         'SHIP',
         'CLOSED',
       ]
-      if (REQUIRES_SERIAL_STAGES.includes(nextStage) && pump.serial === null) {
+      const isUnassignedSerial = !pump.serial || pump.serial.startsWith('AUTO-')
+      if (REQUIRES_SERIAL_STAGES.includes(nextStage) && isUnassignedSerial) {
         // Don't show success toast - moveStage will show the error toast
         moveStage(pumpId, nextStage)
         return
       }
 
       moveStage(pumpId, nextStage)
+      const displaySerial = isUnassignedSerial ? 'pending' : pump.serial
       toast.success(
-        `Moved ${pump.model} (Serial #${
-          pump.serial ?? 'pending'
-        }) to ${nextStage}`
+        `Moved ${pump.model} (Serial #${displaySerial}) to ${nextStage}`
       )
     }
   }

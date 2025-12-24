@@ -35,6 +35,33 @@
 
 ---
 
+## Completed: Agent Skills Integration - Phase 1 ✅ (2025-12-24)
+
+- [x] **GEMINI.md Refactor**: Reduced from 557 to ~200 lines (65% reduction) with progressive disclosure
+- [x] **Documentation Separation**: Created `docs/architecture.md`, `docs/development.md`, `docs/deployment.md`
+- [x] **Context Engineering**: Added context budget management to `AGENTS.md` (70%/80% thresholds)
+- [x] **Session State**: Created `/ai_working/session-state.md` template for task tracking
+- [x] **Memory System**: Created `/ai_working/memory/` with domain-patterns, gotchas, conventions templates
+- [x] **Degradation Awareness**: Added self-check and recovery sequence to `AGENTS.md`
+
+**Impact**: Agents now start with 65% less context, can manage long sessions, and have cross-session memory.  
+**Details**: See [`docs/agent-skills/PHASE1-COMPLETE.md`](../agent-skills/PHASE1-COMPLETE.md)
+
+---
+
+## Completed: Agent Skills Integration - Phase 2 ✅ (2025-12-24)
+
+- [x] **Tool Catalog**: Created `docs/agent-tools.md` with 15+ tools (dev, test, build, lint, E2E, constitution-gate)
+- [x] **Tool Design**: Each tool documents what/when/returns, examples, error recovery
+- [x] **Multi-Agent Patterns**: Created `docs/multi-agent-patterns.md` with 3 patterns (supervisor, multi-expert, swarm)
+- [x] **Handoff Protocol**: Created `/ai_working/handoff.md` template for agent coordination
+- [x] **Use Cases**: Documented PumpTracker-specific multi-agent scenarios
+
+**Impact**: Agents can find and use tools efficiently, scale to multi-agent for complex tasks.  
+**Details**: See [`docs/agent-skills/PHASE2-COMPLETE.md`](../agent-skills/PHASE2-COMPLETE.md)
+
+---
+
 ## Chart Modernization 🎨
 
 **Plan Artifact**: [`docs/plans/chart_modernization.md`](../plans/chart_modernization.md)
@@ -63,11 +90,29 @@
 - [x] **Drill-Downs**: All charts now drill to intermediate charts, not directly to PumpTable.
 - [x] **Overflow Fixes**: Added `overflow-hidden` to chart containers and StagePipeline.
 
-### 📦 Pack 5: Future Enhancements -> **START HERE**
+### 📦 Pack 5: Future Enhancements -> Available
 
 1.  Light mode contrast improvements.
 2.  Additional modal refinements.
 3.  Chart accessibility enhancements.
+
+---
+
+## Next: Agent Skills Integration - Phase 3 (Optional)
+
+**Plan**: [`docs/agent-skills/integration-plan.md`](../agent-skills/integration-plan.md)
+
+**Phases 1 & 2 Complete**:
+- ✅ Phase 1: Context Engineering (progressive disclosure, session tracking, memory)
+- ✅ Phase 2: Architectural Patterns (tool catalog, multi-agent documentation)
+
+**Phase 3 Available** (Operational Excellence):
+- Context optimization (compaction, masking, caching)
+- Evaluation framework (quality rubrics, metrics tracking)
+- Estimated: 10-12 hours
+- Expected: 30% token reduction, systematic quality measurement
+
+**Status**: Phases 1-2 complete, Phase 3 ready when needed
 
 ---
 

@@ -16,7 +16,7 @@ export interface StageMoveRecord {
   /** Pump aggregate ID */
   readonly pumpId: string
   /** Pump serial number */
-  readonly serial: number
+  readonly serial: string
   /** Pump model code */
   readonly model: string
   /** Customer name */

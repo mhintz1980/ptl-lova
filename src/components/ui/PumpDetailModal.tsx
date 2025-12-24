@@ -409,7 +409,9 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight">
                 Pump Details
                 <span className="text-blue-400 font-mono text-lg ml-2">
-                  {currentPump.serial ? `#${currentPump.serial}` : 'No S/N'}
+                  {currentPump.serial && !currentPump.serial.startsWith('AUTO-')
+                    ? `#${currentPump.serial}`
+                    : 'No S/N'}
                 </span>
               </h2>
             </div>
@@ -647,20 +649,25 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   <div className="text-right w-1/2">
                     {isEditing ? (
                       <Input
-                        type="number"
-                        value={formData.serial ?? ''}
+                        type="text"
+                        value={
+                          formData.serial?.startsWith('AUTO-')
+                            ? ''
+                            : formData.serial ?? ''
+                        }
                         onChange={(e) =>
                           handleChange(
                             'serial',
-                            e.target.value ? parseInt(e.target.value) : null
+                            e.target.value || `AUTO-${formData.id}`
                           )
                         }
-                        placeholder="Assign after fabrication"
+                        placeholder="Assign before powder coat"
                         className="bg-background/40 h-8 text-right border-emerald-500/20 focus:border-emerald-500/50 text-sm"
                       />
                     ) : (
                       <p className="font-bold text-foreground tracking-tight text-base">
-                        {formData.serial ? (
+                        {formData.serial &&
+                        !formData.serial.startsWith('AUTO-') ? (
                           `#${formData.serial}`
                         ) : (
                           <span className="text-amber-500">Unassigned</span>

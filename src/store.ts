@@ -209,7 +209,7 @@ export const useApp = create<AppState>()(
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: nanoid(),
-            serial: null, // Unassigned - will be set before moving to POWDER_COAT
+            serial: `AUTO-${nanoid()}`, // Auto-generated, UI shows "Unassigned"
             po,
             customer,
             model: line.model,
@@ -251,8 +251,8 @@ export const useApp = create<AppState>()(
           return
         }
 
-        // SERIAL GATE: Require serial number for stages at or after STAGED_FOR_POWDER
-        // Production flow: QUEUE -> FABRICATION -> STAGED_FOR_POWDER -> POWDER_COAT -> ASSEMBLY -> SHIP -> CLOSED
+        // SERIAL GATE: Require user-assigned serial for stages at or after STAGED_FOR_POWDER
+        // Auto-generated serials (AUTO-*) are treated as unassigned
         const REQUIRES_SERIAL_STAGES: Stage[] = [
           'STAGED_FOR_POWDER',
           'POWDER_COAT',
@@ -260,7 +260,9 @@ export const useApp = create<AppState>()(
           'SHIP',
           'CLOSED',
         ]
-        if (REQUIRES_SERIAL_STAGES.includes(to) && pump.serial === null) {
+        const isUnassignedSerial =
+          !pump.serial || pump.serial.startsWith('AUTO-')
+        if (REQUIRES_SERIAL_STAGES.includes(to) && isUnassignedSerial) {
           toast.error(
             'Serial number required! Click the pump card to assign a serial number before moving to this stage.',
             { duration: 5000 }

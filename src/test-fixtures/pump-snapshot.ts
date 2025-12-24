@@ -14,7 +14,7 @@ export type CustomerTier = 'Tier1' | 'Tier2' | 'Tier3'
 
 export interface PumpSnapshot {
   id: string
-  serial: number | null
+  serial: string
   po: string
   customer: string
   customerTier: CustomerTier
@@ -85,7 +85,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // QUEUE - Not started
   {
     id: 'snap-001',
-    serial: 1001,
+    serial: '1001',
     po: 'PO2025-0001-01',
     customer: 'United Rentals',
     customerTier: 'Tier1',
@@ -99,7 +99,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   },
   {
     id: 'snap-002',
-    serial: 1002,
+    serial: '1002',
     po: 'PO2025-0002-01',
     customer: 'Carter CAT',
     customerTier: 'Tier2',
@@ -115,7 +115,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // FABRICATION - In progress
   {
     id: 'snap-003',
-    serial: 1003,
+    serial: '1003',
     po: 'PO2025-0003-01',
     customer: 'Sunbelt Rentals',
     customerTier: 'Tier1',
@@ -129,7 +129,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   },
   {
     id: 'snap-004',
-    serial: 1004,
+    serial: '1004',
     po: 'PO2025-0004-01',
     customer: 'Valencourt',
     customerTier: 'Tier3',
@@ -145,7 +145,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // POWDER COAT - At vendor
   {
     id: 'snap-005',
-    serial: 1005,
+    serial: '1005',
     po: 'PO2025-0005-01',
     customer: 'Herc Rentals',
     customerTier: 'Tier1',
@@ -159,7 +159,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   },
   {
     id: 'snap-006',
-    serial: 1006,
+    serial: '1006',
     po: 'PO2025-0006-01',
     customer: 'Ring Power CAT',
     customerTier: 'Tier2',
@@ -175,7 +175,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // ASSEMBLY - Final build
   {
     id: 'snap-007',
-    serial: 1007,
+    serial: '1007',
     po: 'PO2025-0007-01',
     customer: 'Rain For Rent',
     customerTier: 'Tier1',
@@ -191,7 +191,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // TESTING - QA stage
   {
     id: 'snap-008',
-    serial: 1008,
+    serial: '1008',
     po: 'PO2025-0008-01',
     customer: 'Thompson CAT',
     customerTier: 'Tier2',
@@ -207,7 +207,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // SHIPPING - Ready to ship
   {
     id: 'snap-009',
-    serial: 1009,
+    serial: '1009',
     po: 'PO2025-0009-01',
     customer: 'Equipment Share',
     customerTier: 'Tier1',
@@ -223,7 +223,7 @@ export const FROZEN_SNAPSHOT: PumpSnapshot[] = [
   // CLOSED - Completed
   {
     id: 'snap-010',
-    serial: 1010,
+    serial: '1010',
     po: 'PO2025-0010-01',
     customer: 'Pioneer Pump',
     customerTier: 'Tier3',

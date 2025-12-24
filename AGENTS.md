@@ -34,6 +34,64 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 
 ---
 
+## Context Engineering & Agent Effectiveness
+
+### Context Budget Management
+
+Agents should monitor context usage and apply these thresholds:
+
+| Utilization | Status | Action |
+|-------------|--------|--------|
+| <70% | 🟢 Normal | Continue normally |
+| 70-80% | 🟡 Warning | Review context, consider summarization |
+| 80%+ | 🔴 Critical | **Trigger compaction** - summarize to `/ai_working/session-state.md` |
+
+**Context compaction strategy**:
+1. Preserve: current task, active files, key decisions, next steps
+2. Summarize: completed work, intermediate reasoning, verbose outputs
+3. Discard: early conversation turns, boilerplate, redundant information
+
+### Context Degradation Self-Check
+
+If you experience any of these symptoms:
+- ❌ Repeated errors on patterns you've already solved
+- ❌ Forgetting decisions made earlier in the conversation
+- ❌ Confused or redundant tool usage
+- ❌ Asking for information already provided
+
+Then perform this recovery sequence:
+1. **Stop current work**
+2. **Summarize task state** to `/ai_working/session-state.md`
+   - Current task and goal
+   - Files touched and changes made
+   - Key decisions and rationale
+   - Next actionable steps
+3. **Review only recent history** (last 5-10 turns)
+4. **Reload only active file contexts** (not full files)
+5. **Ask user if you need to continue** or if compaction is needed
+
+### Session State Tracking
+
+For multi-turn tasks (>10 tool calls), maintain `/ai_working/session-state.md`:
+
+- Update at major milestones (every 10-15 tool calls)
+- Track files touched, decisions made, next steps
+- Use for recovery after context degradation
+- Preserve across context compaction
+
+### Memory System
+
+Use `/ai_working/memory/` for cross-session knowledge:
+
+- **Before complex tasks**: Check memory for prior learnings
+- **After discoveries**: Log patterns, gotchas, conventions
+- **Memory files**:
+  - `domain-patterns.md` - DDD patterns and findings
+  - `gotchas.md` - Known issues and workarounds
+  - `conventions.md` - Project-specific standards
+
+---
+
 ## Build, Test, and Development Commands
 
 - `pnpm install` installs dependencies (pnpm is required).

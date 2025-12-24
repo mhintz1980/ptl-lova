@@ -139,16 +139,16 @@ function getBomComponent(
 }
 
 // Serial number management
-const usedSerials = new Set<number>()
+const usedSerials = new Set<string>()
 let nextSerial = 1000
 
-function genSerial(): number {
+function genSerial(): string {
   let serial: number
   do {
     serial = nextSerial++
-  } while (usedSerials.has(serial))
-  usedSerials.add(serial)
-  return serial
+  } while (usedSerials.has(String(serial)))
+  usedSerials.add(String(serial))
+  return String(serial)
 }
 
 // Business day calculation (excludes weekends)

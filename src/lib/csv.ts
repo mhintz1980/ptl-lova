@@ -76,7 +76,7 @@ function normalizeRow(r: RawPumpRow): Pump | null {
 
   return {
     id: r.id || crypto.randomUUID(),
-    serial: Number(r.serial) || 0, // Should be unique, but we'll trust the input for now
+    serial: r.serial ? String(r.serial) : `AUTO-${r.id || crypto.randomUUID()}`, // String serial, AUTO- if missing
     po: r.po,
     customer: r.customer,
     model: r.model,
