@@ -44,10 +44,13 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     return catalog.models.map((m) => m.model).sort()
   }, [])
 
-  // Get existing customers from pumps for dropdown
+  // Get customers from BOTH catalog AND existing pumps for dropdown
   const { pumps } = useApp()
   const availableCustomers = useMemo(() => {
-    return [...new Set(pumps.map((p) => p.customer))].filter(Boolean).sort()
+    const catalog = getCatalogData()
+    const catalogCustomers = catalog.customers || []
+    const pumpCustomers = pumps.map((p) => p.customer).filter(Boolean)
+    return [...new Set([...catalogCustomers, ...pumpCustomers])].sort()
   }, [pumps])
 
   // Inherit PO promise date to line items when PO date changes
