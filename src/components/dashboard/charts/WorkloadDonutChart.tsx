@@ -23,12 +23,6 @@ const CUSTOMER_COLORS = [
   '#a855f7', // violet
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  'on-time': '#10b981',
-  'at-risk': '#f59e0b',
-  late: '#ef4444',
-}
-
 export function WorkloadDonutChart({
   pumps,
   onDrilldown,
