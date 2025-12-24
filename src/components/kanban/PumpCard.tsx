@@ -1,26 +1,26 @@
 // src/components/kanban/PumpCard.tsx
-import { Pump } from "../../types";
-import { formatDate } from "../../lib/format";
-import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import { Lock } from "lucide-react";
-import { PRIORITY_DOT } from "./constants";
-import { useApp } from "../../store";
-import { useMemo } from "react";
-import { cn } from "../../lib/utils";
+import { Pump } from '../../types'
+import { formatDate } from '../../lib/format'
+import { useDraggable } from '@dnd-kit/core'
+import { CSS } from '@dnd-kit/utilities'
+import { Lock } from 'lucide-react'
+import { PRIORITY_DOT } from './constants'
+import { useApp } from '../../store'
+import { useMemo } from 'react'
+import { cn } from '../../lib/utils'
 
 interface DraggableConfig {
-  id?: string;
-  data?: Record<string, unknown>;
-  disabled?: boolean;
+  id?: string
+  data?: Record<string, unknown>
+  disabled?: boolean
 }
 
 interface PumpCardProps {
-  pump: Pump;
-  collapsed?: boolean;
-  isDragging?: boolean;
-  onClick?: () => void;
-  draggableConfig?: DraggableConfig;
+  pump: Pump
+  collapsed?: boolean
+  isDragging?: boolean
+  onClick?: () => void
+  draggableConfig?: DraggableConfig
 }
 
 export function PumpCard({
@@ -30,48 +30,58 @@ export function PumpCard({
   onClick,
   draggableConfig,
 }: PumpCardProps) {
-  const draggableId = draggableConfig?.id ?? pump.id;
-  const draggableData = draggableConfig?.data ?? { pump };
-  const disabled = draggableConfig?.disabled ?? false;
+  const draggableId = draggableConfig?.id ?? pump.id
+  const draggableData = draggableConfig?.data ?? { pump }
+  const disabled = draggableConfig?.disabled ?? false
 
-  const { attributes, listeners, setNodeRef, transform, isDragging: coreDragging } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging: coreDragging,
+  } = useDraggable({
     id: draggableId,
     data: draggableData,
     disabled,
-  });
+  })
   const leadTimes = useMemo(
     () => useApp.getState().getModelLeadTimes(pump.model),
     [pump.model]
-  );
+  )
 
-  const { isSandbox, originalSnapshot, isPumpLocked, capacityConfig } = useApp();
+  const { isSandbox, originalSnapshot, isPumpLocked, capacityConfig } = useApp()
 
-  const isLocked = useMemo(() => isPumpLocked(pump.id), [isPumpLocked, pump.id]);
+  const isLocked = useMemo(() => isPumpLocked(pump.id), [isPumpLocked, pump.id])
 
   const isGhost = useMemo(() => {
-    if (!isSandbox || !originalSnapshot) return false;
-    return !originalSnapshot.some(p => p.id === pump.id);
-  }, [isSandbox, originalSnapshot, pump.id]);
+    if (!isSandbox || !originalSnapshot) return false
+    return !originalSnapshot.some((p) => p.id === pump.id)
+  }, [isSandbox, originalSnapshot, pump.id])
 
   const shouldShowVendor =
-    pump.stage === "STAGED_FOR_POWDER" || pump.stage === "POWDER_COAT";
+    pump.stage === 'STAGED_FOR_POWDER' || pump.stage === 'POWDER_COAT'
   const vendorName = useMemo(() => {
-    if (!shouldShowVendor) return null;
-    if (!pump.powderCoatVendorId) return null;
+    if (!shouldShowVendor) return null
+    if (!pump.powderCoatVendorId) return null
     const vendor = capacityConfig.powderCoat.vendors.find(
       (v) => v.id === pump.powderCoatVendorId
-    );
-    return vendor?.name ?? null;
-  }, [capacityConfig.powderCoat.vendors, pump.powderCoatVendorId, shouldShowVendor]);
+    )
+    return vendor?.name ?? null
+  }, [
+    capacityConfig.powderCoat.vendors,
+    pump.powderCoatVendorId,
+    shouldShowVendor,
+  ])
 
   const style = transform
     ? {
-      transform: CSS.Transform.toString(transform),
-      opacity: isDragging || coreDragging ? 0.5 : 1,
-    }
+        transform: CSS.Transform.toString(transform),
+        opacity: isDragging || coreDragging ? 0.5 : 1,
+      }
     : {
-      opacity: isDragging || coreDragging ? 0.5 : 1,
-    };
+        opacity: isDragging || coreDragging ? 0.5 : 1,
+      }
 
   return (
     <div
@@ -80,19 +90,25 @@ export function PumpCard({
       {...attributes}
       {...listeners}
       className={cn(
-        "group relative overflow-hidden rounded-xl border bg-card/90 pl-5 pr-4 py-4 shadow-layer-md transition-all duration-200",
-        isGhost ? "border-dashed border-yellow-500 bg-yellow-50/50" : "border-border",
-        pump.isPaused && "border-dashed border-red-400 bg-card/70",
-        disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing",
-        !disabled && "hover:-translate-y-[2px] hover:shadow-layer-lg"
+        'group relative overflow-hidden rounded-xl border bg-card/90 pl-5 pr-4 py-4 shadow-layer-md transition-all duration-200',
+        isGhost
+          ? 'border-dashed border-yellow-500 bg-yellow-50/50'
+          : 'border-border',
+        pump.isPaused && 'border-dashed border-red-400 bg-card/70',
+        disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing',
+        !disabled && 'hover:-translate-y-[2px] hover:shadow-layer-lg'
       )}
       onClick={onClick}
     >
       {/* Powder coat color stripe on left edge */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl"
-        style={{ backgroundColor: pump.powder_color || "hsl(var(--border))" }}
-        title={pump.powder_color ? `Powder Coat: ${pump.powder_color}` : "No powder coat"}
+        style={{ backgroundColor: pump.powder_color || 'hsl(var(--border))' }}
+        title={
+          pump.powder_color
+            ? `Powder Coat: ${pump.powder_color}`
+            : 'No powder coat'
+        }
       />
       {/* PAUSED stamp - large rubber stamp style */}
       {pump.isPaused && (
@@ -132,7 +148,9 @@ export function PumpCard({
       {!isGhost && !pump.isPaused && !isLocked && (
         <div className="absolute top-2 right-2 z-10">
           <span
-            className={`block h-3 w-3 rounded-full ${PRIORITY_DOT[pump.priority]}`}
+            className={`block h-3 w-3 rounded-full ${
+              PRIORITY_DOT[pump.priority]
+            }`}
             title={`Priority: ${pump.priority}`}
           />
         </div>
@@ -156,8 +174,19 @@ export function PumpCard({
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
-            <span className="block truncate" title={`Serial #${pump.serial}`}>
-              Serial #{pump.serial}
+            <span
+              className="block truncate"
+              title={
+                pump.serial?.startsWith('AUTO-')
+                  ? 'Unassigned'
+                  : `Serial #${pump.serial}`
+              }
+            >
+              {pump.serial?.startsWith('AUTO-') ? (
+                <span className="text-amber-500">Serial # Unassigned</span>
+              ) : (
+                <>Serial #{pump.serial}</>
+              )}
             </span>
           </div>
         </div>
@@ -181,27 +210,30 @@ export function PumpCard({
               <span
                 className={
                   new Date(pump.forecastEnd) < new Date()
-                    ? "font-medium text-destructive"
-                    : "font-medium text-emerald-500"
+                    ? 'font-medium text-destructive'
+                    : 'font-medium text-emerald-500'
                 }
               >
                 {formatDate(pump.forecastEnd)}
               </span>
             </div>
           )}
-          {pump.isPaused && pump.totalPausedDays !== undefined && pump.totalPausedDays > 0 && (
-            <div className="flex items-center justify-between text-orange-600">
-              <span>Days Paused</span>
-              <span className="font-bold">{pump.totalPausedDays}</span>
-            </div>
-          )}
+          {pump.isPaused &&
+            pump.totalPausedDays !== undefined &&
+            pump.totalPausedDays > 0 && (
+              <div className="flex items-center justify-between text-orange-600">
+                <span>Days Paused</span>
+                <span className="font-bold">{pump.totalPausedDays}</span>
+              </div>
+            )}
           <div className="flex items-center justify-between border-t border-border/60 pt-2 text-[11px]">
             <span>Last update</span>
-            <span className="text-foreground/80">{formatDate(pump.last_update)}</span>
+            <span className="text-foreground/80">
+              {formatDate(pump.last_update)}
+            </span>
           </div>
         </div>
       )}
-
     </div>
-  );
+  )
 }
