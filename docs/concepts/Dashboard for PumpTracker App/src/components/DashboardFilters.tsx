@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { CalendarIcon, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./ui/popover";
 import { Calendar } from "./ui/calendar";
 import { Badge } from "./ui/badge";
 import { Slider } from "./ui/slider";
@@ -86,9 +96,14 @@ export function DashboardFilters({
     setTempStatus("");
   };
 
-  const handleRemoveCustomer = (e: React.MouseEvent, customer: string) => {
+  const handleRemoveCustomer = (
+    e: React.MouseEvent,
+    customer: string,
+  ) => {
     e.stopPropagation();
-    onCustomerChange(selectedCustomers.filter((c) => c !== customer));
+    onCustomerChange(
+      selectedCustomers.filter((c) => c !== customer),
+    );
   };
 
   const handleRemovePO = (e: React.MouseEvent, po: string) => {
@@ -96,14 +111,22 @@ export function DashboardFilters({
     onPOChange(selectedPOs.filter((p) => p !== po));
   };
 
-  const handleRemoveModel = (e: React.MouseEvent, model: string) => {
+  const handleRemoveModel = (
+    e: React.MouseEvent,
+    model: string,
+  ) => {
     e.stopPropagation();
     onModelChange(selectedModels.filter((m) => m !== model));
   };
 
-  const handleRemoveStatus = (e: React.MouseEvent, status: string) => {
+  const handleRemoveStatus = (
+    e: React.MouseEvent,
+    status: string,
+  ) => {
     e.stopPropagation();
-    onStatusChange(selectedStatuses.filter((s) => s !== status));
+    onStatusChange(
+      selectedStatuses.filter((s) => s !== status),
+    );
   };
 
   const formatDateRange = (range: DateRange) => {
@@ -121,7 +144,7 @@ export function DashboardFilters({
     const labels: Record<string, string> = {
       "on-time": "On Time",
       "at-risk": "At Risk",
-      "late": "Late",
+      late: "Late",
     };
     return labels[status] || status;
   };
@@ -131,7 +154,8 @@ export function DashboardFilters({
     selectedPOs.length > 0 ||
     selectedModels.length > 0 ||
     selectedStatuses.length > 0 ||
-    (progressRange[0] !== 0 || progressRange[1] !== 100) ||
+    progressRange[0] !== 0 ||
+    progressRange[1] !== 100 ||
     dueDateRange.from ||
     dateRange.from;
 
@@ -141,7 +165,10 @@ export function DashboardFilters({
         {/* Customer Filter */}
         <div>
           <label className="block mb-2">Customers</label>
-          <Select value={tempCustomer} onValueChange={handleAddCustomer}>
+          <Select
+            value={tempCustomer}
+            onValueChange={handleAddCustomer}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select customers" />
             </SelectTrigger>
@@ -175,7 +202,10 @@ export function DashboardFilters({
         {/* Model Filter */}
         <div>
           <label className="block mb-2">Models</label>
-          <Select value={tempModel} onValueChange={handleAddModel}>
+          <Select
+            value={tempModel}
+            onValueChange={handleAddModel}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select models" />
             </SelectTrigger>
@@ -192,7 +222,10 @@ export function DashboardFilters({
         {/* Status Filter */}
         <div>
           <label className="block mb-2">Status</label>
-          <Select value={tempStatus} onValueChange={handleAddStatus}>
+          <Select
+            value={tempStatus}
+            onValueChange={handleAddStatus}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -214,7 +247,9 @@ export function DashboardFilters({
           <div className="pt-2">
             <Slider
               value={progressRange}
-              onValueChange={(value) => onProgressRangeChange(value as [number, number])}
+              onValueChange={(value) =>
+                onProgressRangeChange(value as [number, number])
+              }
               min={0}
               max={100}
               step={5}
@@ -228,15 +263,24 @@ export function DashboardFilters({
           <label className="block mb-2">Due Date Range</label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+              >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {formatDateRange(dueDateRange)}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent
+              className="w-auto p-0"
+              align="start"
+            >
               <Calendar
                 mode="range"
-                selected={{ from: dueDateRange.from, to: dueDateRange.to }}
+                selected={{
+                  from: dueDateRange.from,
+                  to: dueDateRange.to,
+                }}
                 onSelect={(range) => {
                   onDueDateRangeChange({
                     from: range?.from,
@@ -254,15 +298,24 @@ export function DashboardFilters({
           <label className="block mb-2">Date Range</label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+              >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {formatDateRange(dateRange)}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent
+              className="w-auto p-0"
+              align="start"
+            >
               <Calendar
                 mode="range"
-                selected={{ from: dateRange.from, to: dateRange.to }}
+                selected={{
+                  from: dateRange.from,
+                  to: dateRange.to,
+                }}
                 onSelect={(range) => {
                   onDateRangeChange({
                     from: range?.from,
@@ -279,18 +332,30 @@ export function DashboardFilters({
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-muted-foreground">Active filters:</span>
+          <span className="text-muted-foreground">
+            Active filters:
+          </span>
           {selectedCustomers.map((customer) => (
-            <Badge key={customer} variant="secondary" className="gap-1">
+            <Badge
+              key={customer}
+              variant="secondary"
+              className="gap-1"
+            >
               {customer}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
-                onClick={(e) => handleRemoveCustomer(e, customer)}
+                onClick={(e) =>
+                  handleRemoveCustomer(e, customer)
+                }
               />
             </Badge>
           ))}
           {selectedPOs.map((po) => (
-            <Badge key={po} variant="secondary" className="gap-1">
+            <Badge
+              key={po}
+              variant="secondary"
+              className="gap-1"
+            >
               {po}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
@@ -299,7 +364,11 @@ export function DashboardFilters({
             </Badge>
           ))}
           {selectedModels.map((model) => (
-            <Badge key={model} variant="secondary" className="gap-1">
+            <Badge
+              key={model}
+              variant="secondary"
+              className="gap-1"
+            >
               {model}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
@@ -308,7 +377,11 @@ export function DashboardFilters({
             </Badge>
           ))}
           {selectedStatuses.map((status) => (
-            <Badge key={status} variant="secondary" className="gap-1">
+            <Badge
+              key={status}
+              variant="secondary"
+              className="gap-1"
+            >
               {formatStatusLabel(status)}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
@@ -316,7 +389,8 @@ export function DashboardFilters({
               />
             </Badge>
           ))}
-          {(progressRange[0] !== 0 || progressRange[1] !== 100) && (
+          {(progressRange[0] !== 0 ||
+            progressRange[1] !== 100) && (
             <Badge variant="secondary" className="gap-1">
               Progress: {progressRange[0]}%-{progressRange[1]}%
               <X
@@ -335,7 +409,10 @@ export function DashboardFilters({
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDueDateRangeChange({ from: undefined, to: undefined });
+                  onDueDateRangeChange({
+                    from: undefined,
+                    to: undefined,
+                  });
                 }}
               />
             </Badge>
@@ -347,7 +424,10 @@ export function DashboardFilters({
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDateRangeChange({ from: undefined, to: undefined });
+                  onDateRangeChange({
+                    from: undefined,
+                    to: undefined,
+                  });
                 }}
               />
             </Badge>

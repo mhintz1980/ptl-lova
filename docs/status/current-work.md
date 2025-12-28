@@ -1,8 +1,17 @@
 # Current Work Status
 
-> **Last Updated**: 2025-12-24
+> [!IMPORTANT] > **READ THIS FILE FIRST** in every new conversation.
+> This is the single source of truth for what's happening in the project right now.
+
+> **Last Updated**: 2025-12-27 (Drill-down charts in progress - 3/6 complete)
 > **Active Branch**: `main` > **Deployment Status**: 🚀 **BETA** (Cloud Mode Active)
 > **Data Strategy**: **Supabase** (Shared) - `pump` table
+
+**Key References**:
+
+- [`docs/DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) — UI standards, chart patterns, drill-down architecture
+- [`docs/concepts/Dashboard for PumpTracker App/README.md`](../concepts/Dashboard%20for%20PumpTracker%20App/README.md) — Drill-down chart implementation guide
+- [`GEMINI.md`](../../GEMINI.md) — Agent bootloader and documentation map
 
 > [!IMPORTANT] > **CRITICAL PERSISTENCE FIX APPLIED**
 > We recently fixed a major crash where the app tried to write to `pump_api` instead of `pump`.
@@ -62,6 +71,17 @@
 
 ---
 
+## Completed: Context Conservation Theme ✅ (2025-12-28)
+
+- [x] **10 Context Rules**: Added quick-reference table to `AGENTS.md`
+- [x] **Skill Document**: Created `docs/agent-skills/skills/context-conservation/index.md`
+- [x] **Turbo Workflows**: Added `.agent/workflows/quick-commit.md` and `quick-test.md`
+
+**Impact**: Context conservation is now a documented project theme with enforceable rules.  
+**Details**: See [`docs/agent-skills/skills/context-conservation/index.md`](../agent-skills/skills/context-conservation/index.md)
+
+---
+
 ## Chart Modernization 🎨
 
 **Plan Artifact**: [`docs/plans/chart_modernization.md`](../plans/chart_modernization.md)
@@ -101,11 +121,54 @@
 ## Chart Modernization - All Packs Complete ✅
 
 All 5 packs of chart modernization are now complete:
+
 - ✅ Pack 1: Core Engine (SparklineAreaChart, DrilldownDonutChart)
 - ✅ Pack 2: The Rings (WipCyclingDonut, CycleTimeBreakdown)
 - ✅ Pack 3: The Trends (TotalValueTrend, LeadTimeTrend)
 - ✅ Pack 4: Polish & Cleanup (sizing, drill-downs, overflow fixes)
 - ✅ Pack 5: Accessibility & Light Mode (ARIA, contrast, modal refinements)
+
+---
+
+## 🚧 Active Work: Dashboard Drill-Down Chart Upgrade (2025-12-27)
+
+**Plan**: [`docs/plans/dashboard_drilldown_implementation.md`](../plans/dashboard_drilldown_implementation.md)
+
+**Goal**: Upgrade 5 dashboard charts to use unified drill-down pattern with path-based state, AnimatePresence transitions, breadcrumb navigation, and DrilldownChart3D bar visualization.
+
+### ✅ Completed (Batch 1: Tasks 1-3)
+
+- [x] **Task 1**: Port `DrilldownChart3D` to `src/components/dashboard/charts/` (from concepts folder)
+- [x] **Task 2**: Upgrade `CycleTimeBreakdownChart` with drill-down (Donut → Bar breakdown by customer)
+- [x] **Task 3**: Upgrade `StagePipelineChart` with drill-down (Pipeline → Bar breakdown by customer)
+
+**Critical Fixes Applied**:
+
+- Fixed missing `motion, AnimatePresence` imports (caused page load failures)
+- Fixed age calculations to use `pump.last_update` instead of non-existent `pump.stageEntryTime`/`pump.createdAt`
+- Fixed scroll jumping issue by adding `min-h-[300px]` containers with opacity-only transitions
+- Fixed TypeScript errors by prefixing unused props with underscore
+
+**Documentation Updated**:
+
+- ✅ `docs/DESIGN_SYSTEM.md`: Added "Critical Implementation Rules" section with Pump interface reference, required imports, age calculation patterns, and scroll preservation patterns
+- ✅ `docs/concepts/Dashboard for PumpTracker App/README.md`: Created comprehensive 636-line implementation guide with templates, patterns, debugging checklists
+
+### 🔄 Remaining (Batch 2: Tasks 4-6)
+
+- [ ] **Task 4**: Upgrade `TotalValueTrendChart` with drill-down (Week → Customer value breakdown)
+- [ ] **Task 5**: Upgrade `ThroughputTrendChart` with drill-down (Week → Completed pumps by model)
+- [ ] **Task 6**: Upgrade `CyclingDonutChart` with drill-down and pause cycling when drilled
+
+**Estimated Time**: ~2 hours for remaining 3 charts
+
+**Known Working Patterns**:
+
+- Path-based state: `useState<string[]>([])`
+- AnimatePresence with `mode="wait"` for smooth transitions
+- `min-h-[300px]` container to prevent layout collapse
+- Opacity-only transitions to prevent scroll jumping
+- Use `pump.last_update` for all age/time calculations
 
 ---
 
@@ -116,10 +179,12 @@ All 5 packs of chart modernization are now complete:
 **Plan**: [`docs/agent-skills/integration-plan.md`](../agent-skills/integration-plan.md)
 
 **Completed**:
+
 - ✅ Phase 1: Context Engineering (progressive disclosure, session tracking, memory)
 - ✅ Phase 2: Architectural Patterns (tool catalog, multi-agent documentation)
 
 **Phase 3** (Operational Excellence):
+
 - Context optimization (compaction, masking, caching)
 - Evaluation framework (quality rubrics, metrics tracking)
 - Estimated: 10-12 hours

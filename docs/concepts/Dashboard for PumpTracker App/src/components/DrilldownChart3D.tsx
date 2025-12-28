@@ -31,7 +31,7 @@ export function DrilldownChart3D({
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Card className="p-6 overflow-hidden">
+    <Card className="overflow-hidden rounded-[8px] p-[14px]">
       {/* Header with Breadcrumbs */}
       <div className="mb-6">
         <h3 className="mb-2">{title}</h3>
@@ -118,7 +118,8 @@ export function DrilldownChart3D({
                       <motion.div
                         className="absolute inset-0 rounded-lg"
                         style={{
-                          background: `linear-gradient(135deg, ${segment.color}40, ${segment.color}20)`,
+                          background: `${segment.color}`,
+                          opacity: 0.15,
                           transform: "translateY(4px) translateX(4px) rotateX(5deg)",
                           transformStyle: "preserve-3d",
                         }}
@@ -131,7 +132,8 @@ export function DrilldownChart3D({
                       <motion.div
                         className="absolute inset-0 rounded-lg overflow-hidden group-hover:shadow-lg transition-all duration-300"
                         style={{
-                          background: `linear-gradient(180deg, ${segment.color}, ${segment.color}dd)`,
+                          background: segment.color,
+                          opacity: 0.9,
                           transformStyle: "preserve-3d",
                           boxShadow: `0 4px 8px ${segment.color}40`,
                         }}
@@ -162,9 +164,10 @@ export function DrilldownChart3D({
 
                         {/* 3D Edge Highlight */}
                         <div
-                          className="absolute top-0 left-0 right-0 h-1"
+                          className="absolute top-0 left-0 right-0 h-2"
                           style={{
-                            background: `linear-gradient(90deg, ${segment.color}ff, ${segment.color}aa)`,
+                            background: segment.color,
+                            opacity: 0.4,
                           }}
                         />
                       </motion.div>

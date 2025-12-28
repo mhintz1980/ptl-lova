@@ -178,8 +178,8 @@ export function DrilldownTreemapChart({
                     x2="0%"
                     y2="100%"
                   >
-                    <stop offset="0%" stopColor={rect.segment.color} stopOpacity="1" />
-                    <stop offset="100%" stopColor={rect.segment.color} stopOpacity="0.8" />
+                    <stop offset="0%" stopColor={rect.segment.color} stopOpacity="0.95" />
+                    <stop offset="100%" stopColor={rect.segment.color} stopOpacity="0.85" />
                   </linearGradient>
                 ))}
 
@@ -188,7 +188,7 @@ export function DrilldownTreemapChart({
                   <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
                   <feOffset dx="2" dy="2" result="offsetblur" />
                   <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.4" />
+                    <feFuncA type="linear" slope="0.2" />
                   </feComponentTransfer>
                   <feMerge>
                     <feMergeNode />
@@ -207,9 +207,9 @@ export function DrilldownTreemapChart({
                   height={rect.height}
                   rx="6"
                   fill={rect.segment.color}
-                  opacity="0.3"
+                  opacity="0.15"
                   initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 0.3, scale: 1 }}
+                  animate={{ opacity: 0.15, scale: 1 }}
                   transition={{ delay: index * 0.03, duration: 0.4 }}
                 />
               ))}
@@ -228,14 +228,14 @@ export function DrilldownTreemapChart({
                       width={rect.width}
                       height={rect.height}
                       rx="6"
-                      fill={`url(#treemap-gradient-${rect.segment.id})`}
+                      fill={rect.segment.color}
                       stroke="white"
                       strokeWidth="2"
                       filter="url(#treemap-shadow)"
                       className={onSegmentClick ? "cursor-pointer" : ""}
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{
-                        opacity: 1,
+                        opacity: 0.9,
                         scale: isHovered && onSegmentClick ? 1.02 : 1,
                       }}
                       transition={{
@@ -260,13 +260,13 @@ export function DrilldownTreemapChart({
                       x={rect.x}
                       y={rect.y}
                       width={rect.width}
-                      height="6"
+                      height="8"
                       rx="6"
                       fill={rect.segment.color}
-                      opacity="0.6"
+                      opacity="0.4"
                       className="pointer-events-none"
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.6 }}
+                      animate={{ opacity: 0.4 }}
                       transition={{ delay: index * 0.03 + 0.2, duration: 0.3 }}
                     />
 

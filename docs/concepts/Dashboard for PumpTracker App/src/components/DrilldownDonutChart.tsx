@@ -145,7 +145,7 @@ export function DrilldownDonutChart({
       </div>
 
       {/* 3D Donut Chart */}
-      <div className="flex flex-col lg:flex-row gap-6 items-center">
+      <div className="flex flex-col lg:flex-row gap-6 items-center bg-[rgba(255,254,254,0)]">
         <AnimatePresence mode="wait">
           <motion.div
             key={breadcrumbs.join("-")}
@@ -173,8 +173,8 @@ export function DrilldownDonutChart({
                     x2="0%"
                     y2="100%"
                   >
-                    <stop offset="0%" stopColor={segment.color} stopOpacity="1" />
-                    <stop offset="100%" stopColor={segment.color} stopOpacity="0.7" />
+                    <stop offset="0%" stopColor={segment.color} stopOpacity="0.95" />
+                    <stop offset="100%" stopColor={segment.color} stopOpacity="0.85" />
                   </linearGradient>
                 ))}
 
@@ -183,7 +183,7 @@ export function DrilldownDonutChart({
                   <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
                   <feOffset dx="0" dy="4" result="offsetblur" />
                   <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.3" />
+                    <feFuncA type="linear" slope="0.15" />
                   </feComponentTransfer>
                   <feMerge>
                     <feMergeNode />
@@ -203,7 +203,7 @@ export function DrilldownDonutChart({
                     innerRadius
                   )}
                   fill={segment.color}
-                  opacity="0.3"
+                  opacity="0.12"
                   transform="translate(0, 8) scale(1.02, 1.02)"
                   style={{ transformOrigin: "200px 200px" }}
                   initial={{ pathLength: 0 }}
@@ -226,7 +226,8 @@ export function DrilldownDonutChart({
                         outerRadius,
                         innerRadius
                       )}
-                      fill={`url(#gradient-${segment.id})`}
+                      fill={segment.color}
+                      fillOpacity="0.9"
                       stroke="white"
                       strokeWidth="2"
                       filter="url(#donut-shadow)"

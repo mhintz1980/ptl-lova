@@ -194,8 +194,8 @@ export const TreemapChart: React.FC<ChartProps> = ({
   return (
     <div className="flex flex-col h-full w-full">
       {/* Controls Header */}
-      <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-        {/* View Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        {/* Left: View Switcher */}
         <div className="flex bg-muted/30 p-1 rounded-lg">
           {(['customer', 'model'] as const).map((m) => (
             <button
@@ -212,37 +212,40 @@ export const TreemapChart: React.FC<ChartProps> = ({
           ))}
         </div>
 
-        {/* Time Filters */}
-        <div className="flex gap-1">
-          {(['all', 'year', 'quarter', 'week'] as const).map((t) => (
-            <Badge
-              key={t}
-              variant={timeFilter === t ? 'default' : 'outline'}
-              className="cursor-pointer hover:bg-primary/20 transition-colors"
-              onClick={() => setTimeFilter(t)}
-            >
-              {t === 'all'
-                ? 'All Time'
-                : `This ${t.charAt(0).toUpperCase() + t.slice(1)}`}
-            </Badge>
-          ))}
+        {/* Right: Time Filters + Total Value */}
+        <div className="flex items-center gap-3">
+          {/* Time Filters */}
+          <div className="flex gap-1">
+            {(['all', 'year', 'quarter', 'week'] as const).map((t) => (
+              <Badge
+                key={t}
+                variant={timeFilter === t ? 'default' : 'outline'}
+                className="cursor-pointer hover:bg-primary/20 transition-colors"
+                onClick={() => setTimeFilter(t)}
+              >
+                {t === 'all'
+                  ? 'All Time'
+                  : `This ${t.charAt(0).toUpperCase() + t.slice(1)}`}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Total Value - Now properly positioned in header */}
+          <div className="text-right pl-3 border-l border-border/50">
+            <p className="text-xs text-muted-foreground">Total Value</p>
+            <p className="text-sm font-bold text-cyan-400">
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0,
+              }).format(totalValue)}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Total Indicator in corner */}
-      <div className="absolute top-4 right-4 text-right pointer-events-none hidden md:block">
-        <p className="text-xs text-muted-foreground">Total Value</p>
-        <p className="text-lg font-bold text-cyan-400">
-          {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0,
-          }).format(totalValue)}
-        </p>
-      </div>
-
       {/* Chart */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${viewMode}-${timeFilter}`}

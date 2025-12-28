@@ -58,12 +58,14 @@ export interface ChartProps {
   onDrilldown: (update: Partial<DashboardFilters>) => void
 }
 
+export type ChartSize = 'small' | 'large' | 'max'
+
 export interface ChartConfig {
   id: ChartId
   title: string
   description?: string
   component: ComponentType<ChartProps>
-  defaultSize?: 'sm' | 'md' | 'lg' | 'full'
+  defaultSize?: ChartSize
   drillDownSequence?: ChartId[]
 }
 

@@ -10,7 +10,7 @@
 
 ### 1. The Prime Directive: "Where is the work?"
 
-**Always** read [`docs/status/current-work.md`](docs/status/current-work.md) first.
+**Always** read [`docs/status/current-work.md`](docs/status/current-work.md) **FIRST** in every new conversation.
 
 - It tells you the active branch, deployment status, and the immediate **Next Actions**.
 - **Do not** hallucinate next steps. Trust this file.
@@ -27,6 +27,7 @@
 | **Architecture Details**      | [`docs/architecture.md`](docs/architecture.md)               |
 | **Development Guide**         | [`docs/development.md`](docs/development.md)                 |
 | **Deployment Guide**          | [`docs/deployment.md`](docs/deployment.md)                   |
+| **UI/Component Standards**    | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md)             |
 
 ### 3. Your First 5 Minutes
 
@@ -52,6 +53,7 @@
 ### Project Overview
 
 Modern, responsive production management system for pump manufacturing. Built with:
+
 - **Frontend**: React + TypeScript + Vite
 - **Styling**: Tailwind CSS
 - **State**: Zustand
@@ -93,20 +95,22 @@ pnpm format           # Run Prettier
 
 ### Context Budget Management
 
-| Utilization | Action |
-|-------------|--------|
-| <70% | Continue normally |
-| 70-80% | Review context, summarize if needed |
-| 80%+ | **TRIGGER COMPACTION** - Summarize to `/ai_working/session-state.md` |
+| Utilization | Action                                                               |
+| ----------- | -------------------------------------------------------------------- |
+| <70%        | Continue normally                                                    |
+| 70-80%      | Review context, summarize if needed                                  |
+| 80%+        | **TRIGGER COMPACTION** - Summarize to `/ai_working/session-state.md` |
 
 ### Degradation Self-Check
 
 If you experience:
+
 - ❌ Repeated errors on known patterns
 - ❌ Forgetting earlier decisions
 - ❌ Confused tool usage
 
 Then:
+
 1. Summarize current task state to `/ai_working/session-state.md`
 2. Review only recent conversation history
 3. Reload only active file contexts
@@ -180,17 +184,21 @@ Use `/ai_working/session-state.md` to track multi-turn tasks:
 
 ```markdown
 ## Current Task
+
 <task description>
 
 ## Files Touched
+
 - file1.ts (added X, modified Y)
 - file2.ts (refactored Z)
 
 ## Decisions Made
+
 - Decision 1
 - Decision 2
 
 ## Next Steps
+
 - [ ] Step 1
 - [ ] Step 2
 ```
@@ -201,7 +209,7 @@ Use `/ai_working/memory/` for learnings that persist:
 
 - `domain-patterns.md` - DDD patterns and gotchas
 - `gotchas.md` - Known issues and workarounds
-- `conventions.md` - Project-specific  conventions
+- `conventions.md` - Project-specific conventions
 
 **Before complex tasks**: Check memory files  
 **After discoveries**: Log to memory for future agents
@@ -241,7 +249,7 @@ Use `/ai_working/memory/` for learnings that persist:
 
 ---
 
-**Version**: 2.0 (Progressive Disclosure)  
-**Last Updated**: 2025-12-24  
-**Previous Version**: 1.0 (Monolithic, 557 lines)  
+**Version**: 2.1 (Added DESIGN_SYSTEM reference)  
+**Last Updated**: 2025-12-27  
+**Previous Version**: 2.0 (Progressive Disclosure)  
 **Token Reduction**: ~65% (from 1500+ tokens to <500 tokens)

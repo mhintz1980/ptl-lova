@@ -15,8 +15,7 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 - Vertical slice > sprawling architecture
 - "Because it's cleaner" is not a sufficient reason (it's a vibe, not a requirement)
 
-> [!CAUTION]
-> **BETA PROTOCOL IN EFFECT**
+> [!CAUTION] > **BETA PROTOCOL IN EFFECT**
 > The application is in **Cloud Mode** using a shared Supabase database.
 > **DO NOT** reset data, clear tables, or run seed scripts without explicit user authorization.
 > Read [`docs/status/current-work.md`](docs/status/current-work.md) before starting any task.
@@ -40,13 +39,14 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 
 Agents should monitor context usage and apply these thresholds:
 
-| Utilization | Status | Action |
-|-------------|--------|--------|
-| <70% | 🟢 Normal | Continue normally |
-| 70-80% | 🟡 Warning | Review context, consider summarization |
-| 80%+ | 🔴 Critical | **Trigger compaction** - summarize to `/ai_working/session-state.md` |
+| Utilization | Status      | Action                                                               |
+| ----------- | ----------- | -------------------------------------------------------------------- |
+| <70%        | 🟢 Normal   | Continue normally                                                    |
+| 70-80%      | 🟡 Warning  | Review context, consider summarization                               |
+| 80%+        | 🔴 Critical | **Trigger compaction** - summarize to `/ai_working/session-state.md` |
 
 **Context compaction strategy**:
+
 1. Preserve: current task, active files, key decisions, next steps
 2. Summarize: completed work, intermediate reasoning, verbose outputs
 3. Discard: early conversation turns, boilerplate, redundant information
@@ -54,12 +54,14 @@ Agents should monitor context usage and apply these thresholds:
 ### Context Degradation Self-Check
 
 If you experience any of these symptoms:
+
 - ❌ Repeated errors on patterns you've already solved
 - ❌ Forgetting decisions made earlier in the conversation
 - ❌ Confused or redundant tool usage
 - ❌ Asking for information already provided
 
 Then perform this recovery sequence:
+
 1. **Stop current work**
 2. **Summarize task state** to `/ai_working/session-state.md`
    - Current task and goal
@@ -89,6 +91,25 @@ Use `/ai_working/memory/` for cross-session knowledge:
   - `domain-patterns.md` - DDD patterns and findings
   - `gotchas.md` - Known issues and workarounds
   - `conventions.md` - Project-specific standards
+
+### Context Conservation Rules
+
+> **Theme**: Every token counts. Minimize context consumption while maximizing effectiveness.
+
+| #   | Rule                 | Description                                      |
+| --- | -------------------- | ------------------------------------------------ |
+| 1   | **Outline First**    | Run `view_file_outline` before full file reads   |
+| 2   | **Line Limits**      | Components: 200 max, Docs: 300 max               |
+| 3   | **Header Summaries** | New files start with purpose/exports comment     |
+| 4   | **Tiered Docs**      | Summary (50 lines) → Detail (on-demand)          |
+| 5   | **Link Over Inline** | Never paste full content in artifacts            |
+| 6   | **Minimal Handoffs** | Handoff docs: 30 lines max                       |
+| 7   | **Lazy Loading**     | Load docs on-demand, not upfront                 |
+| 8   | **Targeted Reads**   | Use line ranges, never read entire files         |
+| 9   | **grep Before View** | Search for specific content first                |
+| 10  | **Turbo Workflows**  | Use pre-approved commands in `.agent/workflows/` |
+
+Full details: [`docs/agent-skills/skills/context-conservation/index.md`](docs/agent-skills/skills/context-conservation/index.md)
 
 ---
 
@@ -237,6 +258,7 @@ AI agents with built-in browser capabilities can view the running app:
 Key references:
 
 - `docs/development.md`, `docs/testing.md`
+- `docs/DESIGN_SYSTEM.md` — UI component standards, chart patterns, accessibility
 - `DDD_BLUEPRINT-OPUS.md`
 - `docs/constitution/pumptracker-constitution.md`
 

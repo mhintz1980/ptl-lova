@@ -16,7 +16,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:codegen": "playwright codegen",
     "test:e2e:install": "playwright install",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "context": "node scripts/check-context.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -120,8 +120,9 @@ export function DrilldownTreemapChart({
   const total = data.reduce((sum, item) => sum + item.value, 0)
 
   return (
-    <Card className="layer-l1 overflow-hidden">
-      <CardHeader className="pb-2">
+    <Card className="layer-l1 overflow-hidden !bg-card !relative">
+      <style>{`.layer-l1 { isolation: isolate; }`}</style>
+      <CardHeader className="pb-2 !relative z-20">
         <CardTitle className="text-lg">{title}</CardTitle>
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -150,275 +151,258 @@ export function DrilldownTreemapChart({
         )}
       </CardHeader>
 
-      <CardContent>
-        {/* 3D Treemap Chart */}
-        <div className="relative" style={{ perspective: '1200px' }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={breadcrumbs.join('-')}
-              initial={{ opacity: 0, rotateX: -15 }}
-              animate={{ opacity: 1, rotateX: 0 }}
-              exit={{ opacity: 0, rotateX: 15 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="relative"
-            >
-              <svg
-                width={width}
-                height={height}
-                className="w-full h-auto drop-shadow-xl"
-                style={{ transformStyle: 'preserve-3d' }}
+      <CardContent className="!relative z-10">
+        {/* Chart + Legend Side-by-Side */}
+        <div className="flex gap-4 min-h-[300px]">
+          {/* 3D Treemap Chart */}
+          <div className="flex-1 relative z-10" style={{ perspective: '1200px' }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={breadcrumbs.join('-')}
+                initial={{ opacity: 0, rotateX: -15 }}
+                animate={{ opacity: 1, rotateX: 0 }}
+                exit={{ opacity: 0, rotateX: 15 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="relative"
               >
-                <defs>
-                  {/* Gradients for each segment */}
-                  {calculateTreemap.map((rect) => (
+                <svg
+                  width={width}
+                  height={height}
+                  className="w-full h-auto drop-shadow-xl"
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  <defs>
+                    {/* Shadow filter - reduced slope from 0.4 to 0.2 */}
+                    <filter id="treemap-shadow">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                      <feOffset dx="2" dy="2" result="offsetblur" />
+                      <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.2" />
+                      </feComponentTransfer>
+                      <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    {/* Shine gradient */}
                     <linearGradient
-                      key={`gradient-${rect.segment.id}`}
-                      id={`treemap-gradient-${rect.segment.id}`}
+                      id="treemap-shine"
                       x1="0%"
                       y1="0%"
-                      x2="0%"
+                      x2="100%"
                       y2="100%"
                     >
-                      <stop
-                        offset="0%"
-                        stopColor={rect.segment.color}
-                        stopOpacity="1"
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor={rect.segment.color}
-                        stopOpacity="0.8"
-                      />
+                      <stop offset="0%" stopColor="white" stopOpacity="0" />
+                      <stop offset="50%" stopColor="white" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="white" stopOpacity="0" />
                     </linearGradient>
+                  </defs>
+
+                  {/* 3D depth/shadow rectangles - reduced opacity from 0.3 to 0.15 */}
+                  {calculateTreemap.map((rect, index) => (
+                    <motion.rect
+                      key={`shadow-${rect.segment.id}`}
+                      x={rect.x + 3}
+                      y={rect.y + 3}
+                      width={rect.width}
+                      height={rect.height}
+                      rx="6"
+                      fill={rect.segment.color}
+                      opacity="0.15"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 0.15, scale: 1 }}
+                      transition={{ delay: index * 0.03, duration: 0.4 }}
+                    />
                   ))}
 
-                  {/* Shadow filter */}
-                  <filter id="treemap-shadow">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                    <feOffset dx="2" dy="2" result="offsetblur" />
-                    <feComponentTransfer>
-                      <feFuncA type="linear" slope="0.4" />
-                    </feComponentTransfer>
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
+                  {/* Main rectangles */}
+                  {calculateTreemap.map((rect, index) => {
+                    const isHovered = hoveredSegment === rect.segment.id
+                    const percentage =
+                      total > 0 ? (rect.segment.value / total) * 100 : 0
 
-                  {/* Shine gradient */}
-                  <linearGradient
-                    id="treemap-shine"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="white" stopOpacity="0" />
-                    <stop offset="50%" stopColor="white" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="white" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
+                    return (
+                      <motion.g key={rect.segment.id}>
+                        <motion.rect
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                          rx="6"
+                          fill={rect.segment.color}
+                          fillOpacity="0.9"
+                          stroke="white"
+                          strokeWidth="2"
+                          filter="url(#treemap-shadow)"
+                          className={onSegmentClick ? 'cursor-pointer' : ''}
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{
+                            opacity: 1,
+                            scale: isHovered && onSegmentClick ? 1.02 : 1,
+                          }}
+                          transition={{
+                            opacity: { delay: index * 0.03, duration: 0.4 },
+                            scale: { duration: 0.2 },
+                          }}
+                          onMouseEnter={() => setHoveredSegment(rect.segment.id)}
+                          onMouseLeave={() => setHoveredSegment(null)}
+                          onClick={() => onSegmentClick?.(rect.segment)}
+                          whileHover={
+                            onSegmentClick
+                              ? {
+                                  filter: 'brightness(1.1)',
+                                  strokeWidth: 3,
+                                }
+                              : {}
+                          }
+                        />
 
-                {/* 3D depth/shadow rectangles */}
-                {calculateTreemap.map((rect, index) => (
-                  <motion.rect
-                    key={`shadow-${rect.segment.id}`}
-                    x={rect.x + 3}
-                    y={rect.y + 3}
-                    width={rect.width}
-                    height={rect.height}
-                    rx="6"
-                    fill={rect.segment.color}
-                    opacity="0.3"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 0.3, scale: 1 }}
-                    transition={{ delay: index * 0.03, duration: 0.4 }}
-                  />
-                ))}
-
-                {/* Main rectangles */}
-                {calculateTreemap.map((rect, index) => {
-                  const isHovered = hoveredSegment === rect.segment.id
-                  const percentage =
-                    total > 0 ? (rect.segment.value / total) * 100 : 0
-
-                  return (
-                    <motion.g key={rect.segment.id}>
-                      <motion.rect
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height={rect.height}
-                        rx="6"
-                        fill={`url(#treemap-gradient-${rect.segment.id})`}
-                        stroke="white"
-                        strokeWidth="2"
-                        filter="url(#treemap-shadow)"
-                        className={onSegmentClick ? 'cursor-pointer' : ''}
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{
-                          opacity: 1,
-                          scale: isHovered && onSegmentClick ? 1.02 : 1,
-                        }}
-                        transition={{
-                          opacity: { delay: index * 0.03, duration: 0.4 },
-                          scale: { duration: 0.2 },
-                        }}
-                        onMouseEnter={() => setHoveredSegment(rect.segment.id)}
-                        onMouseLeave={() => setHoveredSegment(null)}
-                        onClick={() => onSegmentClick?.(rect.segment)}
-                        whileHover={
-                          onSegmentClick
-                            ? {
-                                filter: 'brightness(1.1)',
-                                strokeWidth: 3,
-                              }
-                            : {}
-                        }
-                      />
-
-                      {/* 3D Edge highlight */}
-                      <motion.rect
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height="6"
-                        rx="6"
-                        fill={rect.segment.color}
-                        opacity="0.6"
-                        className="pointer-events-none"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.6 }}
-                        transition={{
-                          delay: index * 0.03 + 0.2,
-                          duration: 0.3,
-                        }}
-                      />
-
-                      {/* Text label */}
-                      {rect.width > 60 && rect.height > 40 && (
-                        <motion.g
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.03 + 0.3 }}
+                        {/* 3D Edge highlight - reduced opacity from 0.6 to 0.4, increased height from 6 to 8 */}
+                        <motion.rect
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height="8"
+                          rx="6"
+                          fill={rect.segment.color}
+                          opacity="0.4"
                           className="pointer-events-none"
-                        >
-                          <text
-                            x={rect.x + rect.width / 2}
-                            y={rect.y + rect.height / 2 - 8}
-                            textAnchor="middle"
-                            fill="white"
-                            className="text-xs font-medium"
-                          >
-                            {rect.segment.label.length > 12
-                              ? rect.segment.label.substring(0, 12) + '...'
-                              : rect.segment.label}
-                          </text>
-                          <text
-                            x={rect.x + rect.width / 2}
-                            y={rect.y + rect.height / 2 + 8}
-                            textAnchor="middle"
-                            fill="white"
-                            opacity="0.9"
-                            className="text-xs"
-                          >
-                            {valueFormatter(rect.segment.value)}
-                          </text>
-                          <text
-                            x={rect.x + rect.width / 2}
-                            y={rect.y + rect.height / 2 + 22}
-                            textAnchor="middle"
-                            fill="white"
-                            opacity="0.8"
-                            className="text-[10px]"
-                          >
-                            {percentage.toFixed(1)}%
-                          </text>
-                        </motion.g>
-                      )}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 0.4 }}
+                          transition={{
+                            delay: index * 0.03 + 0.2,
+                            duration: 0.3,
+                          }}
+                        />
 
-                      {/* Compact label for smaller rectangles */}
-                      {(rect.width <= 60 || rect.height <= 40) &&
-                        rect.width > 35 &&
-                        rect.height > 25 && (
-                          <motion.text
-                            x={rect.x + rect.width / 2}
-                            y={rect.y + rect.height / 2}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill="white"
-                            className="text-[10px] pointer-events-none font-medium"
+                        {/* Text label */}
+                        {rect.width > 60 && rect.height > 40 && (
+                          <motion.g
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: index * 0.03 + 0.3 }}
+                            className="pointer-events-none"
                           >
-                            {percentage.toFixed(0)}%
-                          </motion.text>
+                            <text
+                              x={rect.x + rect.width / 2}
+                              y={rect.y + rect.height / 2 - 8}
+                              textAnchor="middle"
+                              fill="white"
+                              className="text-xs font-medium"
+                            >
+                              {rect.segment.label.length > 12
+                                ? rect.segment.label.substring(0, 12) + '...'
+                                : rect.segment.label}
+                            </text>
+                            <text
+                              x={rect.x + rect.width / 2}
+                              y={rect.y + rect.height / 2 + 8}
+                              textAnchor="middle"
+                              fill="white"
+                              opacity="0.9"
+                              className="text-xs"
+                            >
+                              {valueFormatter(rect.segment.value)}
+                            </text>
+                            <text
+                              x={rect.x + rect.width / 2}
+                              y={rect.y + rect.height / 2 + 22}
+                              textAnchor="middle"
+                              fill="white"
+                              opacity="0.8"
+                              className="text-[10px]"
+                            >
+                              {percentage.toFixed(1)}%
+                            </text>
+                          </motion.g>
                         )}
 
-                      {/* Shine effect */}
-                      <motion.rect
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height={rect.height}
-                        rx="6"
-                        fill="url(#treemap-shine)"
-                        className="pointer-events-none"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 0.3, 0] }}
-                        transition={{
-                          delay: index * 0.03 + 0.4,
-                          duration: 0.8,
-                        }}
-                      />
-                    </motion.g>
-                  )
-                })}
-              </svg>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+                        {/* Compact label for smaller rectangles */}
+                        {(rect.width <= 60 || rect.height <= 40) &&
+                          rect.width > 35 &&
+                          rect.height > 25 && (
+                            <motion.text
+                              x={rect.x + rect.width / 2}
+                              y={rect.y + rect.height / 2}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fill="white"
+                              className="text-[10px] pointer-events-none font-medium"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: index * 0.03 + 0.3 }}
+                            >
+                              {percentage.toFixed(0)}%
+                            </motion.text>
+                          )}
 
-        {/* Legend/Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-4 pt-4 border-t"
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {data.map((segment, index) => {
-              const percentage = total > 0 ? (segment.value / total) * 100 : 0
-
-              return (
-                <motion.div
-                  key={segment.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
-                    onSegmentClick ? 'cursor-pointer hover:bg-muted' : ''
-                  } ${hoveredSegment === segment.id ? 'bg-muted' : ''}`}
-                  onMouseEnter={() => setHoveredSegment(segment.id)}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  onClick={() => onSegmentClick?.(segment)}
-                >
-                  <div
-                    className="w-3 h-3 rounded-sm flex-shrink-0"
-                    style={{ backgroundColor: segment.color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs truncate">{segment.label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {percentage.toFixed(1)}%
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
+                        {/* Shine effect */}
+                        <motion.rect
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                          rx="6"
+                          fill="url(#treemap-shine)"
+                          className="pointer-events-none"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 0.3, 0] }}
+                          transition={{
+                            delay: index * 0.03 + 0.4,
+                            duration: 0.8,
+                          }}
+                        />
+                      </motion.g>
+                    )
+                  })}
+                </svg>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </motion.div>
+
+          {/* Legend - Now on the side */}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            className="w-48 flex-shrink-0 overflow-y-auto max-h-[300px] pr-2"
+          >
+            <div className="space-y-2">
+              {data.map((segment, index) => {
+                const percentage = total > 0 ? (segment.value / total) * 100 : 0
+
+                return (
+                  <motion.div
+                    key={segment.id}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                      onSegmentClick ? 'cursor-pointer hover:bg-muted' : ''
+                    } ${hoveredSegment === segment.id ? 'bg-muted' : ''}`}
+                    onMouseEnter={() => setHoveredSegment(segment.id)}
+                    onMouseLeave={() => setHoveredSegment(null)}
+                    onClick={() => onSegmentClick?.(segment)}
+                  >
+                    <div
+                      className="w-3 h-3 rounded-sm flex-shrink-0"
+                      style={{ backgroundColor: segment.color }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs truncate" title={segment.label}>
+                        {segment.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {percentage.toFixed(1)}%
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+        </div>
       </CardContent>
     </Card>
   )

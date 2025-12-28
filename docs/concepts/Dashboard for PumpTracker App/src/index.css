@@ -650,8 +650,8 @@
     height: calc(var(--spacing) * 9);
   }
 
-  .h-1 {
-    height: calc(var(--spacing) * 1);
+  .h-2 {
+    height: calc(var(--spacing) * 2);
   }
 
   .h-3 {
@@ -1010,6 +1010,10 @@
     border-radius: .25rem;
   }
 
+  .rounded-\[8px\] {
+    border-radius: 8px;
+  }
+
   .rounded-full {
     border-radius: 3.40282e38px;
   }
@@ -1059,6 +1063,10 @@
 
   .border-transparent {
     border-color: #0000;
+  }
+
+  .bg-\[rgba\(255\,254\,254\,0\)\] {
+    background-color: #fffefe00;
   }
 
   .bg-accent {
@@ -1190,6 +1198,10 @@
 
   .p-6 {
     padding: calc(var(--spacing) * 6);
+  }
+
+  .p-\[14px\] {
+    padding: 14px;
   }
 
   .px-2 {

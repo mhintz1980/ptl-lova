@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { ChevronRight, Home } from 'lucide-react'
@@ -94,8 +94,9 @@ export function DrilldownDonutChart({
   })
 
   return (
-    <Card className="layer-l1 overflow-hidden">
-      <CardHeader className="pb-2">
+    <Card className="layer-l1 overflow-hidden !bg-card !relative">
+      <style>{`.layer-l1 { isolation: isolate; }`}</style>
+      <CardHeader className="pb-2 !relative z-20">
         <CardTitle className="text-lg">{title}</CardTitle>
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -124,260 +125,226 @@ export function DrilldownDonutChart({
         )}
       </CardHeader>
 
-      <CardContent>
-        <div className="flex flex-col lg:flex-row gap-6 items-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={breadcrumbs.join('-')}
-              initial={{ opacity: 0, scale: 0.8, rotateY: -45 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              exit={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="relative"
-              style={{ perspective: '1000px' }}
+      <CardContent className="!relative z-10">
+        <div className="flex flex-col lg:flex-row gap-6 items-center min-h-[300px]">
+          <div className="relative z-10" style={{ perspective: '1000px' }}>
+            <svg
+              width="300"
+              height="300"
+              viewBox="0 0 400 400"
+              className="drop-shadow-2xl"
+              role="graphics-document"
+              aria-roledescription="donut chart"
+              aria-label={`${title} - showing ${data.length} segments totaling ${valueFormatter(total)}`}
             >
-              <svg
-                width="300"
-                height="300"
-                viewBox="0 0 400 400"
-                className="drop-shadow-2xl"
-                role="graphics-document"
-                aria-roledescription="donut chart"
-                aria-label={`${title} - showing ${data.length} segments totaling ${valueFormatter(total)}`}
-              >
-                <title>{title}</title>
-                <defs>
-                  {/* Gradients for each segment */}
-                  {segments.map((segment) => (
-                    <linearGradient
-                      key={`gradient-${segment.id}`}
-                      id={`gradient-${segment.id}`}
-                      x1="0%"
-                      y1="0%"
-                      x2="0%"
-                      y2="100%"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor={segment.color}
-                        stopOpacity="1"
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor={segment.color}
-                        stopOpacity="0.7"
-                      />
-                    </linearGradient>
-                  ))}
+              <title>{title}</title>
+              <defs>
+                {/* Drop shadow - reduced from 0.3 to 0.2 slope for lighter appearance */}
+                <filter
+                  id="donut-shadow"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                  <feOffset dx="0" dy="4" result="offsetblur" />
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.2" />
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-                  {/* Drop shadow */}
-                  <filter
-                    id="donut-shadow"
-                    x="-50%"
-                    y="-50%"
-                    width="200%"
-                    height="200%"
-                  >
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                    <feOffset dx="0" dy="4" result="offsetblur" />
-                    <feComponentTransfer>
-                      <feFuncA type="linear" slope="0.3" />
-                    </feComponentTransfer>
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                {/* 3D depth/shadow segments */}
-                {segments.map((segment, index) => (
-                  <motion.path
-                    key={`shadow-${segment.id}`}
-                    d={createSegmentPath(
-                      segment.startAngle,
-                      segment.endAngle,
-                      outerRadius,
-                      innerRadius
-                    )}
-                    fill={segment.color}
-                    opacity="0.3"
-                    transform="translate(0, 8) scale(1.02, 1.02)"
-                    style={{ transformOrigin: '200px 200px' }}
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ delay: index * 0.05, duration: 0.6 }}
-                  />
-                ))}
-
-                {/* Main donut segments */}
-                {segments.map((segment, index) => {
-                  const isHovered = hoveredSegment === segment.id
-                  const scale = isHovered && onSegmentClick ? hoverScale : 1
-
-                  return (
-                    <motion.g key={segment.id}>
-                      <motion.path
-                        d={createSegmentPath(
-                          segment.startAngle,
-                          segment.endAngle,
-                          outerRadius,
-                          innerRadius
-                        )}
-                        fill={`url(#gradient-${segment.id})`}
-                        stroke="white"
-                        strokeWidth="2"
-                        filter="url(#donut-shadow)"
-                        className={onSegmentClick ? 'cursor-pointer' : ''}
-                        style={{ transformOrigin: '200px 200px' }}
-                        role="graphics-symbol"
-                        aria-label={`${segment.label}: ${valueFormatter(segment.value)} (${segment.percentage.toFixed(1)}%)`}
-                        tabIndex={onSegmentClick ? 0 : undefined}
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{
-                          pathLength: 1,
-                          opacity: 1,
-                          scale: scale,
-                        }}
-                        transition={{
-                          pathLength: { delay: index * 0.05, duration: 0.6 },
-                          opacity: { delay: index * 0.05, duration: 0.3 },
-                          scale: { duration: 0.2 },
-                        }}
-                        onMouseEnter={() => setHoveredSegment(segment.id)}
-                        onMouseLeave={() => setHoveredSegment(null)}
-                        onClick={() => onSegmentClick?.(segment)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            onSegmentClick?.(segment)
-                          }
-                        }}
-                        onFocus={() => setHoveredSegment(segment.id)}
-                        onBlur={() => setHoveredSegment(null)}
-                        whileHover={
-                          onSegmentClick
-                            ? {
-                                filter: 'brightness(1.1)',
-                              }
-                            : {}
-                        }
-                      />
-
-                      {/* Percentage label in the middle of segment */}
-                      {segment.percentage > 5 && (
-                        <motion.text
-                          x={
-                            centerX +
-                            ((outerRadius + innerRadius) / 2) *
-                              Math.cos(segment.midAngle)
-                          }
-                          y={
-                            centerY +
-                            ((outerRadius + innerRadius) / 2) *
-                              Math.sin(segment.midAngle)
-                          }
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="white"
-                          className="text-xs pointer-events-none font-medium"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.05 + 0.3 }}
-                        >
-                          {segment.percentage.toFixed(0)}%
-                        </motion.text>
-                      )}
-                    </motion.g>
-                  )
-                })}
-
-                {/* Center circle with total */}
-                <motion.circle
-                  cx={centerX}
-                  cy={centerY}
-                  r={innerRadius - 5}
-                  fill="hsl(var(--card))"
-                  stroke="hsl(var(--border))"
-                  strokeWidth="2"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
+              {/* 3D depth/shadow segments - reduced opacity from 0.3 to 0.15 */}
+              {segments.map((segment, index) => (
+                <motion.path
+                  key={`shadow-${segment.id}`}
+                  d={createSegmentPath(
+                    segment.startAngle,
+                    segment.endAngle,
+                    outerRadius,
+                    innerRadius
+                  )}
+                  fill={segment.color}
+                  opacity="0.15"
+                  transform="translate(0, 8) scale(1.02, 1.02)"
+                  style={{ transformOrigin: '200px 200px' }}
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ delay: index * 0.05, duration: 0.6 }}
                 />
+              ))}
 
-                <motion.text
-                  x={centerX}
-                  y={centerY - 10}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="text-xs"
-                  fill="hsl(var(--muted-foreground))"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  Total
-                </motion.text>
+              {/* Main donut segments */}
+              {segments.map((segment, index) => {
+                const isHovered = hoveredSegment === segment.id
+                const scale = isHovered && onSegmentClick ? hoverScale : 1
 
-                <motion.text
-                  x={centerX}
-                  y={centerY + 15}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="hsl(var(--foreground))"
-                  className="text-base font-semibold"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  {valueFormatter(total)}
-                </motion.text>
-              </svg>
-            </motion.div>
-          </AnimatePresence>
+                return (
+                  <g key={segment.id}>
+                    <motion.path
+                      d={createSegmentPath(
+                        segment.startAngle,
+                        segment.endAngle,
+                        outerRadius,
+                        innerRadius
+                      )}
+                      fill={segment.color}
+                      fillOpacity="0.9"
+                      stroke="white"
+                      strokeWidth="2"
+                      filter="url(#donut-shadow)"
+                      className={onSegmentClick ? 'cursor-pointer' : ''}
+                      style={{ transformOrigin: '200px 200px' }}
+                      role="graphics-symbol"
+                      aria-label={`${segment.label}: ${valueFormatter(segment.value)} (${segment.percentage.toFixed(1)}%)`}
+                      tabIndex={onSegmentClick ? 0 : undefined}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{
+                        pathLength: 1,
+                        opacity: 1,
+                        scale: scale,
+                      }}
+                      transition={{
+                        pathLength: { delay: index * 0.05, duration: 0.6 },
+                        opacity: { delay: index * 0.05, duration: 0.3 },
+                        scale: { duration: 0.2 },
+                      }}
+                      onMouseEnter={() => setHoveredSegment(segment.id)}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      onClick={() => onSegmentClick?.(segment)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onSegmentClick?.(segment)
+                        }
+                      }}
+                      onFocus={() => setHoveredSegment(segment.id)}
+                      onBlur={() => setHoveredSegment(null)}
+                      whileHover={
+                        onSegmentClick
+                          ? {
+                              filter: 'brightness(1.1)',
+                            }
+                          : {}
+                      }
+                    />
+
+                    {/* Percentage label in the middle of segment */}
+                    {segment.percentage > 5 && (
+                      <motion.text
+                        x={
+                          centerX +
+                          ((outerRadius + innerRadius) / 2) *
+                            Math.cos(segment.midAngle)
+                        }
+                        y={
+                          centerY +
+                          ((outerRadius + innerRadius) / 2) *
+                            Math.sin(segment.midAngle)
+                        }
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="white"
+                        className="text-xs pointer-events-none font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.05 + 0.3 }}
+                      >
+                        {segment.percentage.toFixed(0)}%
+                      </motion.text>
+                    )}
+                  </g>
+                )
+              })}
+
+              {/* Center circle with total */}
+              <motion.circle
+                cx={centerX}
+                cy={centerY}
+                r={innerRadius - 5}
+                fill="hsl(var(--card))"
+                stroke="hsl(var(--border))"
+                strokeWidth="2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              />
+
+              <motion.text
+                x={centerX}
+                y={centerY - 10}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="text-xs"
+                fill="hsl(var(--muted-foreground))"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Total
+              </motion.text>
+
+              <motion.text
+                x={centerX}
+                y={centerY + 15}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="hsl(var(--foreground))"
+                className="text-base font-semibold"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {valueFormatter(total)}
+              </motion.text>
+            </svg>
+          </div>
 
           {/* Legend */}
           <div className="flex-1 space-y-2 max-h-64 overflow-y-auto">
-            <AnimatePresence mode="wait">
-              {segments.map((segment, index) => (
-                <motion.div
-                  key={segment.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                    onSegmentClick ? 'cursor-pointer hover:bg-muted' : ''
-                  } ${hoveredSegment === segment.id ? 'bg-muted' : ''}`}
-                  onMouseEnter={() => setHoveredSegment(segment.id)}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  onClick={() => onSegmentClick?.(segment)}
-                >
-                  <div
-                    className="w-4 h-4 rounded-sm flex-shrink-0"
-                    style={{ backgroundColor: segment.color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm truncate">{segment.label}</span>
-                      {onSegmentClick && (
-                        <ChevronRight className="size-3 text-muted-foreground flex-shrink-0" />
-                      )}
-                    </div>
-                    {segment.sublabel && (
-                      <div className="text-xs text-muted-foreground truncate">
-                        {segment.sublabel}
-                      </div>
+            {segments.map((segment, index) => (
+              <motion.div
+                key={segment.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                  onSegmentClick ? 'cursor-pointer hover:bg-muted' : ''
+                } ${hoveredSegment === segment.id ? 'bg-muted' : ''}`}
+                onMouseEnter={() => setHoveredSegment(segment.id)}
+                onMouseLeave={() => setHoveredSegment(null)}
+                onClick={() => onSegmentClick?.(segment)}
+              >
+                <div
+                  className="w-4 h-4 rounded-sm flex-shrink-0"
+                  style={{ backgroundColor: segment.color }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm truncate">{segment.label}</span>
+                    {onSegmentClick && (
+                      <ChevronRight className="size-3 text-muted-foreground flex-shrink-0" />
                     )}
                   </div>
-                  <div className="text-sm text-right flex-shrink-0">
-                    <div>{valueFormatter(segment.value)}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {segment.percentage.toFixed(1)}%
+                  {segment.sublabel && (
+                    <div className="text-xs text-muted-foreground truncate">
+                      {segment.sublabel}
                     </div>
+                  )}
+                </div>
+                <div className="text-sm text-right flex-shrink-0">
+                  <div>{valueFormatter(segment.value)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {segment.percentage.toFixed(1)}%
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </CardContent>

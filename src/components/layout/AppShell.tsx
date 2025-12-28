@@ -7,6 +7,7 @@ interface AppShellProps {
   onChangeView: (view: AppView) => void;
   onOpenAddPo: () => void;
   onOpenSettings: () => void;
+  filteredPumpsCount?: number;
   children: ReactNode;
 }
 
@@ -15,6 +16,7 @@ export function AppShell({
   onChangeView,
   onOpenAddPo,
   onOpenSettings,
+  filteredPumpsCount,
   children,
 }: AppShellProps) {
   return (
@@ -25,6 +27,7 @@ export function AppShell({
           onChangeView={onChangeView}
           onOpenAddPo={onOpenAddPo}
           onOpenSettings={onOpenSettings}
+          filteredPumpsCount={filteredPumpsCount}
         />
         <main className="flex-1 overflow-auto content-stage">{children}</main>
       </div>

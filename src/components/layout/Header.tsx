@@ -1,20 +1,20 @@
-import { Filter, Moon, Package, Search, Settings, Sun } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
-import { cn } from "../../lib/utils";
-import { useTheme } from "../../hooks/useTheme";
-import { ControlFlyout } from "./ControlFlyout";
-import { useApp } from "../../store";
-import { AddPoButton } from "../toolbar/AddPoButton";
-import { CollapseToggle } from "./CollapseToggle";
-import { NAV_ITEMS, type AppView } from "./navigation";
+import { Filter, Moon, Package, Search, Settings, Sun } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { cn } from '../../lib/utils'
+import { useTheme } from '../../hooks/useTheme'
+import { ControlFlyout } from './ControlFlyout'
+import { useApp } from '../../store'
+import { AddPoButton } from '../toolbar/AddPoButton'
+import { CollapseToggle } from './CollapseToggle'
+import { NAV_ITEMS, type AppView } from './navigation'
 
 interface HeaderProps {
-  currentView: AppView;
-  onChangeView: (view: AppView) => void;
-  onOpenAddPo: () => void;
-  onOpenSettings: () => void;
+  currentView: AppView
+  onChangeView: (view: AppView) => void
+  onOpenAddPo: () => void
+  onOpenSettings: () => void
 }
 
 export function Header({
@@ -23,11 +23,11 @@ export function Header({
   onOpenAddPo,
   onOpenSettings,
 }: HeaderProps) {
-  const { mode, toggle } = useTheme();
-  const { filters, setFilters } = useApp();
-  const collapsedCards = useApp((state) => state.collapsedCards);
-  const toggleCollapsedCards = useApp((state) => state.toggleCollapsedCards);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { mode, toggle } = useTheme()
+  const { filters, setFilters } = useApp()
+  const collapsedCards = useApp((state) => state.collapsedCards)
+  const toggleCollapsedCards = useApp((state) => state.toggleCollapsedCards)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const activeFilterCount = useMemo(
     () =>
@@ -40,11 +40,11 @@ export function Header({
         filters.stage,
       ].filter(Boolean).length,
     [filters]
-  );
+  )
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 text-foreground backdrop-blur-xl">
-      <div className="flex h-16 items-center gap-4 px-8">
+      <div className="flex h-20 items-center gap-4 px-8">
         <div className="flex min-w-[180px] items-center gap-3">
           <div className="rounded-2xl border border-border/70 bg-card/80 p-2 shadow-layer-sm">
             <Package className="h-5 w-5 text-primary" strokeWidth={2.5} />
@@ -67,38 +67,41 @@ export function Header({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "header-button h-9 w-9 rounded-full border border-border/60 bg-card/70 text-foreground/70",
+                  'header-button h-10 w-10 rounded-full border border-border/60 bg-card/70 text-foreground/70',
                   currentView === id &&
-                  "border-primary/40 bg-primary/15 text-foreground"
+                    'border-primary/40 bg-primary/15 text-foreground'
                 )}
                 onClick={() => onChangeView(id)}
                 title={label}
                 aria-label={`Go to ${label}`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" strokeWidth={2.5} />
               </Button>
             ))}
           </nav>
 
-          <div className="relative hidden items-center gap-1 rounded-full border border-border/60 bg-card/80 px-3 py-1 text-sm text-foreground/80 shadow-sm md:flex">
-            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="relative hidden items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm text-foreground/80 shadow-sm md:flex">
+            <Search
+              className="h-4 w-4 text-muted-foreground"
+              strokeWidth={2}
+            />
             <Input
-              value={filters.q || ""}
+              value={filters.q || ''}
               onChange={(event) => setFilters({ q: event.target.value })}
               placeholder="Search"
-              className="h-7 w-32 border-none bg-transparent p-0 text-xs text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-11 w-44 border-none bg-transparent p-0 text-sm text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
           <Button
             variant="ghost"
             size="icon"
-            className="header-button relative h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button relative h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={() => setFiltersOpen((open) => !open)}
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-5 w-5" strokeWidth={2.5} />
             {activeFilterCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
                 {activeFilterCount}
               </span>
             )}
@@ -112,27 +115,27 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="header-button h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={toggle}
-            title={`Switch to ${mode === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
             aria-label="Toggle theme"
           >
-            {mode === "dark" ? (
-              <Sun className="h-4 w-4" />
+            {mode === 'dark' ? (
+              <Sun className="h-5 w-5" strokeWidth={2.5} />
             ) : (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-5 w-5" strokeWidth={2.5} />
             )}
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            className="header-button h-9 w-9 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={onOpenSettings}
             title="Settings"
             aria-label="Open settings"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-5 w-5" strokeWidth={2.5} />
           </Button>
 
           <AddPoButton onClick={onOpenAddPo} />
@@ -141,5 +144,5 @@ export function Header({
 
       <ControlFlyout open={filtersOpen} onClose={() => setFiltersOpen(false)} />
     </header>
-  );
+  )
 }

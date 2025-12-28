@@ -170,37 +170,39 @@ export function DashboardEngine() {
   const isDrillMode = drillStack.length > 0
 
   return (
-    <div className="flex flex-col gap-6 p-2 md:p-4 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-6 p-2 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
       {/* Header / Controls */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             {isDrillMode ? (
-              <nav className="flex items-center text-sm font-medium text-muted-foreground">
-                <button
-                  onClick={() => handleBreadcrumbClick(-1)}
-                  className="hover:text-foreground flex items-center gap-1 transition-colors"
-                >
-                  <Home className="h-4 w-4" />
-                  Dashboard
-                </button>
-                {drillStack.map((step, idx) => (
-                  <div key={idx} className="flex items-center">
-                    <BreadcrumbSeparator className="h-4 w-4 mx-1 opacity-50" />
-                    <button
-                      onClick={() => handleBreadcrumbClick(idx)}
-                      className={`hover:text-foreground transition-colors ${
-                        idx === drillStack.length - 1
-                          ? 'text-foreground font-semibold'
-                          : ''
-                      }`}
-                      disabled={idx === drillStack.length - 1}
-                    >
-                      {step.label}
-                    </button>
-                  </div>
-                ))}
-              </nav>
+              <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm px-4 py-2.5">
+                <nav className="flex items-center text-sm font-medium text-muted-foreground">
+                  <button
+                    onClick={() => handleBreadcrumbClick(-1)}
+                    className="hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    <Home className="h-4 w-4" />
+                    Dashboard
+                  </button>
+                  {drillStack.map((step, idx) => (
+                    <div key={idx} className="flex items-center">
+                      <BreadcrumbSeparator className="h-4 w-4 mx-1 opacity-70" />
+                      <button
+                        onClick={() => handleBreadcrumbClick(idx)}
+                        className={`hover:text-foreground transition-colors ${
+                          idx === drillStack.length - 1
+                            ? 'text-foreground font-semibold'
+                            : ''
+                        }`}
+                        disabled={idx === drillStack.length - 1}
+                      >
+                        {step.label}
+                      </button>
+                    </div>
+                  ))}
+                </nav>
+              </div>
             ) : (
               <>
                 <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -252,7 +254,7 @@ export function DashboardEngine() {
               </div>
 
               <Button
-                variant={showFavorites ? 'default' : 'outline'}
+                variant={showFavorites ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setShowFavorites((prev) => !prev)}
                 className="gap-2"
@@ -302,8 +304,8 @@ export function DashboardEngine() {
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 grid-flow-dense ${
-          isDrillMode ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-4'
+        className={`grid gap-6 grid-cols-12 grid-flow-dense flex-1 auto-rows-fr ${
+          isDrillMode ? 'grid-cols-1' : ''
         }`}
       >
         <AnimatePresence mode="popLayout">
@@ -313,13 +315,15 @@ export function DashboardEngine() {
 
             const ChartComponent = cfg.component
             const isFav = favoriteChartIds.includes(chartId)
+
+            // Map size to 12-column grid: small=4, large=8, max=12
             const colSpan = isDrillMode
-              ? 'col-span-1'
-              : cfg.defaultSize === 'full'
-              ? 'md:col-span-2 xl:col-span-4'
-              : cfg.defaultSize === 'lg'
-              ? 'md:col-span-2 xl:col-span-2'
-              : 'col-span-1'
+              ? 'col-span-12'
+              : cfg.defaultSize === 'max'
+              ? 'md:col-span-12 col-span-12'
+              : cfg.defaultSize === 'large'
+              ? 'md:col-span-8 col-span-12'
+              : 'md:col-span-4 col-span-12' // small
 
             return (
               <motion.div
@@ -329,11 +333,11 @@ export function DashboardEngine() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group ${colSpan} ${
-                  isDrillMode ? 'h-[calc(100vh-200px)]' : ''
+                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
+                  isDrillMode ? 'min-h-[calc(100vh-200px)]' : ''
                 }`}
               >
-                <div className="mb-4 flex items-start justify-between">
+                <div className="mb-4 flex items-start justify-between flex-shrink-0">
                   <div>
                     <h2 className="text-lg font-semibold tracking-tight">
                       {cfg.title}
@@ -359,8 +363,8 @@ export function DashboardEngine() {
                 <div
                   className={
                     isDrillMode
-                      ? 'h-[calc(100%-60px)] w-full relative overflow-hidden'
-                      : 'h-[300px] w-full relative overflow-hidden'
+                      ? 'flex-1 w-full relative overflow-hidden min-h-0'
+                      : 'flex-1 w-full relative overflow-hidden min-h-0'
                   }
                 >
                   <ChartComponent

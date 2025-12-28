@@ -1,170 +1,143 @@
----
-title: 'PumpTracker Lite'
-doc_type: 'project_readme'
-app_name: 'PumpTracker Lite'
-version: '1.0.0'
-status: 'active'
-entrypoint: true
-related_docs:
-  - 'Architecture Overview'
-  - 'PumpTracker Lite – Development Guide'
-  - 'PumpTracker Lite – Testing Guide'
-  - 'PumpTracker Lite – Deployment Guide'
----
-
 # PumpTracker Lite
 
-A modern, responsive production management system for tracking pump manufacturing orders through their complete lifecycle. Built with React, TypeScript, Tailwind CSS, and Recharts for data visualization.
+A modern, responsive production management system for tracking pump manufacturing orders through their complete lifecycle. Built with React 19, TypeScript, Tailwind CSS, and Zustand with Domain-Driven Design architecture.
+
+## 🚀 Status
+
+> **Version**: 2.0.0 (Beta)  
+> **Deployment**: Live on Vercel with Supabase persistence  
+> **Last Updated**: December 25, 2024
 
 ## 🎯 Overview
 
-PumpTracker Lite is a lightweight yet powerful web application designed to help manufacturing teams manage pump production orders efficiently. It provides real-time visibility into production status, KPI tracking, and intuitive drag-and-drop Kanban board management.
+PumpTracker Lite is a powerful web application designed to help manufacturing teams manage pump production orders efficiently. It provides real-time visibility into production status, advanced KPI tracking with drill-down analytics, intuitive drag-and-drop Kanban board management, and intelligent scheduling.
 
 ## 📚 Documentation
 
-All project documents now live under [`docs/`](docs/README.md). Most docs include **YAML front matter** so both humans and coding agents can understand their type and relationships.
+All project documents live under [`docs/`](docs/README.md):
 
-Key starting points:
-
-- [`docs/architecture.md`](docs/architecture.md) – UI surfaces, data flow, and state responsibilities.
-- [`docs/development-guide.md`](docs/development-guide.md) – setup, workflow, and coding conventions.
-- [`docs/testing.md`](docs/testing.md) – Vitest/Playwright instructions, including how to verify the scheduling legend filters.
-- [`docs/deployment.md`](docs/deployment.md) – updated hosting guidance.
-
-Historical context and older migration notes were moved to [`docs/archive/`](docs/archive/).
+| Document                                                     | Purpose                             |
+| ------------------------------------------------------------ | ----------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md)               | UI surfaces, data flow, DDD layers  |
+| [`docs/development.md`](docs/development.md)                 | Setup, workflow, coding conventions |
+| [`docs/testing.md`](docs/testing.md)                         | Vitest + Playwright instructions    |
+| [`docs/deployment.md`](docs/deployment.md)                   | Hosting and deployment guidance     |
+| [`docs/status/current-work.md`](docs/status/current-work.md) | Active work and next steps          |
 
 ## ✨ Features
 
 ### Dashboard View
 
-- **KPI Strip**: Real-time metrics including average build time, shop efficiency, on-time orders, and late orders
-- **Workload Distribution**: Donut charts showing workload breakdown by customer and pump model
-- **Build Time Trend**: Area chart tracking average build times over the past 12 weeks
-- **Value Breakdown**: Pie charts displaying order value distribution by customer and model
-- **Order Details Table**: Comprehensive sortable table with all pump order information
+- **Multi-Mode Dashboard**: Switch between Operations, Value, and Production views
+- **KPI Strip**: Real-time metrics with favorites and drill-down capability
+- **3D Drill-Down Charts**: Interactive donut and treemap charts with breadcrumb navigation
+- **SparklineAreaChart**: Modern SVG-based charts with Bezier curves, 3D depth, and hover scanner
+- **Tab-Based Analysis**: WIP by Stage/Customer/Model, Cycle Time Breakdown with bottleneck highlighting
+- **Trend Visualization**: Lead time and total value trends with period-over-period comparison
+- **Purchase Order Breakdown**: Sortable table with value summaries by PO
 
 ### Kanban Board View
 
 - **8-Stage Production Pipeline**: UNSCHEDULED → NOT STARTED → FABRICATION → POWDER COAT → ASSEMBLY → TESTING → SHIPPING → CLOSED
-- **Drag-and-Drop Interface**: Move pumps between stages with intuitive drag-and-drop functionality
-- **Smart Card Display**: Each pump card shows essential information including:
-  - Model and Serial Number
-  - PO Number and Customer
-  - Order Value
-  - Scheduled End Date
-  - Priority Badge (Low, Normal, High, Rush, Urgent)
-  - Color-Coded Priority Indicators
+- **Drag-and-Drop Interface**: Move pumps between stages with intuitive drag-and-drop
+- **Serial Number Gate**: Stage progression blocked without assigned serial number
+- **Smart Card Display**: Model, Serial, PO, Customer, Value, Priority badges, color-coded indicators
+- **WIP Limits**: Configurable per-stage limits with visual warnings
 
 ### Scheduling View
 
-- **Unscheduled Queue**: Sidebar showing all pumps in "UNSCHEDULED" stage ready for scheduling
-- **Drag-and-Drop Calendar**: Intuitive 4-week calendar grid where pumps can be dropped to assign dates
-- **Automatic Stage Progression**: When a pump is scheduled, it automatically moves from "UNSCHEDULED" to "NOT STARTED"
-- **Smart Scheduling**: Uses model-specific lead times to calculate optimal start and end dates
-- **Calendar Event Display**: Scheduled pumps appear as color-coded events on the calendar with stage metadata
-- **Empty State Management**: Helpful messaging when all pumps are scheduled with navigation to upcoming work
-
-### Filtering & Search
-
-- **Multi-Criteria Filtering**: Filter by PO, Customer, Model, Priority, and Stage
-- **Full-Text Search**: Search across all pump data
-- **Quick Clear**: Reset all filters with one click
+- **Unscheduled Queue**: Sidebar showing pumps ready for scheduling
+- **4-Week Calendar Grid**: Drag-and-drop scheduling with model-specific lead times
+- **Stage Timelines**: Visual representation of fabrication, powder coat, assembly, and testing phases
+- **Legend Filters**: Quick-filter calendar by production stage
+- **Automatic Stage Progression**: Scheduled pumps auto-advance from UNSCHEDULED to NOT STARTED
 
 ### Data Management
 
-- **Add PO Modal**: Create new purchase orders with multi-line item support
+- **Cloud Persistence**: Supabase integration for shared data across devices
+- **Local Storage Fallback**: Automatic fallback when offline
+- **Add PO Modal**: Create purchase orders with multi-line item support, customer dropdown, promise date inheritance
 - **Bulk CSV Import**: Upload pump data from CSV files
-- **Local Storage**: Automatic data persistence in browser
-- **Mock Data**: Pre-populated with 80 realistic pump orders for demonstration
+- **Serial Number Control**: Nullable serials with "Unassigned" badge, required for production stages
+
+### Accessibility & Polish
+
+- **Light/Dark Mode**: Full theming with improved contrast ratios
+- **Keyboard Navigation**: Full keyboard support for charts and modals
+- **ARIA Labels**: Screen reader support throughout
+- **Focus Management**: Proper focus trapping and restoration in modals
 
 ## 🏗️ Architecture
 
 ### Technology Stack
 
-- **Frontend Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS 3.4 with custom design tokens
-- **State Management**: Zustand
-- **Data Visualization**: Recharts
-- **Drag & Drop**: @dnd-kit (sortable)
-- **UI Components**: Custom components following 21st.dev/magic design standards
-- **Icons**: Lucide React
-- **Notifications**: Sonner (toast notifications)
-- **CSV Parsing**: PapaParse
+| Category      | Technology                           |
+| ------------- | ------------------------------------ |
+| Frontend      | React 19 + TypeScript                |
+| Build         | Vite 7                               |
+| Styling       | Tailwind CSS 3.4                     |
+| State         | Zustand 5                            |
+| Visualization | Recharts + Custom SVG (motion/react) |
+| Drag & Drop   | @dnd-kit                             |
+| Database      | Supabase                             |
+| Testing       | Vitest + Playwright                  |
+| Routing       | React Router 7                       |
+| Animations    | Framer Motion                        |
 
 ### Project Structure
 
-```text
-src/
-├── components/
-│   ├── dashboard/          # Dashboard-specific components
-│   │   ├── KpiStrip.tsx   # KPI metrics display
-│   │   ├── Donuts.tsx     # Workload distribution charts
-│   │   ├── BuildTimeTrend.tsx  # Build time trend chart
-│   │   ├── ValueBreakdown.tsx  # Value distribution charts
-│   │   └── OrderTable.tsx  # Order details table
-│   ├── kanban/             # Kanban board components
-│   │   ├── KanbanBoard.tsx # Main kanban container
-│   │   ├── StageColumn.tsx # Individual stage column
-│   │   └── PumpCard.tsx    # Pump card with drag support
-│   ├── toolbar/            # Filter and action components
-│   │   ├── FilterBar.tsx   # Filter controls
-│   │   ├── AddPoButton.tsx # Add PO button
-│   │   └── AddPoModal.tsx  # Add PO form modal
-│   └── ui/                 # Reusable UI components
-│       ├── Button.tsx
-│       ├── Input.tsx
-│       ├── Card.tsx
-│       └── Badge.tsx
-├── lib/
-│   ├── format.ts           # Formatting utilities
-│   ├── seed.ts             # Mock data generation
-│   ├── csv.ts              # CSV import functionality
-│   ├── utils.ts            # Class name utilities
-│   └── theme.ts            # Design tokens
-├── adapters/
-│   ├── local.ts            # Local storage adapter
-│   └── supabase.ts         # Supabase integration (optional)
-├── types.ts                # TypeScript type definitions
-├── store.ts                # Zustand store
-├── App.tsx                 # Main application component
-├── main.tsx                # Entry point
-└── index.css               # Global styles
 ```
+src/
+├── domain/                 # DDD: Pure business logic
+│   ├── production/         # Pump aggregate, Stage/Priority value objects
+│   └── sales/              # PurchaseOrder, LineItem entities
+├── application/            # Use case orchestration (commands/handlers)
+├── infrastructure/         # External concerns (adapters, repositories, event bus)
+├── presentation/           # React hooks for domain operations
+├── components/
+│   ├── charts/             # Custom chart components (SparklineAreaChart, DrilldownDonutChart)
+│   ├── dashboard/          # Dashboard views and KPI components
+│   ├── kanban/             # Kanban board and pump cards
+│   ├── scheduling/         # Calendar grid, backlog dock
+│   ├── toolbar/            # Filter bar, Add PO modal
+│   └── ui/                 # Reusable primitives (Button, Badge, Card, etc.)
+├── adapters/               # Local + Supabase persistence
+├── lib/                    # Utilities: formatters, CSV, seed, schedule helpers
+├── store.ts                # Zustand store
+└── types.ts                # Application types
+```
+
+### Domain-Driven Design
+
+The app follows DDD principles with enforced invariants:
+
+- **Stage transitions must be sequential** (QUEUE → FABRICATION → POWDER_COAT → ...)
+- **CLOSED is terminal** (no transitions allowed)
+- **Serial numbers are immutable** after creation
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- pnpm (or npm/yarn)
+- pnpm
 
 ### Installation
 
-1. **Clone the repository**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd pumptracker-lite
 
-   ```bash
-   git clone <repository-url>
-   cd pumptracker-lite
-   ```
+# Install dependencies
+pnpm install
 
-2. **Install dependencies**
+# Start the development server
+pnpm dev
 
-   ```bash
-   pnpm install
-   ```
-
-3. **Start the development server**
-
-   ```bash
-   pnpm dev
-   ```
-
-4. **Open in browser**
-   Navigate to `http://localhost:8080/`
-
-5. **AI Agent Browser** (optional)
-   Agents with built-in browsers can use `browser_subagent` to navigate to `http://localhost:8080/` after starting the dev server.
+# Open in browser
+# Navigate to http://localhost:8080/
+```
 
 ### Build for Production
 
@@ -172,39 +145,37 @@ src/
 pnpm build
 ```
 
-The production-ready files will be in the `dist/` directory.
+### Testing
 
-#### Bundle chunking strategy
+```bash
+# Unit tests
+pnpm test
 
-To keep Rollup from emitting a single ~800kB vendor bundle (which triggered the default 500kB chunk-size warning), the Vite config now defines `build.rollupOptions.output.manualChunks`. During `pnpm build` or `pnpm run build:dev`, dependencies in `node_modules` are routed into purpose-specific chunks:
+# End-to-end tests
+pnpm test:e2e
 
-- `react` – React runtime, React DOM, and JSX helpers
-- `charts` – Recharts + date-fns formatting helpers
-- `dnd` – all `@dnd-kit/*` drag-and-drop packages
-- `ui` – Lucide icons, Sonner toasts, and Radix primitives
-- `table` – TanStack table utilities
+# E2E with UI
+pnpm test:e2e:ui
+```
+
+## 📊 Bundle Optimization
+
+The Vite config uses manual chunk splitting to keep bundles efficient:
+
+- `react` – React runtime and JSX helpers
+- `charts` – Recharts + date-fns
+- `dnd` – @dnd-kit packages
+- `ui` – Lucide icons, Sonner toasts, Radix primitives
 - `supabase` – Supabase client (tree-shaken when unused)
-- `vendor` – fallback for any other third-party modules
 
-This keeps the largest chunk under ~275 kB in development builds and removes the chunk-size warning without changing application code-splitting behavior. Adjust or extend the groups in `vite.config.ts` if new dependency clusters grow too large.
+## 🔧 Environment Variables
 
-## 📊 Key Metrics Explained
+For cloud mode (Supabase):
 
-### Average Build Time
-
-The mean number of days between order creation and completion for all closed orders.
-
-### Shop Efficiency
-
-The percentage of orders completed on or before their scheduled end date.
-
-### On-Time Orders
-
-The count of orders that were completed by their scheduled end date.
-
-### Late Orders
-
-The count of orders that were completed after their scheduled end date.
+```env
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
 
 ## 🎨 Design System
 
@@ -214,63 +185,16 @@ The count of orders that were completed after their scheduled end date.
 - **Success**: Green (#16a34a)
 - **Warning**: Yellow (#ca8a04)
 - **Error**: Red (#dc2626)
-- **Neutral**: Gray scale for backgrounds and text
 
-### Priority Color Coding
+### Priority Indicators
 
-- **Urgent**: Red border and background
-- **Rush**: Orange border and background
-- **High**: Yellow border and background
-- **Normal**: Blue border and background
-- **Low**: Gray border and background
-
-## 🔄 State Management
-
-The application uses **Zustand** for state management. The main store manages:
-
-- Pump Data: All pump orders and their state
-- Filters: Active filter selections
-- UI State: Collapsed stages, selected pump details
-- Data Persistence: Automatic save/load from local storage
-
-## 📈 Data Visualization
-
-The application uses Recharts for interactive charts including:
-
-- Donut Charts: Workload and value distribution
-- Area Chart: Build time trends over time
-- Pie Charts: Detailed value breakdowns
-
-All charts are responsive and include tooltips, legends, and custom styling.
-
-## ♿ Accessibility
-
-The application follows WCAG 2.1 guidelines:
-
-- Semantic HTML structure
-- ARIA labels for interactive elements
-- Keyboard navigation support
-- Color contrast compliance
-- Focus indicators for keyboard users
-
-## 📱 Responsive Design
-
-The application is fully responsive and tested on:
-
-- Desktop (1920px, 1440px, 1024px)
-- Tablet (768px, 810px)
-- Mobile (375px, 414px)
-
-## 🚀 Future Enhancements
-
-- Real-time collaboration with WebSockets
-- Advanced reporting and analytics
-- User authentication and role-based access
-- Email notifications for order updates
-- Mobile app with offline support
-- API integration with ERP systems
-- Advanced scheduling with resource constraints
-- Historical data and audit logs
+| Priority | Color  |
+| -------- | ------ |
+| Urgent   | Red    |
+| Rush     | Orange |
+| High     | Yellow |
+| Normal   | Blue   |
+| Low      | Gray   |
 
 ## 📄 License
 
@@ -278,6 +202,4 @@ This project is proprietary software. All rights reserved.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: October 24, 2025  
-**Built with**: React + TypeScript + Tailwind CSS
+**Built with**: React 19 + TypeScript + Tailwind CSS + Zustand + Supabase
