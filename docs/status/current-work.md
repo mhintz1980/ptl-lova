@@ -21,6 +21,8 @@
 
 ## Completed: Vercel Repair & Persistence ✅
 
+- [x] **Adding Vercel Data Persistence**: Configured `.env.local` for local dev and documented Vercel env var requirements.
+- [x] **Fixed Vercel Build (AppShell)**: Removed unused `filteredPumpsCount` prop that caused TS build failure.
 - [x] **Fixed Vercel Build**: Removed unused imports (`Sparkles`, `toast`).
 - [x] **Fixed Data Crash**: Corrected table name `pump_api` -> `pump` in `supabase.ts`.
 - [x] **Added Safety**: `store.ts` now catches adapter errors and shows Toast notifications.

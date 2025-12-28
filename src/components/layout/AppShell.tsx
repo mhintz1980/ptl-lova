@@ -1,14 +1,13 @@
-import type { ReactNode } from "react";
-import { Header } from "./Header";
-import { type AppView } from "./navigation";
+import type { ReactNode } from 'react'
+import { Header } from './Header'
+import { type AppView } from './navigation'
 
 interface AppShellProps {
-  currentView: AppView;
-  onChangeView: (view: AppView) => void;
-  onOpenAddPo: () => void;
-  onOpenSettings: () => void;
-  filteredPumpsCount?: number;
-  children: ReactNode;
+  currentView: AppView
+  onChangeView: (view: AppView) => void
+  onOpenAddPo: () => void
+  onOpenSettings: () => void
+  children: ReactNode
 }
 
 export function AppShell({
@@ -16,7 +15,6 @@ export function AppShell({
   onChangeView,
   onOpenAddPo,
   onOpenSettings,
-  filteredPumpsCount,
   children,
 }: AppShellProps) {
   return (
@@ -27,10 +25,9 @@ export function AppShell({
           onChangeView={onChangeView}
           onOpenAddPo={onOpenAddPo}
           onOpenSettings={onOpenSettings}
-          filteredPumpsCount={filteredPumpsCount}
         />
         <main className="flex-1 overflow-auto content-stage">{children}</main>
       </div>
     </div>
-  );
+  )
 }
