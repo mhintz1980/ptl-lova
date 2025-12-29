@@ -46,6 +46,15 @@
 
 ---
 
+## Completed: Supabase Authentication ✅ (2025-12-29)
+
+- [x] **RLS Policies**: Automated migration to secure `pump` table.
+- [x] **Frontend Auth**: Added `AuthContext`, `useAuth`, and `LoginPage`.
+- [x] **Route Protection**: Wrapped app in `ProtectedRoute`, redirects to login.
+- [x] **Verified**: Unit tests passed, manual verification plan created.
+
+---
+
 ## Completed: Agent Skills Integration - Phase 1 ✅ (2025-12-24)
 
 - [x] **GEMINI.md Refactor**: Reduced from 557 to ~200 lines (65% reduction) with progressive disclosure

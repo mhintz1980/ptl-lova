@@ -35,8 +35,31 @@ import { SandboxToolbar } from './components/sandbox/SandboxToolbar'
 import { KioskLayout } from './components/kiosk/KioskLayout'
 import { ShopFloorHUD } from './components/kiosk/ShopFloorHUD'
 
+import { AuthProvider } from './context/AuthContext'
+import { LoginPage } from './pages/LoginPage'
+import { useAuth } from './hooks/useAuth'
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-muted-foreground">Loading auth...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
+
 function MainApp() {
   const { load, pumps, filters, sortField, sortDirection, loading } = useApp()
+  // ... existing code ...
   const [isAddPoModalOpen, setIsAddPoModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
@@ -60,7 +83,7 @@ function MainApp() {
   }, [location.pathname])
 
   return (
-    <>
+    <ProtectedRoute>
       <SandboxToolbar />
       <Toaster position="top-right" richColors />
       <AppShell
@@ -121,29 +144,47 @@ function MainApp() {
         pump={selectedPump}
         onClose={() => setSelectedPump(null)}
       />
-    </>
+    </ProtectedRoute>
   )
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Main Application */}
-        <Route path="/*" element={<MainApp />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Print Views */}
-        <Route path="/print" element={<PrintLayout />}>
-          <Route path="brief" element={<MondayBrief />} />
-          <Route path="forecast" element={<CapacityForecast />} />
-        </Route>
+          {/* Main Application */}
+          <Route path="/*" element={<MainApp />} />
 
-        {/* Kiosk Views */}
-        <Route path="/kiosk" element={<KioskLayout />}>
-          <Route index element={<ShopFloorHUD />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Print Views - Protected? Ideally yes, but keeping open for simplicity if needed, or protect them too. Let's protect them. */}
+          <Route
+            path="/print"
+            element={
+              <ProtectedRoute>
+                <PrintLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="brief" element={<MondayBrief />} />
+            <Route path="forecast" element={<CapacityForecast />} />
+          </Route>
+
+          {/* Kiosk Views - Protected? Maybe not, kiosk might be shared. But for now let's protect everything to be safe. */}
+          <Route
+            path="/kiosk"
+            element={
+              <ProtectedRoute>
+                <KioskLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ShopFloorHUD />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

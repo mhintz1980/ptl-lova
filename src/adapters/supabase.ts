@@ -9,7 +9,7 @@ const url = (import.meta.env.VITE_SUPABASE_URL as string) || ''
 const key = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || ''
 
 // Prevent crash if keys are missing (Local Mode)
-const supabase = url && key ? createClient(url, key) : null
+export const supabase = url && key ? createClient(url, key) : null
 
 export const SupabaseAdapter: DataAdapter = {
   async load(): Promise<Pump[]> {
