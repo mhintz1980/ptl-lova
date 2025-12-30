@@ -4,7 +4,7 @@ import { useApp } from '../../store'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { PoLine, Priority } from '../../types'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getModelPrice, getCatalogData } from '../../lib/seed'
 
@@ -29,6 +29,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
       priority: 'Normal',
     },
   ])
+  const [isSaving, setIsSaving] = useState(false)
 
   const priorityOptions: Priority[] = [
     'Low',
@@ -101,7 +102,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     setLines(newLines)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validation
@@ -118,18 +119,34 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
       return
     }
 
-    // Submit
-    addPO({ po, customer, dateReceived, promiseDate, lines: validLines })
-    toast.success(
-      `Added ${validLines.reduce(
-        (sum, l) => sum + l.quantity,
-        0
-      )} pumps to ${po}`
-    )
-
-    // Reset and close
-    resetForm()
-    onClose()
+    // Submit with loading state
+    setIsSaving(true)
+    try {
+      await addPO({
+        po,
+        customer,
+        dateReceived,
+        promiseDate,
+        lines: validLines,
+      })
+      toast.success(
+        `Added ${validLines.reduce(
+          (sum, l) => sum + l.quantity,
+          0
+        )} pumps to ${po}`
+      )
+      // Reset and close only on success
+      resetForm()
+      onClose()
+    } catch (error) {
+      console.error('Failed to save PO:', error)
+      toast.error(
+        'Failed to save to cloud. Please check your connection and try again.'
+      )
+      // Modal stays open, form data preserved
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Reset form to initial state
@@ -197,7 +214,8 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
           </div>
           <button
             onClick={handleCancel}
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            disabled={isSaving}
+            className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="h-5 w-5" />
           </button>
@@ -482,11 +500,19 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
               variant="outline"
               className="rounded-full"
               onClick={handleCancel}
+              disabled={isSaving}
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full">
-              Create Purchase Order
+            <Button type="submit" className="rounded-full" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Create Purchase Order'
+              )}
             </Button>
           </div>
         </form>

@@ -65,7 +65,7 @@ export interface AppState {
   load: () => Promise<void>
   setFilters: (f: Partial<Filters>) => void
   clearFilters: () => void
-  addPO: (payload: AddPoPayload) => void
+  addPO: (payload: AddPoPayload) => Promise<void>
   moveStage: (id: string, to: Stage) => void
   updatePump: (id: string, patch: Partial<Pump>) => void
   pausePump: (id: string) => void
@@ -204,7 +204,7 @@ export const useApp = create<AppState>()(
       setFilters: (f) => set({ filters: { ...get().filters, ...f } }),
       clearFilters: () => set({ filters: {} }),
 
-      addPO: ({ po, customer, lines, promiseDate }) => {
+      addPO: async ({ po, customer, lines, promiseDate }) => {
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: crypto.randomUUID(), // Use valid UUID format for Supabase
@@ -223,14 +223,8 @@ export const useApp = create<AppState>()(
 
         const newPumps = [...get().pumps, ...expanded]
         set({ pumps: newPumps })
-        get()
-          .adapter.upsertMany(expanded)
-          .catch((err) => {
-            console.error('Failed to persist PO:', err)
-            toast.error(
-              'Failed to save data to cloud. Please refresh and try again.'
-            )
-          })
+        // Await the save - errors propagate to caller for handling
+        await get().adapter.upsertMany(expanded)
       },
 
       // Constitution §3: Kanban Truth Rules

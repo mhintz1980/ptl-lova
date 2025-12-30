@@ -12,6 +12,7 @@
 - [`docs/DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) — UI standards, chart patterns, drill-down architecture
 - [`docs/concepts/Dashboard for PumpTracker App/README.md`](../concepts/Dashboard%20for%20PumpTracker%20App/README.md) — Drill-down chart implementation guide
 - [`GEMINI.md`](../../GEMINI.md) — Agent bootloader and documentation map
+- [`docs/process/support-operations.md`](../process/support-operations.md) — Password resets & support SOPs
 
 > [!IMPORTANT] > **CRITICAL PERSISTENCE FIX APPLIED**
 > We recently fixed a major crash where the app tried to write to `pump_api` instead of `pump`.
@@ -52,6 +53,18 @@
 - [x] **Frontend Auth**: Added `AuthContext`, `useAuth`, and `LoginPage`.
 - [x] **Route Protection**: Wrapped app in `ProtectedRoute`, redirects to login.
 - [x] **Verified**: Unit tests passed, manual verification plan created.
+
+---
+
+## Completed: Serial Number DB Fix ✅ (2025-12-29)
+
+- [x] **Database Schema**: Made `serial` column nullable to fix "Add PO" error.
+- [x] **Verification**: Confirmed "No move past Fabrication" rule still protects the workflow.
+
+## Completed: Support Operations Setup ✅ (2025-12-29)
+
+- [x] **New SOPs**: Created `docs/process/support-operations.md` for common admin tasks.
+- [x] **Password Reset**: Verified and documented procedure for resetting user passwords.
 
 ---
 
@@ -203,7 +216,12 @@ All 5 packs of chart modernization are now complete:
 
 ### Option 2: New Feature Development
 
-No specific features currently planned. Ready for new product requirements.
+**Completed: "Blocking Save" for Add PO ✅ (2025-12-29)**
+
+- [x] `store.ts`: Made `addPO` async, returns Promise, errors propagate to caller
+- [x] `AddPoModal.tsx`: Added loading state, spinner, disabled controls during save
+- [x] Error handling: Modal stays open with form data preserved on failure
+- [x] Tests: All 183 tests pass, build OK
 
 ---
 
