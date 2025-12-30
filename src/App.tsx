@@ -37,9 +37,15 @@ import { ShopFloorHUD } from './components/kiosk/ShopFloorHUD'
 
 import { AuthProvider } from './context/AuthContext'
 import { LoginPage } from './pages/LoginPage'
+import { UpdatePasswordPage } from './pages/UpdatePasswordPage'
 import { useAuth } from './hooks/useAuth'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  // DEV BYPASS: Skip auth in development mode for faster local testing
+  if (import.meta.env.DEV) {
+    return <>{children}</>
+  }
+
   const { user, loading } = useAuth()
 
   if (loading) {
@@ -154,6 +160,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/update-password" element={<UpdatePasswordPage />} />
 
           {/* Main Application */}
           <Route path="/*" element={<MainApp />} />

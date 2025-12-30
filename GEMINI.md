@@ -17,17 +17,18 @@
 
 ### 2. The Documentation Map: "Where do I look/write?"
 
-| If you need to...             | Go to...                                                     |
-| :---------------------------- | :----------------------------------------------------------- |
-| **Check Rules & Philosophy**  | [`AGENTS.md`](AGENTS.md) (The Constitution)                  |
-| **Track Tasks / Status**      | [`docs/status/current-work.md`](docs/status/current-work.md) |
-| **Read/Write Design Specs**   | [`docs/plans/`](docs/plans/)                                 |
-| **Find Technical Deep Dives** | [`docs/process/`](docs/process/)                             |
-| **Learn Agent Skills**        | [`docs/agent-skills/`](docs/agent-skills/)                   |
-| **Architecture Details**      | [`docs/architecture.md`](docs/architecture.md)               |
-| **Development Guide**         | [`docs/development.md`](docs/development.md)                 |
-| **Deployment Guide**          | [`docs/deployment.md`](docs/deployment.md)                   |
-| **UI/Component Standards**    | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md)             |
+| If you need to...             | Go to...                                                                   |
+| :---------------------------- | :------------------------------------------------------------------------- |
+| **Check Rules & Philosophy**  | [`AGENTS.md`](AGENTS.md) (The Constitution)                                |
+| **Track Tasks / Status**      | [`docs/status/current-work.md`](docs/status/current-work.md)               |
+| **Read/Write Design Specs**   | [`docs/plans/`](docs/plans/)                                               |
+| **Find Technical Deep Dives** | [`docs/process/`](docs/process/)                                           |
+| **Support Operations**        | [`docs/process/support-operations.md`](docs/process/support-operations.md) |
+| **Learn Agent Skills**        | [`docs/agent-skills/`](docs/agent-skills/)                                 |
+| **Architecture Details**      | [`docs/architecture.md`](docs/architecture.md)                             |
+| **Development Guide**         | [`docs/development.md`](docs/development.md)                               |
+| **Deployment Guide**          | [`docs/deployment.md`](docs/deployment.md)                                 |
+| **UI/Component Standards**    | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md)                           |
 
 ### 3. Your First 5 Minutes
 
