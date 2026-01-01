@@ -22,12 +22,16 @@ interface TrendAreaChartProps extends ChartProps {
   data: TrendDataPoint[]
   color?: string // Gradient base color
   valueFormatter?: (val: number) => string
+  onPointClick?: (point: TrendDataPoint) => void
+  className?: string
 }
 
 export function TrendAreaChart({
   data,
   color = '#06b6d4', // Cyan default
   valueFormatter = (val) => val.toString(),
+  onPointClick,
+  className,
 }: TrendAreaChartProps) {
   const chartData = useMemo(() => {
     // We can apply further filtering here if needed, or assume parent did it.
@@ -38,7 +42,7 @@ export function TrendAreaChart({
 
   return (
     <motion.div
-      className="w-full h-full relative"
+      className={`w-full h-full relative ${className || ''}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -47,6 +51,11 @@ export function TrendAreaChart({
         <AreaChart
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          onClick={(e: any) => {
+            if (onPointClick && e && e.activePayload && e.activePayload[0]) {
+              onPointClick(e.activePayload[0].payload)
+            }
+          }}
         >
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -100,8 +109,15 @@ export function TrendAreaChart({
             fillOpacity={1}
             fill={`url(#${gradientId})`}
             animationDuration={1500}
-            // Add dots or active dot styles?
-            activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }}
+            activeDot={{
+              r: 6,
+              strokeWidth: 2,
+              fill: color,
+              stroke: '#fff',
+              onClick: (_e: any, payload: any) =>
+                onPointClick?.(payload.payload),
+              style: { cursor: onPointClick ? 'pointer' : 'default' },
+            }}
           />
         </AreaChart>
       </ResponsiveContainer>

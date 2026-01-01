@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 
 // --- Types ---
 export interface SparklineDataPoint {
@@ -66,6 +66,26 @@ export function SparklineAreaChart({
 }: SparklineAreaChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [mouseX, setMouseX] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(400)
+
+  // Measure container width on mount and resize
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setWidth(containerRef.current.clientWidth || 400)
+      }
+    }
+
+    updateWidth()
+
+    const observer = new ResizeObserver(updateWidth)
+    observer.observe(containerRef.current)
+
+    return () => observer.disconnect()
+  }, [])
 
   // Combine external focused index with internal hover
   const activeIndex = externalFocusedIndex ?? hoveredIndex
@@ -77,7 +97,6 @@ export function SparklineAreaChart({
     bottom: showXAxis ? 30 : 10,
     left: showYAxis ? 50 : 10,
   }
-  const width = 400
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
 
@@ -186,15 +205,16 @@ export function SparklineAreaChart({
 
   return (
     <motion.div
-      className="w-full relative"
+      ref={containerRef}
+      className="w-full h-full relative"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-auto"
-        style={{ maxHeight: height }}
+        className="w-full h-full"
+        preserveAspectRatio="none"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}

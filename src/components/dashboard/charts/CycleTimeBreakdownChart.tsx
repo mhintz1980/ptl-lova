@@ -97,13 +97,8 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
     }
   }
 
-  const getTitle = () => {
-    if (drilldownPath.length === 0) return 'Cycle Time By Stage'
-    return `Pumps in ${drilldownPath[0].replace(/_/g, ' ')}`
-  }
-
   return (
-    <div className="w-full h-full flex flex-col min-h-[300px]">
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
       <AnimatePresence mode="wait">
         {drilldownPath.length === 0 ? (
           <motion.div
@@ -116,9 +111,10 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
           >
             <DrilldownDonutChart
               data={donutData}
-              title={getTitle()}
+              title="" // Title handled by generic dashboard container or internal
               onSegmentClick={handleSegmentClick}
               valueFormatter={(v) => `${v.toFixed(1)} days`}
+              className="h-full"
             />
           </motion.div>
         ) : (
@@ -132,10 +128,11 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
           >
             <DrilldownChart3D
               data={drilldownData}
-              title={getTitle()}
+              title="" // Title handled by generic dashboard container or internal
               breadcrumbs={drilldownPath}
               onBreadcrumbClick={handleBreadcrumbClick}
               valueFormatter={(v) => `${v.toFixed(1)} days`}
+              className="h-full flex flex-col overflow-y-auto"
             />
           </motion.div>
         )}

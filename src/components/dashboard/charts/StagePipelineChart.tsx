@@ -65,7 +65,9 @@ export function StagePipelineChart(_props: ChartProps) {
         label: customer,
         value: data.count,
         color: getStageColor(selectedStage),
-        sublabel: `Avg: ${data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0} days`,
+        sublabel: `Avg: ${
+          data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0
+        } days`,
       }))
       .sort((a, b) => b.value - a.value)
   }, [selectedStage, pumps])
@@ -78,13 +80,8 @@ export function StagePipelineChart(_props: ChartProps) {
     setSelectedStage(null)
   }
 
-  const getTitle = () => {
-    if (!selectedStage) return 'Production Pipeline'
-    return `Pumps in ${selectedStage.replace(/_/g, ' ')}`
-  }
-
   return (
-    <div className="w-full h-full flex flex-col min-h-[300px]">
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
       <AnimatePresence mode="wait">
         {selectedStage ? (
           <motion.div
@@ -97,10 +94,11 @@ export function StagePipelineChart(_props: ChartProps) {
           >
             <DrilldownChart3D
               data={drilldownData}
-              title={getTitle()}
+              title="" // Title handled by DashboardEngine (breadcrumbs will still show)
               breadcrumbs={[selectedStage.replace(/_/g, ' ')]}
               onBreadcrumbClick={handleBreadcrumbClick}
               valueFormatter={(v) => `${v} pump${v === 1 ? '' : 's'}`}
+              className="h-full border-0 shadow-none bg-transparent" // Remove nested card styling
             />
           </motion.div>
         ) : (
@@ -112,10 +110,7 @@ export function StagePipelineChart(_props: ChartProps) {
             transition={{ duration: 0.2 }}
             className="w-full h-full flex flex-col"
           >
-            {/* Title */}
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-foreground">{getTitle()}</h3>
-            </div>
+            {/* Title removed (handled by DashboardEngine) */}
 
             {/* Pipeline Visualization */}
             <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative">

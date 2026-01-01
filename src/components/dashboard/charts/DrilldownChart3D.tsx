@@ -18,6 +18,7 @@ interface DrilldownChart3DProps {
   breadcrumbs?: string[]
   onBreadcrumbClick?: (index: number) => void
   valueFormatter?: (value: number) => string
+  className?: string
 }
 
 export function DrilldownChart3D({
@@ -27,16 +28,25 @@ export function DrilldownChart3D({
   breadcrumbs = [],
   onBreadcrumbClick,
   valueFormatter = (v) => v.toString(),
+  className,
 }: DrilldownChart3DProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
 
   return (
-    <Card className="layer-l1 overflow-hidden !bg-card !relative">
+    <Card
+      className={`layer-l1 overflow-hidden !bg-card !relative flex flex-col ${
+        className || ''
+      }`}
+    >
       <style>{`.layer-l1-drilldown-3d { isolation: isolate; }`}</style>
 
       {/* Header with Breadcrumbs */}
       <div className="!relative z-20 mb-6 px-6 pt-6">
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+        {title && (
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            {title}
+          </h3>
+        )}
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             <Button
@@ -64,8 +74,11 @@ export function DrilldownChart3D({
         )}
       </div>
 
-      {/* 3D Bar Chart */}
-      <div className="!relative z-10 px-6 pb-6 min-h-[300px]" style={{ perspective: '1000px' }}>
+      {/* 3D Bar Chart - Scrollable Container */}
+      <div
+        className="!relative z-10 px-6 pb-6 flex-1 overflow-y-auto min-h-0 scroller"
+        style={{ perspective: '1000px' }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={breadcrumbs.join('-')}
@@ -85,7 +98,9 @@ export function DrilldownChart3D({
                   initial={{ opacity: 0, x: -50, scale: 0.9 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}
-                  className={`relative group ${onSegmentClick ? 'cursor-pointer' : ''}`}
+                  className={`relative group ${
+                    onSegmentClick ? 'cursor-pointer' : ''
+                  }`}
                   onClick={() => onSegmentClick?.(segment)}
                   style={{ perspective: '800px' }}
                 >
@@ -95,7 +110,9 @@ export function DrilldownChart3D({
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-foreground">{segment.label}</span>
+                          <span className="text-sm text-foreground">
+                            {segment.label}
+                          </span>
                           {onSegmentClick && (
                             <ChevronRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                           )}
@@ -122,12 +139,16 @@ export function DrilldownChart3D({
                         style={{
                           background: `${segment.color}`,
                           opacity: 0.15,
-                          transform: 'translateY(4px) translateX(4px) rotateX(5deg)',
+                          transform:
+                            'translateY(4px) translateX(4px) rotateX(5deg)',
                           transformStyle: 'preserve-3d',
                         }}
                         initial={{ width: '0%' }}
                         animate={{ width: `${height}%` }}
-                        transition={{ delay: index * 0.05 + 0.2, duration: 0.6 }}
+                        transition={{
+                          delay: index * 0.05 + 0.2,
+                          duration: 0.6,
+                        }}
                       />
 
                       {/* Main Bar */}
@@ -141,7 +162,10 @@ export function DrilldownChart3D({
                         }}
                         initial={{ width: '0%' }}
                         animate={{ width: `${height}%` }}
-                        transition={{ delay: index * 0.05 + 0.2, duration: 0.6 }}
+                        transition={{
+                          delay: index * 0.05 + 0.2,
+                          duration: 0.6,
+                        }}
                         whileHover={
                           onSegmentClick
                             ? {
