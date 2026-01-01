@@ -221,13 +221,10 @@ function generatePumpFromCatalog(
     )
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
 
-    // Generate promise date (2-7 days before scheduled end)
-    // Some pumps (20%) will have promise dates in the past to create "late orders"
-    const promiseDaysBefore = Math.floor(Math.random() * 6) + 2 // 2-7 days
-    const isIntentionallyLate = Math.random() < 0.2 // 20% chance
-    const promiseDate = isIntentionallyLate
-      ? addBusinessDays(now, -Math.floor(Math.random() * 10) - 1) // 1-10 days ago
-      : addBusinessDays(testingEnd, -promiseDaysBefore)
+    // Generate promise date spread across last 12 weeks for TotalValueTrendChart
+    // CHANGED: Distribute promise dates across past 12 weeks (84 days) for better chart visualization
+    const weeksBack = Math.floor(Math.random() * 12) // 0-11 weeks ago
+    const promiseDate = addBusinessDays(now, -(weeksBack * 7) - Math.floor(Math.random() * 7))
 
     // Determine current stage based on dates
     // CHANGED: Ensure better distribution across stages for dashboard visualization
