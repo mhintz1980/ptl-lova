@@ -7,20 +7,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { SparklineAreaChart, SparklineDataPoint } from './SparklineAreaChart'
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
 
-function getWeekNum(d: Date) {
-  const date = new Date(d.getTime())
-  date.setHours(0, 0, 0, 0)
-  date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7))
-  const week1 = new Date(date.getFullYear(), 0, 4)
-  return (
-    1 +
-    Math.round(
-      ((date.getTime() - week1.getTime()) / 86400000 -
-        3 +
-        ((week1.getDay() + 6) % 7)) /
-        7
-    )
+// Get week label relative to now (W0 = this week, W-1 = last week, etc.)
+function getRelativeWeekLabel(date: Date): string {
+  const now = new Date()
+  const nowWeekStart = new Date(now)
+  nowWeekStart.setDate(now.getDate() - now.getDay()) // Start of this week (Sunday)
+  nowWeekStart.setHours(0, 0, 0, 0)
+
+  const dateWeekStart = new Date(date)
+  dateWeekStart.setDate(date.getDate() - date.getDay())
+  dateWeekStart.setHours(0, 0, 0, 0)
+
+  const weeksDiff = Math.round(
+    (dateWeekStart.getTime() - nowWeekStart.getTime()) /
+      (7 * 24 * 60 * 60 * 1000)
   )
+
+  // Return label like "W-3" for 3 weeks ago, "W0" for this week
+  return weeksDiff >= 0 ? `W+${weeksDiff}` : `W${weeksDiff}`
 }
 
 // Consistent colors for customers (matching WorkloadDonut)
@@ -46,35 +50,39 @@ export function TotalValueTrendChart({
   const chartData = useMemo((): SparklineDataPoint[] => {
     const weeksMap: Record<string, { total: number; count: number }> = {}
 
-    // Initialize last 12 weeks
+    // Initialize last 12 weeks (W-11 to W0)
     for (let i = 11; i >= 0; i--) {
-      const d = new Date()
-      d.setDate(d.getDate() - i * 7)
-      const k = `W${getWeekNum(d)}`
-      weeksMap[k] = { total: 0, count: 0 }
+      weeksMap[`W-${i}`] = { total: 0, count: 0 }
     }
 
     // Bucket pumps by promise date week
+    // Include ALL stages with promiseDate to show projected value
     pumps.forEach((p) => {
-      if (!p.promiseDate || p.stage === 'CLOSED' || p.stage === 'QUEUE') return
+      if (!p.promiseDate) return
       if (filters.customerId && p.customer !== filters.customerId) return
       if (filters.modelId && p.model !== filters.modelId) return
       if (filters.stage && p.stage !== filters.stage) return
 
-      const d = new Date(p.promiseDate)
-      const k = `W${getWeekNum(d)}`
+      const weekLabel = getRelativeWeekLabel(new Date(p.promiseDate))
 
-      if (weeksMap[k]) {
-        weeksMap[k].total += p.value || 0
-        weeksMap[k].count += 1
+      if (weeksMap[weekLabel] !== undefined) {
+        weeksMap[weekLabel].total += p.value || 0
+        weeksMap[weekLabel].count += 1
       }
     })
 
     // Convert to sparkline format
-    return Object.entries(weeksMap).map(([weekLabel, { total }]) => ({
-      label: weekLabel,
-      value: total,
-    }))
+    return Object.entries(weeksMap)
+      .sort(([a], [b]) => {
+        // Sort W-11, W-10, ..., W-1, W0
+        const aNum = parseInt(a.substring(1))
+        const bNum = parseInt(b.substring(1))
+        return aNum - bNum
+      })
+      .map(([weekLabel, { total }]) => ({
+        label: weekLabel,
+        value: total,
+      }))
   }, [pumps, filters])
 
   // Drill-down data: Breakdown of value by customer for selected week
@@ -84,12 +92,11 @@ export function TotalValueTrendChart({
     const customerMap = new Map<string, { value: number; count: number }>()
 
     pumps.forEach((p) => {
-      if (!p.promiseDate || p.stage === 'CLOSED' || p.stage === 'QUEUE') return
+      if (!p.promiseDate) return
 
-      const d = new Date(p.promiseDate)
-      const k = `W${getWeekNum(d)}`
+      const weekLabel = getRelativeWeekLabel(new Date(p.promiseDate))
 
-      if (k === selectedWeek) {
+      if (weekLabel === selectedWeek) {
         if (!customerMap.has(p.customer)) {
           customerMap.set(p.customer, { value: 0, count: 0 })
         }
