@@ -230,27 +230,41 @@ function generatePumpFromCatalog(
       : addBusinessDays(testingEnd, -promiseDaysBefore)
 
     // Determine current stage based on dates
+    // CHANGED: Ensure better distribution across stages for dashboard visualization
     let currentStage: Stage = 'QUEUE'
     let lastUpdate = poDate.toISOString()
     const forecastEnd = testingEnd.toISOString()
 
     const nowTime = now.getTime()
-    if (nowTime >= testingEnd.getTime()) {
-      currentStage = Math.random() > 0.6 ? 'CLOSED' : 'SHIP' // 40% CLOSED, 60% SHIP
+
+    // Use a weighted distribution to ensure all stages have pumps
+    const stageProgress =
+      (nowTime - fabricationStart.getTime()) /
+      (testingEnd.getTime() - fabricationStart.getTime())
+    const randomFactor = Math.random() * 0.2 // Add some randomness
+
+    if (stageProgress + randomFactor >= 1.0) {
+      // Past completion
+      currentStage = Math.random() > 0.7 ? 'CLOSED' : 'SHIP' // 30% CLOSED, 70% SHIP
       lastUpdate = testingEnd.toISOString()
-    } else if (nowTime >= assemblyEnd.getTime()) {
-      currentStage = 'SHIP' // Constitution §2.1: merged testing+shipping
+    } else if (stageProgress + randomFactor >= 0.75) {
+      // In final stage (SHIP/testing)
+      currentStage = 'SHIP'
       lastUpdate = assemblyEnd.toISOString()
-    } else if (nowTime >= powderCoatEnd.getTime()) {
+    } else if (stageProgress + randomFactor >= 0.55) {
+      // In assembly
       currentStage = 'ASSEMBLY'
       lastUpdate = powderCoatEnd.toISOString()
-    } else if (nowTime >= fabricationEnd.getTime()) {
-      currentStage = 'POWDER_COAT' // Constitution §2.2: underscore
+    } else if (stageProgress + randomFactor >= 0.35) {
+      // In powder coat
+      currentStage = 'POWDER_COAT'
       lastUpdate = fabricationEnd.toISOString()
-    } else if (nowTime >= fabricationStart.getTime()) {
+    } else if (stageProgress + randomFactor >= 0.15) {
+      // In fabrication
       currentStage = 'FABRICATION'
       lastUpdate = fabricationStart.toISOString()
     } else {
+      // Still in queue
       currentStage = 'QUEUE'
       lastUpdate = poDate.toISOString()
     }
