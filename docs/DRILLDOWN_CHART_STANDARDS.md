@@ -1,80 +1,65 @@
-# Dashboard Drill-Down Chart Standards
+# Dashboard Drill-Down Chart Standards & Implementation Guide
 
-> **CRITICAL**: Read this document BEFORE creating or modifying any dashboard charts with drill-down functionality.
+> **CRITICAL**: This is the ONLY authoritative guide for creating drill-down charts. Read this BEFORE implementing ANY dashboard chart.
 
-## Overview
-
-This document defines the standards for implementing drill-down charts in the PumpTracker dashboard. These patterns ensure consistent UX, zero layout shift, and smooth transitions.
-
----
-
-## Core Principles
-
-1. **Zero Layout Shift**: Container heights must be fixed to prevent jarring layout changes
-2. **Smooth Transitions**: Use `AnimatePresence mode="wait"` for fade transitions (0.2s)
-3. **Responsive Sizing**: Charts must adapt to their container, not use fixed pixel widths
-4. **Clear Navigation**: Breadcrumbs must always be visible in drill-down views
-5. **Consistent Patterns**: All drill-down charts follow the same interaction model
+**Version**: 2.0 (Consolidated)  
+**Last Updated**: 2026-01-01  
+**Replaces**: `docs/concepts/Dashboard for PumpTracker App/README.md`
 
 ---
 
-## Required Pattern: AnimatePresence
+## 🎯 Quick Reference
 
-**ALWAYS** wrap drill-down view transitions with `AnimatePresence`:
+**Working Examples** (use as templates):
 
-```tsx
-import { AnimatePresence } from 'motion/react'
+- `src/components/dashboard/charts/TotalValueTrendChart.tsx` - Sparkline → Customer breakdown
+- `src/components/dashboard/charts/ThroughputTrendChart.tsx` - Area chart → Model breakdown
+- `src/components/dashboard/charts/CyclingDonutChart.tsx` - Auto-pause + drill-down
 
-<AnimatePresence mode="wait">
-  {!isDrilledDown ? (
-    <motion.div key="main" /* main view */>
-  ) : (
-    <motion.div key="drilldown" /* drill-down view */>
-  )}
-</AnimatePresence>
-```
+**Reusable Components**:
 
-**Key Properties**:
-
-- `mode="wait"`: Waits for exit animation before showing new view
-- `key` prop: Must be unique for each view state
-- `transition={{ duration: 0.2 }}`: Standard transition speed
+- `DrilldownChart3D.tsx` - 3D horizontal bars for drill-downs
+- `SparklineAreaChart.tsx` - Responsive sparkline
+- `TrendAreaChart.tsx` - Area chart with visible selection
 
 ---
 
-## Required Pattern: Fixed Heights
+## 📋 Core Principles (NEVER VIOLATE)
 
-**Container Heights Must Be Fixed** to prevent layout shift:
+1. **Zero Layout Shift**: Fixed container heights prevent page jumping
+2. **Responsive Sizing**: Charts adapt to containers, never use fixed widths
+3. **Smooth Transitions**: `AnimatePresence mode="wait"` with 0.2s fade
+4. **Clear Navigation**: Breadcrumbs always visible in drill-down
+5. **Visible Interactions**: Selection dots/lines must be clearly visible
+
+---
+
+## ⚡ Critical Patterns (Copy These Exactly)
+
+### Pattern 1: Fixed Height Container
+
+**ALWAYS use fixed heights to prevent layout shift:**
 
 ```tsx
 // ✅ CORRECT
 <CardContent className="h-[400px] w-full px-0 pb-0 relative overflow-hidden">
 
-// ❌ WRONG - causes layout jumping
-<CardContent className="w-full px-0 pb-0">
+// ❌ WRONG - causes page jumping
+<CardContent className="min-h-[400px]"> // Expands, shifts layout
 ```
 
 **Standard Heights**:
 
-- **Trend/Sparkline Charts**: `h-[400px]` (container + chart height)
-- **Donut Charts**: `h-[450px]`
-- **3D Bar Charts (DrilldownChart3D)**: Individual bars = `h-12` (48px)
+- Trend/Sparkline/Area charts: `h-[400px]`
+- Donut charts: `h-[450px]`
+- 3D Bar individual bars: `h-12` (48px)
 
----
+### Pattern 2: Responsive Chart Sizing
 
-## Required Pattern: Responsive Chart Sizing
-
-Charts must size to their container, **not use fixed pixel widths**.
-
-### ❌ WRONG - Fixed Width
+**Charts MUST measure their container, NOT use fixed pixel widths:**
 
 ```tsx
-const width = 400 // BAD: causes undersizing and mouse offset
-```
-
-### ✅ CORRECT - Responsive Width
-
-```tsx
+// ✅ CORRECT - Responsive
 const containerRef = useRef<HTMLDivElement>(null)
 const [width, setWidth] = useState(400)
 
@@ -101,30 +86,148 @@ return (
       className="w-full h-full"
       preserveAspectRatio="none"
     >
+
+// ❌ WRONG - Fixed width causes undersizing
+const width = 400 // BAD: doesn't scale to container
+```
+
+### Pattern 3: AnimatePresence Transitions
+
+**ALWAYS wrap view transitions:**
+
+```tsx
+import { AnimatePresence } from 'motion/react'
+
+;<AnimatePresence mode="wait">
+  {!isDrilledDown ? (
+    <motion.div
+      key="main"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="w-full h-full"
+    >
+      {/* Main view */}
+    </motion.div>
+  ) : (
+    <motion.div
+      key="drilldown"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="w-full h-full"
+    >
+      {/* Drill-down view */}
+    </motion.div>
+  )}
+</AnimatePresence>
+```
+
+**Critical Details**:
+
+- `mode="wait"`: Waits for exit before showing new view
+- `key` prop: MUST be unique for each state
+- `duration: 0.2`: Standard transition speed (DO NOT change)
+- `className="w-full h-full"`: Fills container, prevents shift
+
+### Pattern 4: Visible Selection Indicators
+
+**Selection elements MUST be clearly visible:**
+
+```tsx
+// ✅ CORRECT - Colored with white outline
+activeDot={{
+  r: 6,
+  strokeWidth: 2,
+  fill: color,        // Use chart's color
+  stroke: '#fff',     // White outline for contrast
+}}
+
+// ❌ WRONG - Invisible on light backgrounds
+activeDot={{
+  fill: '#fff',       // Same as background!
+  strokeWidth: 0,
+}}
 ```
 
 ---
 
-## Component Structure
+## 🚀 Complete Implementation Template
 
-### Level 0: Main Chart (e.g., TotalValueTrendChart)
+Use this template for all new drill-down charts:
 
 ```tsx
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
+import { ChartProps } from '../dashboardConfig'
+import { useApp } from '../../../store'
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
+import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
+import { YourMainChart } from './YourMainChart'
+
 export function MyDrilldownChart({ filters }: ChartProps) {
   const { pumps } = useApp()
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
 
-  // Level 0: Main data
+  // Level 0: Main chart data
   const mainData = useMemo(() => {
-    // Aggregate data for main view
-    return /* ... */
+    // Filter pumps based on filters
+    let filtered = pumps
+    if (filters.customerId)
+      filtered = filtered.filter((p) => p.customer === filters.customerId)
+    if (filters.modelId)
+      filtered = filtered.filter((p) => p.model === filters.modelId)
+    if (filters.stage)
+      filtered = filtered.filter((p) => p.stage === filters.stage)
+
+    // Aggregate data (example: by customer)
+    const groupMap = new Map<string, number>()
+    filtered.forEach((pump) => {
+      const key = pump.customer // or stage, model, etc.
+      groupMap.set(key, (groupMap.get(key) || 0) + 1)
+    })
+
+    return Array.from(groupMap.entries()).map(([key, value]) => ({
+      label: key,
+      value,
+    }))
   }, [pumps, filters])
 
   // Level 1: Drill-down data
   const drilldownData = useMemo((): DrilldownSegment[] => {
     if (!selectedItem) return []
-    // Break down selected item
-    return /* ... */
+
+    // Filter to selected item
+    const filtered = pumps.filter((p) => p.customer === selectedItem)
+
+    // Break down by another dimension (example: by model)
+    const modelMap = new Map<string, { count: number; totalAge: number }>()
+    filtered.forEach((pump) => {
+      if (!modelMap.has(pump.model)) {
+        modelMap.set(pump.model, { count: 0, totalAge: 0 })
+      }
+      const data = modelMap.get(pump.model)!
+      data.count += 1
+
+      // Calculate age using last_update
+      if (pump.last_update) {
+        const ageInMs = Date.now() - new Date(pump.last_update).getTime()
+        const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
+        data.totalAge += ageInDays
+      }
+    })
+
+    return Array.from(modelMap.entries())
+      .map(([model, data], index) => ({
+        id: model,
+        label: model,
+        value: data.count,
+        color: COLORS[index % COLORS.length],
+        sublabel: `Avg: ${(data.totalAge / data.count).toFixed(1)} days`,
+      }))
+      .sort((a, b) => b.value - a.value)
   }, [pumps, selectedItem])
 
   return (
@@ -132,7 +235,7 @@ export function MyDrilldownChart({ filters }: ChartProps) {
       <CardHeader className="px-0 pt-0 pb-2 flex-shrink-0">
         <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between">
           <span>
-            {selectedItem ? `Breakdown: ${selectedItem}` : 'Main View'}
+            {selectedItem ? `Breakdown: ${selectedItem}` : 'Main View Title'}
           </span>
           {!selectedItem && (
             <span className="text-xs font-normal opacity-70">
@@ -153,7 +256,7 @@ export function MyDrilldownChart({ filters }: ChartProps) {
               transition={{ duration: 0.2 }}
               className="w-full h-full"
             >
-              <MyChart
+              <YourMainChart
                 data={mainData}
                 onItemClick={(item) => setSelectedItem(item)}
               />
@@ -182,151 +285,275 @@ export function MyDrilldownChart({ filters }: ChartProps) {
     </Card>
   )
 }
+
+const COLORS = [
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#06b6d4',
+  '#f97316',
+  '#6366f1',
+]
 ```
 
 ---
 
-## Visual Standards
+## ⚠️ Pump Interface - Critical Rules
 
-### Selection Indicators
-
-**Active Dots/Points Must Be Visible**:
+**Use ONLY these properties:**
 
 ```tsx
-// ✅ CORRECT - colored dot
-activeDot={{
-  r: 6,
-  strokeWidth: 2,
-  fill: color,        // Use chart color
-  stroke: '#fff',     // White outline
-}}
+// ✅ CORRECT - These exist
+pump.last_update // ISO timestamp - USE FOR TIME CALCULATIONS
+pump.value // Numeric value
+pump.customer // String
+pump.model // String
+pump.stage // Stage enum
+pump.priority // Priority enum
+pump.po // String
+pump.serial // number | null
+pump.promiseDate // ISO timestamp | null
 
-// ❌ WRONG - invisible on light backgrounds
-activeDot={{
-  fill: '#fff',       // BAD: same as background
-}}
+// ❌ WRONG - These DO NOT exist
+pump.stageEntryTime // ❌ Will cause TypeScript error
+pump.createdAt // ❌ Will cause TypeScript error
+pump.entryTime // ❌ Will cause TypeScript error
 ```
 
-### Hover Effects
+**Age Calculation Pattern**:
 
 ```tsx
-// Vertical tracking line
-{
-  nearestPoint && (
-    <motion.line
-      x1={nearestPoint.x}
-      y1={chartTop}
-      x2={nearestPoint.x}
-      y2={chartBottom}
-      stroke={color}
-      strokeWidth="1"
-      strokeDasharray="4 4"
-      opacity="0.5"
-    />
-  )
+// ✅ CORRECT
+if (pump.last_update) {
+  const ageInMs = Date.now() - new Date(pump.last_update).getTime()
+  const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
 }
+
+// ❌ WRONG
+const age = pump.stageEntryTime // Property doesn't exist!
 ```
 
 ---
 
-## Breadcrumb Navigation
+## 📊 Component Selection Guide
 
-**Always provide clear navigation back**:
+### Use DrilldownDonutChart For:
+
+- Top-level aggregated data
+- Part-to-whole relationships
+- Customer/Stage/Model distribution
 
 ```tsx
-<DrilldownChart3D
-  breadcrumbs={[selectedWeek]}
-  onBreadcrumbClick={() => setSelectedWeek(null)}
-  // ...
+<DrilldownDonutChart
+  data={donutSegments}
+  title="Distribution"
+  onSegmentClick={handleClick}
+  valueFormatter={(v) => `${v} units`}
 />
 ```
 
-DrilldownChart3D automatically renders:
+### Use DrilldownChart3D For:
 
-- Home icon button
-- Breadcrumb trail
-- Click handlers to return to main view
+- Drill-down detail views
+- Ranked comparisons
+- List-style breakdowns
+
+```tsx
+<DrilldownChart3D
+  data={drilldownSegments}
+  breadcrumbs={['Customer A']}
+  onBreadcrumbClick={() => setPath([])}
+  valueFormatter={(v) => `${v} items`}
+/>
+```
+
+### Use SparklineAreaChart For:
+
+- Time-series trends
+- Weekly/monthly aggregations
+- Compact visualizations
+
+```tsx
+<SparklineAreaChart
+  data={weeklyData}
+  color="#06b6d4"
+  height={400}
+  onPointClick={(point) => setSelected(point.label)}
+/>
+```
+
+### Use TrendAreaChart For:
+
+- Trend analysis with visible selection
+- Interactive time series
+- Click-to-drill patterns
+
+```tsx
+<TrendAreaChart data={trendData} color="#d946ef" onPointClick={handleClick} />
+```
 
 ---
 
-## Common Mistakes to Avoid
+## 🎨 Common Data Patterns
 
-### ❌ Don't: Use Percentage Heights
-
-```tsx
-<div className="h-full"> // Expands to parent, causes layout shift
-```
-
-### ❌ Don't: Hardcode Chart Widths
+### Pattern: Group by Customer with Age
 
 ```tsx
-const width = 400 // Causes undersizing on larger screens
+const customerMap = new Map<string, { count: number; totalAge: number }>()
+pumps.forEach((pump) => {
+  if (!customerMap.has(pump.customer)) {
+    customerMap.set(pump.customer, { count: 0, totalAge: 0 })
+  }
+  const data = customerMap.get(pump.customer)!
+  data.count += 1
+
+  if (pump.last_update) {
+    const ageInMs = Date.now() - new Date(pump.last_update).getTime()
+    const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
+    data.totalAge += ageInDays
+  }
+})
+
+return Array.from(customerMap.entries())
+  .map(([customer, data]) => ({
+    id: customer,
+    label: customer,
+    value: data.count,
+    sublabel: `Avg: ${(data.totalAge / data.count).toFixed(1)} days`,
+  }))
+  .sort((a, b) => b.value - a.value)
 ```
 
-### ❌ Don't: Use White/Transparent for Interactive Elements
+### Pattern: Group by Stage
+
+```tsx
+const stageMap = new Map<Stage, number>()
+pumps.forEach((pump) => {
+  if (pump.stage !== 'CLOSED') {
+    stageMap.set(pump.stage, (stageMap.get(pump.stage) || 0) + 1)
+  }
+})
+
+return Array.from(stageMap.entries()).map(([stage, count]) => ({
+  id: stage,
+  label: stage.replace(/_/g, ' '),
+  value: count,
+  color: STAGE_COLORS[stage],
+}))
+```
+
+---
+
+## 🔍 Common Mistakes (AVOID THESE)
+
+### ❌ Don't: Use min-height for containers
+
+```tsx
+<div className="min-h-[400px]"> // Expands → layout shift
+```
+
+### ❌ Don't: Hardcode chart widths
+
+```tsx
+const width = 400 // Fixed → doesn't scale
+```
+
+### ❌ Don't: Use white/transparent for interactive elements
 
 ```tsx
 fill: '#fff' // Invisible on light backgrounds
-fill: 'transparent' // User can't see what to click
 ```
 
-### ❌ Don't: Forget AnimatePresence mode="wait"
+### ❌ Don't: Forget AnimatePresence mode
 
 ```tsx
-<AnimatePresence> // Views overlap during transition
+<AnimatePresence> // Missing mode="wait" → overlap
 ```
 
-### ❌ Don't: Use Different Transition Speeds
+### ❌ Don't: Use different transition speeds
 
 ```tsx
-transition={{ duration: 0.5 }} // Inconsistent with 0.2s standard
+transition={{ duration: 0.5 }} // Inconsistent
+```
+
+### ❌ Don't: Access non-existent pump properties
+
+```tsx
+pump.stageEntryTime // DOES NOT EXIST
 ```
 
 ---
 
-## Testing Checklist
+## ✅ Pre-Commit Testing Checklist
 
-Before committing drill-down chart changes:
+Before committing drill-down chart code:
 
-- [ ] Container has **fixed height** (`h-[400px]` or similar)
-- [ ] Chart sizing is **responsive** (uses container width)
-- [ ] `AnimatePresence mode="wait"` wraps view transitions
-- [ ] Transition duration is **0.2s**
-- [ ] Selection indicators are **clearly visible**
-- [ ] Breadcrumb navigation **returns to main view**
-- [ ] **No layout jumping** occurs during transitions
-- [ ] Works correctly on **different screen sizes**
-- [ ] TypeScript build passes with **no errors**
-- [ ] Tested in browser - **all interactions work**
-
----
-
-## Reference Implementation
-
-**Best Examples**:
-
-- `TotalValueTrendChart.tsx` - Sparkline → Customer breakdown
-- `ThroughputTrendChart.tsx` - Area chart → Model breakdown
-- `CyclingDonutChart.tsx` - Auto-pause + drill-down
-
-**Reusable Components**:
-
-- `DrilldownChart3D.tsx` - 3D horizontal bar chart for drill-downs
-- `SparklineAreaChart.tsx` - Responsive sparkline with click handling
-- `TrendAreaChart.tsx` - Area chart with visible selection dots
+- [ ] **Fixed Height**: Container uses `h-[400px]` or `h-[450px]`
+- [ ] **Responsive Width**: Chart measures container, not fixed 400px
+- [ ] **AnimatePresence**: Uses `mode="wait"` with 0.2s transition
+- [ ] **Visible Selection**: Dots/lines use chart color, not white
+- [ ] **No Layout Shift**: Page doesn't jump during transitions
+- [ ] **TypeScript Build**: `pnpm build` passes with no errors
+- [ ] **Only Valid Props**: Uses `last_update`, not `stageEntryTime`
+- [ ] **Breadcrumbs Work**: Can return to main view
+- [ ] **Empty State**: Handles no data gracefully
+- [ ] **Mobile Tested**: Works on different screen sizes
 
 ---
 
-## Questions?
+## 📚 Reference Files
 
-If implementing a new drill-down pattern not covered here:
+**Working Examples** (copy these patterns):
 
-1. Review the reference implementations above
-2. Follow the core principles (zero layout shift, smooth transitions, responsive)
-3. Test thoroughly before committing
-4. Update this document with new patterns discovered
+- `src/components/dashboard/charts/TotalValueTrendChart.tsx`
+- `src/components/dashboard/charts/ThroughputTrendChart.tsx`
+- `src/components/dashboard/charts/CyclingDonutChart.tsx`
+- `src/components/dashboard/charts/CycleTimeBreakdownChart.tsx`
+
+**Reusable Components** (use these in your drill-downs):
+
+- `src/components/dashboard/charts/DrilldownChart3D.tsx`
+- `src/components/dashboard/charts/DrilldownDonutChart.tsx`
+- `src/components/dashboard/charts/SparklineAreaChart.tsx`
+- `src/components/dashboard/charts/TrendAreaChart.tsx`
+
+**Type Definitions**:
+
+- `src/types.ts` - Pump interface
+- `src/components/dashboard/dashboardConfig.ts` - ChartProps
 
 ---
 
+## 🚨 If Something Breaks
+
+### TypeScript Errors
+
+1. Check imports include `AnimatePresence` from `'motion/react'`
+2. Verify no usage of `pump.stageEntryTime` or similar
+3. Prefix unused props with underscore: `_props`
+
+### Page Won't Load
+
+1. Verify `AnimatePresence` is imported
+2. Check data is not undefined
+3. Ensure `key` props are unique
+
+### Page Jumps
+
+1. Use fixed height container (`h-[400px]`)
+2. Use `AnimatePresence mode="wait"`
+3. Ensure `w-full h-full` on motion divs
+
+### Data Not Showing
+
+1. Check `useMemo` dependencies
+2. Verify data is not empty array
+3. Console.log data transformations
+
+---
+
+**Version**: 2.0 (Consolidated from v1.0 + Dashboard README)  
 **Last Updated**: 2026-01-01  
-**Version**: 1.0
+**Maintainer**: Development Team
