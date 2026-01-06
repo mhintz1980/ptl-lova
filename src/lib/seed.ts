@@ -154,13 +154,26 @@ function genSerial(): number {
 // Business day calculation (excludes weekends)
 function addBusinessDays(startDate: Date, days: number): Date {
   const result = new Date(startDate)
-  let businessDays = 0
 
+  // Handle negative days (going backwards)
+  if (days < 0) {
+    let businessDays = 0
+    while (businessDays > days) {
+      result.setDate(result.getDate() - 1)
+      const dayOfWeek = result.getDay()
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        businessDays--
+      }
+    }
+    return result
+  }
+
+  // Handle positive days (going forward)
+  let businessDays = 0
   while (businessDays < days) {
     result.setDate(result.getDate() + 1)
     const dayOfWeek = result.getDay()
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      // Not Saturday (6) or Sunday (0)
       businessDays++
     }
   }
@@ -221,49 +234,67 @@ function generatePumpFromCatalog(
     )
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
 
-    // Generate promise date spread across last 12 weeks for TotalValueTrendChart
-    // CHANGED: Distribute promise dates across past 12 weeks (84 days) for better chart visualization
-    const weeksBack = Math.floor(Math.random() * 12) // 0-11 weeks ago
-    const promiseDate = addBusinessDays(now, -(weeksBack * 7) - Math.floor(Math.random() * 7))
+    // Generate promise date distribution for On-Time Risk chart visualization:
+    // - 40% On Track: promise date > 7 days in future
+    // - 20% At Risk: promise date 1-7 days in future
+    // - 40% Late: promise date in the past
+    let promiseDate: Date
+    const riskSlot = i % 10
 
-    // Determine current stage based on dates
-    // CHANGED: Ensure better distribution across stages for dashboard visualization
+    if (riskSlot < 4) {
+      // 40% LATE: promise date 1-30 days in the past
+      const daysLate = Math.floor(Math.random() * 30) + 1
+      promiseDate = addBusinessDays(now, -daysLate)
+    } else if (riskSlot < 6) {
+      // 20% AT RISK: promise date 1-7 days in the future
+      const daysUntilDue = Math.floor(Math.random() * 7) + 1
+      promiseDate = addBusinessDays(now, daysUntilDue)
+    } else {
+      // 40% ON TRACK: promise date 8-45 days in the future
+      const daysUntilDue = Math.floor(Math.random() * 38) + 8
+      promiseDate = addBusinessDays(now, daysUntilDue)
+    }
+
+    // Determine current stage using deterministic index-based distribution
+    // This ensures pumps are spread across all stages for dashboard visualization
     let currentStage: Stage = 'QUEUE'
     let lastUpdate = poDate.toISOString()
     const forecastEnd = testingEnd.toISOString()
 
-    const nowTime = now.getTime()
+    // Use pattern index (i) to distribute across stages deterministically
+    // Target distribution: ~10% QUEUE, 20% FABRICATION, 15% POWDER_COAT, 20% ASSEMBLY, 15% SHIP, 20% CLOSED
+    const stageSlot = i % 10
 
-    // Use a weighted distribution to ensure all stages have pumps
-    const stageProgress =
-      (nowTime - fabricationStart.getTime()) /
-      (testingEnd.getTime() - fabricationStart.getTime())
-    const randomFactor = Math.random() * 0.2 // Add some randomness
-
-    if (stageProgress + randomFactor >= 1.0) {
-      // Past completion
-      currentStage = Math.random() > 0.7 ? 'CLOSED' : 'SHIP' // 30% CLOSED, 70% SHIP
-      lastUpdate = testingEnd.toISOString()
-    } else if (stageProgress + randomFactor >= 0.75) {
-      // In final stage (SHIP/testing)
-      currentStage = 'SHIP'
-      lastUpdate = assemblyEnd.toISOString()
-    } else if (stageProgress + randomFactor >= 0.55) {
-      // In assembly
-      currentStage = 'ASSEMBLY'
-      lastUpdate = powderCoatEnd.toISOString()
-    } else if (stageProgress + randomFactor >= 0.35) {
-      // In powder coat
-      currentStage = 'POWDER_COAT'
-      lastUpdate = fabricationEnd.toISOString()
-    } else if (stageProgress + randomFactor >= 0.15) {
-      // In fabrication
-      currentStage = 'FABRICATION'
-      lastUpdate = fabricationStart.toISOString()
-    } else {
-      // Still in queue
+    if (stageSlot === 0) {
+      // 10% in QUEUE
       currentStage = 'QUEUE'
       lastUpdate = poDate.toISOString()
+    } else if (stageSlot <= 2) {
+      // 20% in FABRICATION
+      currentStage = 'FABRICATION'
+      // Set last_update to a few days ago to show realistic age
+      const daysInStage = Math.floor(Math.random() * 5) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else if (stageSlot <= 4) {
+      // 20% in POWDER_COAT (includes some STAGED_FOR_POWDER)
+      currentStage = i % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
+      const daysInStage = Math.floor(Math.random() * 4) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else if (stageSlot <= 6) {
+      // 20% in ASSEMBLY
+      currentStage = 'ASSEMBLY'
+      const daysInStage = Math.floor(Math.random() * 3) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else if (stageSlot <= 7) {
+      // 10% in SHIP
+      currentStage = 'SHIP'
+      const daysInStage = Math.floor(Math.random() * 2) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else {
+      // 20% CLOSED - completed recently
+      currentStage = 'CLOSED'
+      const daysAgo = Math.floor(Math.random() * 14) + 1
+      lastUpdate = addBusinessDays(now, -daysAgo).toISOString()
     }
 
     pumps.push({

@@ -13,6 +13,7 @@ interface ModeKpisProps {
   pumps: Pump[]
   mode: DashboardMode
   onKpiClick?: (kpiId: KpiId, filter: Partial<DashboardFilters>) => void
+  compact?: boolean // When true, renders inline for header placement
 }
 
 /**
@@ -31,7 +32,12 @@ function getKpiDrilldownFilter(kpiId: KpiId): Partial<DashboardFilters> {
   }
 }
 
-export function ModeKpis({ pumps, mode, onKpiClick }: ModeKpisProps) {
+export function ModeKpis({
+  pumps,
+  mode,
+  onKpiClick,
+  compact = false,
+}: ModeKpisProps) {
   const modeConfig = useMemo(
     () => MODE_CONFIGS.find((m) => m.id === mode) || MODE_CONFIGS[0],
     [mode]
@@ -44,6 +50,31 @@ export function ModeKpis({ pumps, mode, onKpiClick }: ModeKpisProps) {
     }))
   }, [modeConfig.kpis, pumps])
 
+  // Compact mode: inline badges for header placement
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2">
+        {kpiValues.map((kpi) => (
+          <button
+            key={kpi.id}
+            onClick={
+              onKpiClick
+                ? () => onKpiClick(kpi.id, getKpiDrilldownFilter(kpi.id))
+                : undefined
+            }
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 border border-border/40 hover:bg-card/80 transition-colors"
+          >
+            <span className="text-xs font-medium text-muted-foreground">
+              {KPI_LABELS[kpi.id]}
+            </span>
+            <span className="text-sm font-bold">{kpi.formatted}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  // Standard mode: grid of cards
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
       {kpiValues.map((kpi) => (

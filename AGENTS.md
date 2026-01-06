@@ -19,6 +19,10 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 > The application is in **Cloud Mode** using a shared Supabase database.
 > **DO NOT** reset data, clear tables, or run seed scripts without explicit user authorization.
 > Read [`docs/status/current-work.md`](docs/status/current-work.md) before starting any task.
+>
+> **Local Dev is Safe**: When running `pnpm dev`, the app auto-enters **Sandbox Mode** with test data.
+> Production is never touched unless you explicitly click "Commit to Live".
+> See [`docs/development.md`](docs/development.md#-sandbox-testing-mode-critical) for details.
 
 ---
 

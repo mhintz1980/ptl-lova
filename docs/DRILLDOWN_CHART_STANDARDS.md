@@ -97,7 +97,6 @@ const width = 400 // BAD: doesn't scale to container
 
 ```tsx
 import { AnimatePresence } from 'motion/react'
-
 ;<AnimatePresence mode="wait">
   {!isDrilledDown ? (
     <motion.div
@@ -345,6 +344,8 @@ const age = pump.stageEntryTime // Property doesn't exist!
 - Part-to-whole relationships
 - Customer/Stage/Model distribution
 
+> [!IMPORTANT] > **Legend Requirement**: Every donut chart segment MUST have a visual identifier. The built-in legend displays below the chart in a compact horizontal wrap layout with 10px text. Legends scroll if content overflows.
+
 ```tsx
 <DrilldownDonutChart
   data={donutSegments}
@@ -353,6 +354,8 @@ const age = pump.stageEntryTime // Property doesn't exist!
   valueFormatter={(v) => `${v} units`}
 />
 ```
+
+**Compact Design**: Charts sized to fit 3 horizontally on page. SVG is 180x180, minimal padding, legend has max-height 80px with scroll support.
 
 ### Use DrilldownChart3D For:
 
@@ -444,6 +447,81 @@ return Array.from(stageMap.entries()).map(([stage, count]) => ({
 }))
 ```
 
+### Pattern: Stage Colors (Canonical)
+
+Use these colors consistently across all stage-based visualizations:
+
+```tsx
+const STAGE_COLORS: Record<string, string> = {
+  QUEUE: '#94a3b8', // Slate gray
+  FABRICATION: '#0ea5e9', // Sky blue
+  STAGED_FOR_POWDER: '#a855f7', // Purple
+  POWDER_COAT: '#d946ef', // Fuchsia
+  ASSEMBLY: '#f97316', // Orange
+  SHIP: '#22c55e', // Green
+  TESTING: '#fb7185', // Rose (legacy)
+  SHIPPING: '#22c55e', // Green (legacy alias)
+}
+
+const BOTTLENECK_COLOR = '#ef4444' // Red - for highlighting problem areas
+```
+
+---
+
+## ⏱️ Time-Based Charts
+
+### Pattern: Bottleneck Detection
+
+Highlight the worst-performing stage/item automatically:
+
+```tsx
+// Calculate which item has the highest value (bottleneck)
+const maxValue = Math.max(...data.map((d) => d.value), 0)
+
+// Apply red color + sublabel to bottleneck
+const formattedData = data.map((item) => {
+  const isBottleneck = item.value === maxValue && item.value > 0
+  return {
+    ...item,
+    color: isBottleneck ? BOTTLENECK_COLOR : item.color,
+    sublabel: isBottleneck ? '⚠️ Bottleneck' : item.sublabel,
+  }
+})
+```
+
+**Example**: `CycleTimeBreakdownChart.tsx` uses this to identify which production stage has the longest average wait time.
+
+### Pattern: Time Value Formatting
+
+For charts displaying time/duration values:
+
+```tsx
+// Standard time formatter
+valueFormatter={(v) => `${v.toFixed(1)} days`}
+
+// Alternative formats
+valueFormatter={(v) => `${Math.round(v)} hrs`}
+valueFormatter={(v) => `${(v / 7).toFixed(1)} weeks`}
+```
+
+### Pattern: Average Stage Age (KPI Calculator)
+
+Use `getAverageStageAge()` from `kpiCalculators.ts` for time-in-stage analysis:
+
+```tsx
+import { getAverageStageAge } from '../kpiCalculators'
+
+const stageData = useMemo(() => {
+  return getAverageStageAge(pumps) // Returns { stage: string, age: number }[]
+}, [pumps])
+```
+
+**What it does**:
+
+- Filters out QUEUE and CLOSED stages
+- Calculates days since `last_update` for each pump
+- Returns average age per active stage
+
 ---
 
 ## 🔍 Common Mistakes (AVOID THESE)
@@ -507,10 +585,13 @@ Before committing drill-down chart code:
 
 **Working Examples** (copy these patterns):
 
-- `src/components/dashboard/charts/TotalValueTrendChart.tsx`
-- `src/components/dashboard/charts/ThroughputTrendChart.tsx`
-- `src/components/dashboard/charts/CyclingDonutChart.tsx`
-- `src/components/dashboard/charts/CycleTimeBreakdownChart.tsx`
+- `src/components/dashboard/charts/TotalValueTrendChart.tsx` - Sparkline → Customer breakdown
+- `src/components/dashboard/charts/ThroughputTrendChart.tsx` - Area chart → Model breakdown
+- `src/components/dashboard/charts/CyclingDonutChart.tsx` - Auto-pause + drill-down
+- `src/components/dashboard/charts/CycleTimeBreakdownChart.tsx` - **Time-based with bottleneck detection**
+  - **Level 0**: Donut showing avg days per active stage
+  - **Level 1**: Customer breakdown with pump counts and total days
+  - **Features**: Bottleneck auto-detection (red highlight), time formatter
 
 **Reusable Components** (use these in your drill-downs):
 

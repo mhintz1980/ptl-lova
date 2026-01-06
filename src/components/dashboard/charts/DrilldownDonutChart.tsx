@@ -1,8 +1,9 @@
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { Button } from '../../ui/Button'
-import { ChevronRight, Home } from 'lucide-react'
+import { ChevronRight, Home, X } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from '../../../lib/utils'
 
 export interface DonutSegment {
   id: string
@@ -12,33 +13,91 @@ export interface DonutSegment {
   sublabel?: string
 }
 
+export interface DonutTab {
+  id: string
+  label: string
+}
+
+export interface DetailRow {
+  id: string
+  label: string
+  value: string
+  sublabel?: string
+}
+
 interface DrilldownDonutChartProps {
   data: DonutSegment[]
   title: string
   onSegmentClick?: (segment: DonutSegment) => void
+  onSegmentSelect?: (segment: DonutSegment | null) => void
   breadcrumbs?: string[]
   onBreadcrumbClick?: (index: number) => void
   valueFormatter?: (value: number) => string
+  className?: string
+  height?: number
+  // Tab support
+  tabs?: DonutTab[]
+  activeTab?: string
+  onTabChange?: (tabId: string) => void
+  // Inline detail table
+  detailData?: DetailRow[]
+  selectedSegmentId?: string | null
 }
 
 export function DrilldownDonutChart({
   data,
   title,
   onSegmentClick,
+  onSegmentSelect,
   breadcrumbs = [],
   onBreadcrumbClick,
   valueFormatter = (v) => v.toString(),
+  className,
+  height = 375,
+  tabs,
+  activeTab,
+  onTabChange,
+  detailData,
+  selectedSegmentId,
 }: DrilldownDonutChartProps) {
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
+  const [internalActiveTab, setInternalActiveTab] = useState(
+    tabs?.[0]?.id || ''
+  )
+
+  // Use controlled tab if provided, otherwise internal state
+  const currentTab = activeTab ?? internalActiveTab
+  const handleTabChange = (tabId: string) => {
+    if (onTabChange) {
+      onTabChange(tabId)
+    } else {
+      setInternalActiveTab(tabId)
+    }
+    // Clear selection when tab changes
+    if (onSegmentSelect) {
+      onSegmentSelect(null)
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SVG DISPLAY DIMENSIONS - Computed from container height
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Reserve space for tabs and detail panel
+  const hasDetail = detailData && detailData.length > 0 && selectedSegmentId
+  const svgHeightRatio = hasDetail ? 0.45 : 0.6
+  const svgDisplayHeight = Math.round(height * svgHeightRatio)
+  const svgDisplayWidth = Math.round(svgDisplayHeight * 1.11)
 
   const total = data.reduce((sum, item) => sum + item.value, 0)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DONUT GEOMETRY SETTINGS (coordinates within the 400x400 viewBox)
+  // ═══════════════════════════════════════════════════════════════════════════
   const centerX = 200
-  const centerY = 200
-  const outerRadius = 140
-  const innerRadius = 80
+  const centerY = 170
+  const outerRadius = 160
+  const innerRadius = 85
   const hoverScale = 1.08
 
-  // Calculate path for segment
   const createSegmentPath = (
     startAngle: number,
     endAngle: number,
@@ -74,7 +133,7 @@ export function DrilldownDonutChart({
   }
 
   // Calculate segments
-  let currentAngle = -Math.PI / 2 // Start at top
+  let currentAngle = -Math.PI / 2
   const segments = data.map((segment) => {
     const percentage = total > 0 ? segment.value / total : 0
     const angle = percentage * 2 * Math.PI
@@ -93,16 +152,34 @@ export function DrilldownDonutChart({
     }
   })
 
+  const handleSegmentInteraction = (segment: DonutSegment) => {
+    // If onSegmentSelect is provided, use it (new behavior for inline detail)
+    if (onSegmentSelect) {
+      onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
+    }
+    // If onSegmentClick is provided, call it (legacy drill-down behavior)
+    if (onSegmentClick) {
+      onSegmentClick(segment)
+    }
+  }
+
   return (
-    <Card className="layer-l1 overflow-hidden !bg-card !relative">
+    <Card
+      className={cn(
+        'layer-l1 overflow-hidden !bg-card !relative flex flex-col',
+        className
+      )}
+      style={{ height: `${height}px` }}
+    >
       <style>{`.layer-l1 { isolation: isolate; }`}</style>
-      <CardHeader className="pb-2 !relative z-20">
-        <CardTitle className="text-lg">{title}</CardTitle>
+
+      <CardHeader className="p-0 !relative z-0">
+        <CardTitle className="text-sm">{title}</CardTitle>
         {breadcrumbs.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap mt-2">
+          <div className="flex items-center gap-1 flex-wrap mt-0">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => onBreadcrumbClick?.(0)}
               className="h-7 px-2"
             >
@@ -113,7 +190,7 @@ export function DrilldownDonutChart({
                 <ChevronRight className="size-3 text-muted-foreground" />
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => onBreadcrumbClick?.(index + 1)}
                   className="h-7 px-2 text-xs"
                 >
@@ -125,21 +202,44 @@ export function DrilldownDonutChart({
         )}
       </CardHeader>
 
-      <CardContent className="!relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 items-center min-h-[300px]">
+      <CardContent className="p-0 flex flex-col justify-center flex-1 overflow-hidden">
+        {/* Tab Bar (if tabs provided) */}
+        {tabs && tabs.length > 0 && (
+          <div className="flex gap-1 px-2 pt-2 flex-shrink-0">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`
+                  px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 backdrop-blur-sm
+                  ${
+                    currentTab === tab.id
+                      ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)] border border-cyan-500/30'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'
+                  }
+                `}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 items-center justify-center flex-1 min-h-0">
           <div className="relative z-10" style={{ perspective: '1000px' }}>
             <svg
-              width="300"
-              height="300"
-              viewBox="0 0 400 400"
-              className="drop-shadow-2xl"
+              width={svgDisplayWidth}
+              height={svgDisplayHeight}
+              viewBox="0 0 400 360"
+              className="drop-shadow-lg"
               role="graphics-document"
               aria-roledescription="donut chart"
-              aria-label={`${title} - showing ${data.length} segments totaling ${valueFormatter(total)}`}
+              aria-label={`${title} - showing ${
+                data.length
+              } segments totaling ${valueFormatter(total)}`}
             >
               <title>{title}</title>
               <defs>
-                {/* Drop shadow - reduced from 0.3 to 0.2 slope for lighter appearance */}
                 <filter
                   id="donut-shadow"
                   x="-50%"
@@ -159,7 +259,7 @@ export function DrilldownDonutChart({
                 </filter>
               </defs>
 
-              {/* 3D depth/shadow segments - reduced opacity from 0.3 to 0.15 */}
+              {/* 3D depth/shadow segments */}
               {segments.map((segment, index) => (
                 <motion.path
                   key={`shadow-${segment.id}`}
@@ -182,7 +282,10 @@ export function DrilldownDonutChart({
               {/* Main donut segments */}
               {segments.map((segment, index) => {
                 const isHovered = hoveredSegment === segment.id
-                const scale = isHovered && onSegmentClick ? hoverScale : 1
+                const isSelected = selectedSegmentId === segment.id
+                const isClickable = onSegmentClick || onSegmentSelect
+                const scale =
+                  (isHovered || isSelected) && isClickable ? hoverScale : 1
 
                 return (
                   <g key={segment.id}>
@@ -194,15 +297,17 @@ export function DrilldownDonutChart({
                         innerRadius
                       )}
                       fill={segment.color}
-                      fillOpacity="0.9"
-                      stroke="white"
-                      strokeWidth="2"
+                      fillOpacity={isSelected ? 1 : 0.9}
+                      stroke={isSelected ? 'white' : 'white'}
+                      strokeWidth={isSelected ? 3 : 2}
                       filter="url(#donut-shadow)"
-                      className={onSegmentClick ? 'cursor-pointer' : ''}
+                      className={isClickable ? 'cursor-pointer' : ''}
                       style={{ transformOrigin: '200px 200px' }}
                       role="graphics-symbol"
-                      aria-label={`${segment.label}: ${valueFormatter(segment.value)} (${segment.percentage.toFixed(1)}%)`}
-                      tabIndex={onSegmentClick ? 0 : undefined}
+                      aria-label={`${segment.label}: ${valueFormatter(
+                        segment.value
+                      )} (${segment.percentage.toFixed(1)}%)`}
+                      tabIndex={isClickable ? 0 : undefined}
                       initial={{ pathLength: 0, opacity: 0 }}
                       animate={{
                         pathLength: 1,
@@ -216,17 +321,17 @@ export function DrilldownDonutChart({
                       }}
                       onMouseEnter={() => setHoveredSegment(segment.id)}
                       onMouseLeave={() => setHoveredSegment(null)}
-                      onClick={() => onSegmentClick?.(segment)}
+                      onClick={() => handleSegmentInteraction(segment)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
-                          onSegmentClick?.(segment)
+                          handleSegmentInteraction(segment)
                         }
                       }}
                       onFocus={() => setHoveredSegment(segment.id)}
                       onBlur={() => setHoveredSegment(null)}
                       whileHover={
-                        onSegmentClick
+                        isClickable
                           ? {
                               filter: 'brightness(1.1)',
                             }
@@ -250,7 +355,7 @@ export function DrilldownDonutChart({
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fill="white"
-                        className="text-xs pointer-events-none font-medium"
+                        className="text-sm pointer-events-none font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 + 0.3 }}
@@ -280,13 +385,17 @@ export function DrilldownDonutChart({
                 y={centerY - 10}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-xs"
+                className="text-sm text-muted-foreground"
                 fill="hsl(var(--muted-foreground))"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                key={hoveredSegment ? 'hover-label' : 'total-label'}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.2 }}
               >
-                Total
+                {hoveredSegment
+                  ? data.find((s) => s.id === hoveredSegment)?.label
+                  : 'Total'}
               </motion.text>
 
               <motion.text
@@ -295,57 +404,118 @@ export function DrilldownDonutChart({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill="hsl(var(--foreground))"
-                className="text-base font-semibold"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                className="text-2xl font-bold"
+                key={hoveredSegment ? 'hover-value' : 'total-value'}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
               >
-                {valueFormatter(total)}
+                {valueFormatter(
+                  hoveredSegment
+                    ? data.find((s) => s.id === hoveredSegment)?.value || 0
+                    : total
+                )}
               </motion.text>
             </svg>
           </div>
 
-          {/* Legend */}
-          <div className="flex-1 space-y-2 max-h-64 overflow-y-auto">
-            {segments.map((segment, index) => (
-              <motion.div
-                key={segment.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  onSegmentClick ? 'cursor-pointer hover:bg-muted' : ''
-                } ${hoveredSegment === segment.id ? 'bg-muted' : ''}`}
-                onMouseEnter={() => setHoveredSegment(segment.id)}
-                onMouseLeave={() => setHoveredSegment(null)}
-                onClick={() => onSegmentClick?.(segment)}
-              >
-                <div
-                  className="w-4 h-4 rounded-sm flex-shrink-0"
-                  style={{ backgroundColor: segment.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm truncate">{segment.label}</span>
-                    {onSegmentClick && (
-                      <ChevronRight className="size-3 text-muted-foreground flex-shrink-0" />
+          {/* Legend - only show if no detail panel */}
+          {!hasDetail && (
+            <div className="w-full max-h-20 overflow-y-auto px-2">
+              <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center">
+                {segments.map((segment, index) => (
+                  <motion.div
+                    key={segment.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.03 }}
+                    className={`flex items-center gap-1 px-1 py-0.5 rounded transition-colors ${
+                      onSegmentClick || onSegmentSelect
+                        ? 'cursor-pointer hover:bg-muted'
+                        : ''
+                    } ${
+                      hoveredSegment === segment.id ||
+                      selectedSegmentId === segment.id
+                        ? 'bg-muted'
+                        : ''
+                    }`}
+                    onMouseEnter={() => setHoveredSegment(segment.id)}
+                    onMouseLeave={() => setHoveredSegment(null)}
+                    onClick={() => handleSegmentInteraction(segment)}
+                  >
+                    <div
+                      className="w-2 h-2 rounded-sm flex-shrink-0"
+                      style={{ backgroundColor: segment.color }}
+                    />
+                    <span className="text-[10px] truncate max-w-[80px]">
+                      {segment.label}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {valueFormatter(segment.value)}
+                    </span>
+                    {segment.sublabel && (
+                      <span className="text-[9px] text-orange-500 truncate">
+                        {segment.sublabel}
+                      </span>
                     )}
-                  </div>
-                  {segment.sublabel && (
-                    <div className="text-xs text-muted-foreground truncate">
-                      {segment.sublabel}
-                    </div>
-                  )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Inline Detail Panel (when segment selected) */}
+          {hasDetail && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="w-full px-2 flex-1 min-h-0 overflow-hidden"
+            >
+              <div className="h-full flex flex-col border border-border/40 rounded-lg bg-muted/30 overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 flex-shrink-0">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {data.find((s) => s.id === selectedSegmentId)?.label}{' '}
+                    Details
+                  </span>
+                  <button
+                    onClick={() => onSegmentSelect?.(null)}
+                    className="p-0.5 rounded hover:bg-muted transition-colors"
+                    aria-label="Close detail panel"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-                <div className="text-sm text-right flex-shrink-0">
-                  <div>{valueFormatter(segment.value)}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {segment.percentage.toFixed(1)}%
-                  </div>
+                <div className="flex-1 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <tbody>
+                      {detailData?.map((row, i) => (
+                        <tr
+                          key={row.id}
+                          className={
+                            i % 2 === 0 ? 'bg-transparent' : 'bg-muted/20'
+                          }
+                        >
+                          <td className="px-3 py-1.5 truncate max-w-[120px]">
+                            {row.label}
+                          </td>
+                          <td className="px-3 py-1.5 text-right font-medium">
+                            {row.value}
+                          </td>
+                          {row.sublabel && (
+                            <td className="px-3 py-1.5 text-right text-muted-foreground">
+                              {row.sublabel}
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </CardContent>
     </Card>

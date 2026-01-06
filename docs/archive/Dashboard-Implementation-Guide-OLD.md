@@ -47,7 +47,7 @@ export function MyDrilldownChart(_props: ChartProps) {
     // Group and aggregate pump data
     const groupMap = new Map<string, number>()
     pumps.forEach((pump) => {
-      const key = pump.someProperty  // e.g., customer, stage, model
+      const key = pump.someProperty // e.g., customer, stage, model
       groupMap.set(key, (groupMap.get(key) || 0) + 1)
     })
 
@@ -89,7 +89,9 @@ export function MyDrilldownChart(_props: ChartProps) {
         label: customer,
         value: data.count,
         color: getColorFor(selectedId),
-        sublabel: `Avg: ${data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0} days`,
+        sublabel: `Avg: ${
+          data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0
+        } days`,
       }))
       .sort((a, b) => b.value - a.value)
   }, [drilldownPath, pumps])
@@ -164,7 +166,7 @@ function getColorFor(key: string): string {
 function hashCode(str: string): number {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i)
+    hash = (hash << 5) - hash + str.charCodeAt(i)
     hash |= 0
   }
   return hash
@@ -181,19 +183,19 @@ function hashCode(str: string): number {
 // ✅ CORRECT - Use last_update for time calculations
 import { Pump } from '../../../types'
 
-pump.last_update        // ISO timestamp string - USE THIS
-pump.value              // Numeric value
-pump.customer           // String
-pump.model              // String
-pump.stage              // Stage enum
-pump.priority           // Priority enum
-pump.po                 // String
-pump.serial             // number | null
+pump.last_update // ISO timestamp string - USE THIS
+pump.value // Numeric value
+pump.customer // String
+pump.model // String
+pump.stage // Stage enum
+pump.priority // Priority enum
+pump.po // String
+pump.serial // number | null
 
 // ❌ WRONG - These properties DO NOT exist
-pump.stageEntryTime     // ❌ Does NOT exist
-pump.createdAt          // ❌ Does NOT exist
-pump.entryTime          // ❌ Does NOT exist
+pump.stageEntryTime // ❌ Does NOT exist
+pump.createdAt // ❌ Does NOT exist
+pump.entryTime // ❌ Does NOT exist
 ```
 
 ### 2. Required Imports
@@ -201,7 +203,7 @@ pump.entryTime          // ❌ Does NOT exist
 ```tsx
 // ✅ CORRECT - All imports present
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'motion/react'  // ← CRITICAL!
+import { motion, AnimatePresence } from 'motion/react' // ← CRITICAL!
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
 import { DrilldownDonutChart, DonutSegment } from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
@@ -229,7 +231,8 @@ pumps.forEach((pump) => {
   const data = customerMap.get(pump.customer)!
   data.count += 1
 
-  if (pump.last_update) {  // ← Check for existence
+  if (pump.last_update) {
+    // ← Check for existence
     const ageInMs = Date.now() - new Date(pump.last_update).getTime()
     const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
     data.totalAge += ageInDays
@@ -240,7 +243,8 @@ pumps.forEach((pump) => {
 sublabel: `Avg: ${(data.totalAge / data.count).toFixed(1)} days`
 
 // ❌ WRONG - Using non-existent properties
-const ageInMs = Date.now() - new Date(pump.stageEntryTime || pump.createdAt).getTime()
+const ageInMs =
+  Date.now() - new Date(pump.stageEntryTime || pump.createdAt).getTime()
 // TypeScript error: Property 'stageEntryTime' does not exist
 ```
 
@@ -263,21 +267,26 @@ export function MyChart({ onDrilldown }: ChartProps) {
 }
 ```
 
-### 5. Scroll Position Preservation
+### 5. Zero Layout Shift (Fixed Height Pattern)
+
+To prevents page jumping on drill-down, you **MUST** use a fixed height container with internal scrolling. relying on `min-h` is insufficient as drill-down lists can expand and push page content.
 
 ```tsx
-// ✅ CORRECT - Prevents page jumping on drill-down
+// ✅ CORRECT - Zero Layout Shift Pattern
 return (
-  <div className="w-full h-full flex flex-col min-h-[300px]">  {/* ← Fixed height container */}
+  // 1. Fixed height (e.g., h-[450px])
+  // 2. Relative positioning for AnimatePresence
+  // 3. Overflow hidden to contain animations
+  <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
     <AnimatePresence mode="wait">
       {drilldownPath.length === 0 ? (
         <motion.div
           key="donut"
-          initial={{ opacity: 0 }}  // ← Opacity ONLY
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="w-full h-full"  // ← Fill container
+          className="w-full h-full"
         >
           <DrilldownDonutChart {...props} />
         </motion.div>
@@ -290,7 +299,11 @@ return (
           transition={{ duration: 0.2 }}
           className="w-full h-full"
         >
-          <DrilldownChart3D {...props} />
+          {/* Inner chart MUST handle scrolling if content overflows */}
+          <DrilldownChart3D
+            className="flex flex-col overflow-y-auto" // Enable internal scroll
+            {...props}
+          />
         </motion.div>
       )}
     </AnimatePresence>
@@ -299,17 +312,20 @@ return (
 
 // ❌ WRONG - Causes page to jump
 return (
-  <>
+  <div className="min-h-[300px]">
+    {' '}
+    {/* ❌ Allows expansion -> Layout Shift */}
     {drilldownPath.length === 0 ? (
-      <DrilldownDonutChart />  // ← No consistent container
+      <DrilldownDonutChart />
     ) : (
       <DrilldownChart3D />
     )}
-  </>
+  </div>
 )
 ```
 
 **Why this matters:**
+
 - `min-h-[300px]` prevents container collapse during transition
 - Opacity-only transitions prevent layout shifts
 - `w-full h-full` ensures views fill container
@@ -333,19 +349,21 @@ return (
 ```
 
 **Best for:**
+
 - Customer distribution
 - Stage distribution
 - Model distribution
 - Any part-to-whole relationship
 
 **DonutSegment interface:**
+
 ```tsx
 interface DonutSegment {
-  id: string          // Unique identifier
-  label: string       // Display name
-  value: number       // Numeric value
-  color: string       // Hex color
-  sublabel?: string   // Optional secondary text
+  id: string // Unique identifier
+  label: string // Display name
+  value: number // Numeric value
+  color: string // Hex color
+  sublabel?: string // Optional secondary text
 }
 ```
 
@@ -364,19 +382,21 @@ interface DonutSegment {
 ```
 
 **Best for:**
+
 - Drill-down level details
 - Ranked items (customers, POs, models)
 - Comparisons with sublabels
 - Any time-based or numeric data
 
 **DrilldownSegment interface:**
+
 ```tsx
 interface DrilldownSegment {
-  id: string          // Unique identifier
-  label: string       // Display name
-  value: number       // Numeric value
-  color: string       // Hex color
-  sublabel?: string   // Optional secondary text (e.g., "Avg: 5.2 days")
+  id: string // Unique identifier
+  label: string // Display name
+  value: number // Numeric value
+  color: string // Hex color
+  sublabel?: string // Optional secondary text (e.g., "Avg: 5.2 days")
 }
 ```
 
@@ -394,17 +414,19 @@ interface DrilldownSegment {
 ```
 
 **Best for:**
+
 - Value data (monetary)
 - Size comparisons
 - Hierarchical drilling
 
 **TreemapSegment interface:**
+
 ```tsx
 interface TreemapSegment {
-  id: string          // Unique identifier
-  label: string       // Display name
-  value: number       // Numeric value (determines size)
-  color: string       // Hex color
+  id: string // Unique identifier
+  label: string // Display name
+  value: number // Numeric value (determines size)
+  color: string // Hex color
 }
 ```
 
@@ -493,7 +515,9 @@ return Array.from(customerMap.entries())
     id: customer,
     label: customer,
     value: data.count,
-    sublabel: `Avg: ${data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0} days`,
+    sublabel: `Avg: ${
+      data.count > 0 ? (data.totalAge / data.count).toFixed(1) : 0
+    } days`,
   }))
   .sort((a, b) => b.value - a.value)
 ```
@@ -523,7 +547,7 @@ function getColorFor(key: string): string {
 function hashCode(str: string): number {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i)
+    hash = (hash << 5) - hash + str.charCodeAt(i)
     hash |= 0
   }
   return hash

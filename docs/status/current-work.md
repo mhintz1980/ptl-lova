@@ -66,6 +66,12 @@
 - [x] **New SOPs**: Created `docs/process/support-operations.md` for common admin tasks.
 - [x] **Password Reset**: Verified and documented procedure for resetting user passwords.
 
+## Completed: Dev Sandbox Mode ✅ (2025-12-30)
+
+- [x] **Auto-Sandbox in Dev**: `store.ts` now auto-enters sandbox mode with 15 seed pumps when running locally
+- [x] **Production Protection**: "Commit to Live" button shows confirmation dialog in dev mode
+- [x] **Testing Safe**: All test data stays in memory, never touches production Supabase
+
 ---
 
 ## Completed: Agent Skills Integration - Phase 1 ✅ (2025-12-24)

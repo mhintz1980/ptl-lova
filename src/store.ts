@@ -164,6 +164,26 @@ export const useApp = create<AppState>()(
 
       load: async () => {
         set({ loading: true })
+
+        // DEV MODE: Auto-enter sandbox with seed data to protect production
+        if (import.meta.env.DEV) {
+          const { seed } = await import('./lib/seed')
+          const seedData = seed(40) // Generate 40 test pumps for good chart coverage
+          set({
+            pumps: seedData,
+            loading: false,
+            isSandbox: true,
+            originalSnapshot: [], // Empty - no production data to restore
+            adapter: SandboxAdapter,
+          })
+          console.log(
+            '🧪 Dev Mode: Loaded sandbox with',
+            seedData.length,
+            'test pumps'
+          )
+          return
+        }
+
         let rows = await get().adapter.load()
 
         // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
@@ -791,6 +811,14 @@ export const useApp = create<AppState>()(
       commitSandbox: () => {
         const state = get()
         if (!state.isSandbox) return
+
+        // Safety: Confirm before committing dev sandbox to production
+        if (import.meta.env.DEV) {
+          const confirmed = window.confirm(
+            '⚠️ You are about to push sandbox data to PRODUCTION Supabase.\n\nAre you absolutely sure?'
+          )
+          if (!confirmed) return
+        }
 
         // Restore LocalAdapter
         // If we were in Cloud Mode, we should restore SupabaseAdapter?

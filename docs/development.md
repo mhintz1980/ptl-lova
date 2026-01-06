@@ -25,6 +25,46 @@ pnpm build
 
 The production-ready files will be in the `dist/` directory.
 
+---
+
+## 🧪 Sandbox Testing Mode (CRITICAL)
+
+> [!IMPORTANT] > **Local development is automatically isolated from production.**
+> When you run `pnpm dev`, the app enters **Sandbox Mode** with test data.
+
+### How It Works
+
+| Environment                | Data Source                  | Persistence                   |
+| -------------------------- | ---------------------------- | ----------------------------- |
+| **Local Dev** (`pnpm dev`) | 40 auto-generated seed pumps | Memory only (lost on refresh) |
+| **Production** (Vercel)    | Real Supabase database       | Persisted to cloud            |
+
+### Visual Indicators
+
+When in Sandbox Mode, you will see:
+
+- **Yellow banner** at the top: "SANDBOX MODE ACTIVE"
+- **"SIMULATION" badge** confirming test mode
+- **Console log**: `🧪 Dev Mode: Loaded sandbox with 15 test pumps`
+
+### Agent Rules for Testing
+
+1. **Add test data freely** — Create POs, move pump cards, test all features
+2. **Never click "Commit to Live"** — This pushes sandbox data to production (requires confirmation)
+3. **Refresh to reset** — Page refresh regenerates fresh seed data
+4. **Production checks require deploy** — To verify production, check `ptl-lova.vercel.app`
+
+### If You Need Production Data Locally
+
+For debugging production issues:
+
+1. Temporarily edit `src/store.ts` → remove the `if (import.meta.env.DEV)` block in `load()`
+2. The app will connect to real Supabase
+3. **BE EXTREMELY CAREFUL** — changes affect production
+4. **Revert immediately** after debugging
+
+---
+
 ## Agent Browser Instructions
 
 AI agents with built-in browser capabilities can view the running app:

@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { DrilldownDonutChart, DonutSegment } from './DrilldownDonutChart'
-import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
+import {
+  DrilldownDonutChart,
+  DonutSegment,
+  DetailRow,
+} from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getAverageStageAge } from '../kpiCalculators'
-import { Stage } from '../../../types'
 
 // Stage colors with bottleneck (red) highlighting
 const STAGE_COLORS: Record<string, string> = {
@@ -21,7 +22,9 @@ const BOTTLENECK_COLOR = '#ef4444' // Red for bottleneck
 
 export function CycleTimeBreakdownChart(_props: ChartProps) {
   const { pumps } = useApp()
-  const [drilldownPath, setDrilldownPath] = useState<string[]>([])
+  const [selectedSegment, setSelectedSegment] = useState<DonutSegment | null>(
+    null
+  )
 
   // Calculate average days per stage
   const stageData = useMemo(() => {
@@ -49,94 +52,47 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
       })
   }, [stageData, maxAge])
 
-  // Get pumps in selected stage for drill-down
-  const drilldownData = useMemo((): DrilldownSegment[] => {
-    if (drilldownPath.length === 0) return []
+  // Build inline detail data - pumps in selected stage
+  const detailData = useMemo((): DetailRow[] => {
+    if (!selectedSegment) return []
 
-    const selectedStage = drilldownPath[0] as Stage
-    const pumpsInStage = pumps.filter((p) => p.stage === selectedStage)
+    const pumpsInStage = pumps.filter(
+      (p) => p.stage === selectedSegment.id && p.stage !== 'CLOSED'
+    )
 
-    // Group by customer
-    const customerMap = new Map<string, { count: number; totalAge: number }>()
-    pumpsInStage.forEach((pump) => {
-      if (!customerMap.has(pump.customer)) {
-        customerMap.set(pump.customer, { count: 0, totalAge: 0 })
+    return pumpsInStage.slice(0, 10).map((p) => {
+      // Calculate age in days
+      let ageStr = ''
+      if (p.last_update) {
+        const ageInMs = Date.now() - new Date(p.last_update).getTime()
+        const ageInDays = Math.round(ageInMs / (1000 * 60 * 60 * 24))
+        ageStr = `${ageInDays}d`
       }
-      const data = customerMap.get(pump.customer)!
-      data.count += 1
-      // Calculate age in days using last_update
-      if (pump.last_update) {
-        const ageInMs = Date.now() - new Date(pump.last_update).getTime()
-        const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
-        data.totalAge += ageInDays
+
+      return {
+        id: p.id,
+        label: p.po,
+        value: ageStr,
+        sublabel: p.customer,
       }
     })
+  }, [selectedSegment, pumps])
 
-    return Array.from(customerMap.entries())
-      .map(([customer, data]) => ({
-        id: customer,
-        label: customer,
-        value: Math.round(data.totalAge * 10) / 10,
-        color: STAGE_COLORS[selectedStage] || '#6b7280',
-        sublabel: `${data.count} pump${data.count === 1 ? '' : 's'}`,
-      }))
-      .sort((a, b) => b.value - a.value)
-  }, [drilldownPath, pumps, stageData])
-
-  const handleSegmentClick = (segment: DonutSegment | DrilldownSegment) => {
-    if (drilldownPath.length === 0) {
-      // Drill down to stage details
-      setDrilldownPath([segment.id])
-    }
-    // No action at deepest level
-  }
-
-  const handleBreadcrumbClick = (index: number) => {
-    if (index === 0) {
-      setDrilldownPath([])
-    }
+  const handleSegmentSelect = (segment: DonutSegment | null) => {
+    setSelectedSegment(segment)
   }
 
   return (
-    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
-      <AnimatePresence mode="wait">
-        {drilldownPath.length === 0 ? (
-          <motion.div
-            key="donut"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="w-full h-full"
-          >
-            <DrilldownDonutChart
-              data={donutData}
-              title="" // Title handled by generic dashboard container or internal
-              onSegmentClick={handleSegmentClick}
-              valueFormatter={(v) => `${v.toFixed(1)} days`}
-              className="h-full"
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="drilldown"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="w-full h-full"
-          >
-            <DrilldownChart3D
-              data={drilldownData}
-              title="" // Title handled by generic dashboard container or internal
-              breadcrumbs={drilldownPath}
-              onBreadcrumbClick={handleBreadcrumbClick}
-              valueFormatter={(v) => `${v.toFixed(1)} days`}
-              className="h-full flex flex-col overflow-y-auto"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="w-full flex flex-col relative overflow-hidden h-full">
+      <DrilldownDonutChart
+        data={donutData}
+        title=""
+        onSegmentSelect={handleSegmentSelect}
+        selectedSegmentId={selectedSegment?.id}
+        detailData={detailData}
+        valueFormatter={(v) => `${v.toFixed(1)} days`}
+        height={420}
+      />
     </div>
   )
 }

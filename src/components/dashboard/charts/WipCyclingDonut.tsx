@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
-import { DrilldownDonutChart, DonutSegment } from './DrilldownDonutChart'
+import {
+  DrilldownDonutChart,
+  DonutSegment,
+  DonutTab,
+  DetailRow,
+} from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getPumpsByCustomer, getWorkloadByStage } from '../kpiCalculators'
@@ -28,10 +33,10 @@ const COLORS = [
 
 type Perspective = 'stage' | 'customer' | 'model'
 
-const TABS: { id: Perspective; label: string }[] = [
-  { id: 'stage', label: 'By Stage' },
-  { id: 'customer', label: 'By Customer' },
-  { id: 'model', label: 'By Model' },
+const TABS: DonutTab[] = [
+  { id: 'stage', label: 'Stage' },
+  { id: 'customer', label: 'Cust.' },
+  { id: 'model', label: 'Model' },
 ]
 
 // Helper to group pumps by key
@@ -50,6 +55,9 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
   const { pumps } = useApp()
   const [activePerspective, setActivePerspective] =
     useState<Perspective>('stage')
+  const [selectedSegment, setSelectedSegment] = useState<DonutSegment | null>(
+    null
+  )
 
   // Filter out CLOSED pumps + apply filters
   const filteredPumps = useMemo(() => {
@@ -95,7 +103,43 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
       }))
   }, [filteredPumps, activePerspective])
 
-  // Handle segment click → drill down
+  // Build inline detail data for selected segment
+  const detailData = useMemo((): DetailRow[] => {
+    if (!selectedSegment) return []
+
+    // Get pumps matching the selection
+    const matchingPumps = filteredPumps.filter((p) => {
+      if (activePerspective === 'stage') {
+        return p.stage === selectedSegment.id
+      } else if (activePerspective === 'customer') {
+        return p.customer === selectedSegment.id
+      } else {
+        return p.model === selectedSegment.id
+      }
+    })
+
+    // Return pump details (PO, model/stage, customer)
+    return matchingPumps.slice(0, 10).map((p) => ({
+      id: p.id,
+      label: p.po,
+      value:
+        activePerspective === 'stage' ? p.model : p.stage.replace(/_/g, ' '),
+      sublabel: activePerspective === 'customer' ? p.model : p.customer,
+    }))
+  }, [selectedSegment, filteredPumps, activePerspective])
+
+  // Handle segment selection
+  const handleSegmentSelect = (segment: DonutSegment | null) => {
+    setSelectedSegment(segment)
+  }
+
+  // Handle tab change
+  const handleTabChange = (tabId: string) => {
+    setActivePerspective(tabId as Perspective)
+    setSelectedSegment(null) // Clear selection when switching tabs
+  }
+
+  // Handle drill-down when user wants to see more (optional, via onDrilldown)
   const handleSegmentClick = (segment: DonutSegment) => {
     if (!onDrilldown) return
 
@@ -109,36 +153,21 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Perspective Tabs */}
-      <div className="flex gap-1 mb-3 px-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActivePerspective(tab.id)}
-            className={`
-              px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200
-              ${
-                activePerspective === tab.id
-                  ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Donut Chart */}
-      <div className="flex-1 min-h-0">
-        <DrilldownDonutChart
-          data={donutData}
-          title=""
-          onSegmentClick={handleSegmentClick}
-          valueFormatter={(v) => `${v} units`}
-        />
-      </div>
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+      <DrilldownDonutChart
+        data={donutData}
+        title=""
+        tabs={TABS}
+        activeTab={activePerspective}
+        onTabChange={handleTabChange}
+        onSegmentSelect={handleSegmentSelect}
+        onSegmentClick={handleSegmentClick}
+        selectedSegmentId={selectedSegment?.id}
+        detailData={detailData}
+        valueFormatter={(v) => `${v} units`}
+        className="h-full"
+        height={420}
+      />
     </div>
   )
 }
