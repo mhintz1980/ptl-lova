@@ -86,7 +86,7 @@ export function WorkloadByDeptProportional({
   }
 
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
       <DrilldownDonutChart
         data={donutData}
         title=""

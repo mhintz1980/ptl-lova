@@ -8,8 +8,15 @@ import { Pump } from '../../../types'
 import { Badge } from '../../ui/Badge'
 
 // --- Types ---
-type ViewMode = 'customer' | 'model'
+type ViewMode = 'stage' | 'customer' | 'model' | 'value'
 type TimeFilter = 'all' | 'week' | 'quarter' | 'year'
+
+const VIEW_MODE_LABELS: Record<ViewMode, string> = {
+  stage: 'Stage',
+  customer: 'Cust.',
+  model: 'Model',
+  value: 'Value',
+}
 
 const COLORS = [
   '#06b6d4', // cyan
@@ -161,7 +168,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
   onDrilldown,
 }) => {
   const { pumps } = useApp()
-  const [viewMode, setViewMode] = useState<ViewMode>('customer')
+  const [viewMode, setViewMode] = useState<ViewMode>('stage')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
 
   // 1. Filter Logic
@@ -193,8 +200,28 @@ export const TreemapChart: React.FC<ChartProps> = ({
   const data = useMemo(() => {
     const groups: Record<string, { value: number; count: number }> = {}
 
+    if (viewMode === 'value') {
+      // Value mode: show individual pumps by value
+      return filteredPumps
+        .filter((p: Pump) => p.value > 0)
+        .map((p: Pump) => ({
+          name: `${p.po} - ${p.model}`,
+          value: p.value,
+          count: 1,
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 20)
+    }
+
     filteredPumps.forEach((p: Pump) => {
-      const key = viewMode === 'customer' ? p.customer : p.model
+      let key: string
+      if (viewMode === 'stage') {
+        key = p.stage.replace(/_/g, ' ')
+      } else if (viewMode === 'customer') {
+        key = p.customer
+      } else {
+        key = p.model
+      }
       const val = (p as any).value || 0
 
       if (!groups[key]) groups[key] = { value: 0, count: 0 }
@@ -215,9 +242,11 @@ export const TreemapChart: React.FC<ChartProps> = ({
 
   const handleNodeClick = (node: any) => {
     const update: any = {}
-    if (viewMode === 'customer') update.customerId = node.name
-    else update.modelId = node.name
-    onDrilldown(update)
+    if (viewMode === 'stage') update.stage = node.name.replace(/ /g, '_')
+    else if (viewMode === 'customer') update.customerId = node.name
+    else if (viewMode === 'model') update.modelId = node.name
+    // Value mode doesn't drill down further
+    if (Object.keys(update).length > 0) onDrilldown(update)
   }
 
   return (
@@ -226,7 +255,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 mb-2 flex-shrink-0">
         {/* Left: View Switcher */}
         <div className="flex bg-muted/30 p-1 rounded-lg">
-          {(['customer', 'model'] as const).map((m) => (
+          {(['stage', 'customer', 'model', 'value'] as const).map((m) => (
             <button
               key={m}
               onClick={() => setViewMode(m)}
@@ -236,7 +265,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              By {m.charAt(0).toUpperCase() + m.slice(1)}
+              {VIEW_MODE_LABELS[m]}
             </button>
           ))}
         </div>
@@ -273,8 +302,8 @@ export const TreemapChart: React.FC<ChartProps> = ({
         </div>
       </div>
 
-      {/* Chart container with explicit height */}
-      <div className="relative" style={{ height: 380 }}>
+      {/* Chart container - fills remaining space */}
+      <div className="relative flex-1 min-h-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${viewMode}-${timeFilter}`}

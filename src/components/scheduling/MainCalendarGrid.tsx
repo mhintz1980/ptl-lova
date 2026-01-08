@@ -4,13 +4,15 @@ import { useDroppable } from '@dnd-kit/core'
 import { addDays, format, startOfDay, startOfWeek, isWeekend } from 'date-fns'
 import { cn } from '../../lib/utils'
 import type { Pump, Stage } from '../../types'
-import { CalendarEvent } from './CalendarEvent'
-import {
-  type CalendarStageEvent,
-  type StageBlock,
-  projectCapacityAwareTimelines,
+import { UnifiedJobPill } from './UnifiedJobPill'
+import { SwimlaneGroup } from './SwimlaneGroup'
+import type {
+  CalendarStageEvent,
+  StageBlock,
 } from '../../lib/projection-engine'
+import { projectCapacityAwareTimelines } from '../../lib/projection-engine'
 import { useApp } from '../../store'
+import { calculateRisk } from '../../lib/riskCalculator'
 
 interface MainCalendarGridProps {
   pumps: Pump[]
@@ -37,115 +39,28 @@ function isHoliday(date: Date) {
   return HOLIDAYS.includes(dateStr)
 }
 
-function projectSegmentsToTimeline(
-  blocks: StageBlock[],
-  viewStart: Date,
-  daysToShow: number
-): {
-  stage: Stage
-  startIndex: number
-  span: number
-}[] {
-  const viewEnd = addDays(viewStart, daysToShow)
-  const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-  return blocks.reduce<{ stage: Stage; startIndex: number; span: number }[]>(
-    (acc, block) => {
-      if (block.end <= viewStart || block.start >= viewEnd) return acc
-
-      const relativeStart =
-        (block.start.getTime() - viewStart.getTime()) / MS_PER_DAY
-      const relativeEnd =
-        (block.end.getTime() - viewStart.getTime()) / MS_PER_DAY
-
-      const startIndex = Math.max(0, relativeStart)
-      const endIndex = Math.min(daysToShow, relativeEnd)
-      const span = Math.max(1 / 24, endIndex - startIndex)
-
-      acc.push({
-        stage: block.stage,
-        startIndex,
-        span,
-      })
-      return acc
-    },
-    []
-  )
+// Helper to get risk status for grouping
+function getRiskGroup(
+  pump: Pump,
+  shipDate: Date | null
+): 'late' | 'at-risk' | 'on-track' {
+  const result = calculateRisk(pump, shipDate ?? new Date())
+  return result.status
 }
 
-function FlowConnectorLayer({
-  events,
-  rowHeight,
-  cellWidth,
-}: {
-  events: CalendarStageEvent[]
-  rowHeight: number
-  cellWidth: number
-}) {
-  // Group events by pumpId
-  const pumpGroups = useMemo(() => {
-    const groups: Record<string, CalendarStageEvent[]> = {}
-    events.forEach((ev) => {
-      if (!groups[ev.pumpId]) groups[ev.pumpId] = []
-      groups[ev.pumpId].push(ev)
-    })
-    return groups
-  }, [events])
-
-  return (
-    <svg
-      className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible"
-      style={{ top: 0, left: 0 }}
-    >
-      <defs>
-        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="rgb(209 213 219)" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="rgb(156 163 175)" stopOpacity="0.8" />
-        </linearGradient>
-      </defs>
-      {Object.values(pumpGroups).map((groupPumps) => {
-        // Sort by start time
-        const sorted = [...groupPumps].sort((a, b) => a.startDay - b.startDay)
-        return sorted.map((ev, i) => {
-          if (i === sorted.length - 1) return null
-          const nextEv = sorted[i + 1]
-
-          // Only connect if they are on the same row (should always be true for linear view rows we built)
-          if (ev.row !== nextEv.row) return null
-
-          const startX = (ev.startDay + ev.span) * cellWidth
-          const endX = nextEv.startDay * cellWidth
-          const y = ev.row * rowHeight + rowHeight / 2 // Centered vertical alignment relative to row
-
-          // Use a simple cubic bezier for smooth connection
-          // Control points: pull out horizontally from start and in horizontally to end
-          const controlDist = Math.max(20, (endX - startX) / 2)
-
-          return (
-            <path
-              key={`conn-${ev.id}-${nextEv.id}`}
-              d={`M ${startX} ${y} C ${startX + controlDist} ${y}, ${
-                endX - controlDist
-              } ${y}, ${endX} ${y}`}
-              stroke="url(#flowGradient)"
-              strokeWidth="2"
-              fill="none"
-              className="transition-all duration-300"
-            />
-          )
-        })
-      })}
-    </svg>
-  )
+interface GroupedPumps {
+  [groupId: string]: { pump: Pump; timeline: StageBlock[] }[]
 }
 
 export function MainCalendarGrid({
   pumps,
   onEventClick,
-  onEventDoubleClick,
+  onEventDoubleClick: _onEventDoubleClick,
   visibleStages = [],
 }: MainCalendarGridProps) {
   const { getModelLeadTimes } = useApp.getState()
+  const scheduleGroupBy = useApp((state) => state.scheduleGroupBy)
+  const scheduleSortBy = useApp((state) => state.scheduleSortBy)
 
   const today = useMemo(() => startOfDay(new Date()), [])
   // Start view from this week's Monday
@@ -159,6 +74,7 @@ export function MainCalendarGrid({
     [visibleStages]
   )
 
+  // Build timelines for all pumps
   const pumpTimelines = useMemo(() => {
     const { capacityConfig } = useApp.getState()
     const timelinesMap = projectCapacityAwareTimelines(
@@ -171,19 +87,95 @@ export function MainCalendarGrid({
       .map((pump) => {
         const timeline = timelinesMap[pump.id]
         if (!timeline || !timeline.length) return null
-        return { pump, timeline }
+
+        // Apply stage filter if set
+        let filteredTimeline = timeline
+        if (stageFilter.size > 0) {
+          filteredTimeline = timeline.filter((block) =>
+            stageFilter.has(block.stage)
+          )
+        }
+        if (!filteredTimeline.length) return null
+
+        return { pump, timeline: filteredTimeline }
       })
       .filter((item): item is { pump: Pump; timeline: StageBlock[] } =>
         Boolean(item)
       )
-      .sort((a, b) => {
-        const aStart = a.timeline[0]?.start.getTime() ?? 0
-        const bStart = b.timeline[0]?.start.getTime() ?? 0
-        return aStart - bStart
-      })
-  }, [pumps, getModelLeadTimes])
+  }, [pumps, getModelLeadTimes, stageFilter])
 
-  const allEvents: CalendarStageEvent[] = []
+  // Group pumps by selected criteria
+  const groupedPumps = useMemo((): GroupedPumps => {
+    const groups: GroupedPumps = {}
+
+    pumpTimelines.forEach(({ pump, timeline }) => {
+      let groupId: string
+      switch (scheduleGroupBy) {
+        case 'model':
+          groupId = pump.model
+          break
+        case 'customer':
+          groupId = pump.customer || 'Unknown'
+          break
+        case 'po':
+          groupId = pump.po
+          break
+        case 'risk':
+          const shipDate =
+            timeline.length > 0 ? timeline[timeline.length - 1].end : null
+          groupId = getRiskGroup(pump, shipDate)
+          break
+        default:
+          groupId = pump.model
+      }
+
+      if (!groups[groupId]) {
+        groups[groupId] = []
+      }
+      groups[groupId].push({ pump, timeline })
+    })
+
+    return groups
+  }, [pumpTimelines, scheduleGroupBy])
+
+  // Sort pumps within each group
+  const sortedGroups = useMemo(() => {
+    const result: {
+      groupId: string
+      items: { pump: Pump; timeline: StageBlock[] }[]
+    }[] = []
+
+    Object.entries(groupedPumps).forEach(([groupId, items]) => {
+      const sorted = [...items].sort((a, b) => {
+        switch (scheduleSortBy) {
+          case 'customer':
+            return (a.pump.customer || '').localeCompare(b.pump.customer || '')
+          case 'model':
+            return a.pump.model.localeCompare(b.pump.model)
+          case 'po':
+            return a.pump.po.localeCompare(b.pump.po)
+          case 'startDate':
+          default:
+            const aStart = a.timeline[0]?.start.getTime() ?? 0
+            const bStart = b.timeline[0]?.start.getTime() ?? 0
+            return aStart - bStart
+        }
+      })
+      result.push({ groupId, items: sorted })
+    })
+
+    // Sort groups alphabetically, but put risk groups in order: late, at-risk, on-track
+    return result.sort((a, b) => {
+      if (scheduleGroupBy === 'risk') {
+        const order = { late: 0, 'at-risk': 1, 'on-track': 2 }
+        return (
+          (order[a.groupId as keyof typeof order] ?? 3) -
+          (order[b.groupId as keyof typeof order] ?? 3)
+        )
+      }
+      return a.groupId.localeCompare(b.groupId)
+    })
+  }, [groupedPumps, scheduleSortBy, scheduleGroupBy])
 
   const DroppableCell = ({
     date,
@@ -224,6 +216,9 @@ export function MainCalendarGrid({
     addDays(viewStart, i)
   )
 
+  // Track row index across all groups for correct positioning
+  let globalRowIndex = 0
+
   return (
     <div
       className="flex-1 overflow-hidden rounded-3xl border border-border/60 bg-card/95 shadow-inner flex flex-col"
@@ -262,82 +257,49 @@ export function MainCalendarGrid({
               <DroppableCell key={i} date={date} dayIndex={i} />
             ))}
 
-            {/* Content Rows - Calculate events first so we can pass them to SVG layer */}
+            {/* Content Rows - Grouped into Swimlanes */}
             <div className="relative z-10 pt-2 pb-10">
-              {pumpTimelines.map(({ pump, timeline }, rowIdx) => {
-                let segments = projectSegmentsToTimeline(
-                  timeline,
-                  viewStart,
-                  TOTAL_DAYS
-                )
-
-                if (stageFilter.size) {
-                  segments = segments.filter((s) => stageFilter.has(s.stage))
-                }
-                if (!segments.length) return null
+              {sortedGroups.map(({ groupId, items }) => {
+                const startRowIndex = globalRowIndex
+                globalRowIndex += items.length
 
                 return (
-                  <div
-                    key={pump.id}
-                    className="relative w-full border-b border-border/10 hover:bg-muted/5 transition-colors group/row"
-                    style={{ height: ROW_HEIGHT }}
+                  <SwimlaneGroup
+                    key={groupId}
+                    id={groupId}
+                    label={
+                      scheduleGroupBy === 'risk'
+                        ? groupId.toUpperCase()
+                        : groupId
+                    }
+                    count={items.length}
                   >
-                    {/* Row Hover Context: Keep row highlighted */}
-                    {segments.map((segment, segIdx) => {
-                      const event: CalendarStageEvent = {
-                        id: `${pump.id}-${segment.stage}-${segIdx}`,
-                        pumpId: pump.id,
-                        stage: segment.stage,
-                        title: pump.model,
-                        subtitle: pump.po,
-                        week: 0, // Not used in linear
-                        startDay: segment.startIndex,
-                        span: segment.span,
-                        row: rowIdx,
-                        startDate: addDays(viewStart, segment.startIndex),
-                        endDate: addDays(
-                          viewStart,
-                          segment.startIndex + segment.span
-                        ),
-                        shipDate: pump.forecastEnd
-                          ? new Date(pump.forecastEnd)
-                          : undefined,
-                      }
-
-                      // Side-effect: Push to array for SVG layer
-                      // Note: This is safe in render because we clear allEvents on each render before this map
-                      allEvents.push(event)
-
-                      return (
+                    <div>
+                      {items.map(({ pump, timeline }, localIdx) => (
                         <div
-                          key={event.id}
-                          className="absolute top-1/2 -translate-y-1/2 z-10 pl-1 pr-1"
-                          style={{
-                            left: segment.startIndex * CELL_WIDTH,
-                            width: Math.max(20, segment.span * CELL_WIDTH),
-                            height: 28,
-                          }}
+                          key={pump.id}
+                          className={cn(
+                            'relative w-full border-b border-border/10 hover:bg-muted/5 transition-colors group/row',
+                            // Alternating shade for visual grouping
+                            localIdx % 2 === 1 && 'bg-muted/5'
+                          )}
+                          style={{ height: ROW_HEIGHT }}
                         >
-                          <CalendarEvent
-                            event={event}
+                          <UnifiedJobPill
+                            pump={pump}
+                            timeline={timeline}
+                            viewStart={viewStart}
+                            totalDays={TOTAL_DAYS}
                             onClick={onEventClick}
-                            onDoubleClick={onEventDoubleClick}
-                            linearMode
+                            rowIndex={startRowIndex + localIdx}
                           />
                         </div>
-                      )
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  </SwimlaneGroup>
                 )
               })}
             </div>
-
-            {/* SVG Connector Layer - Rendered AFTER logic but strictly absolute positioned */}
-            <FlowConnectorLayer
-              events={allEvents}
-              rowHeight={ROW_HEIGHT}
-              cellWidth={CELL_WIDTH}
-            />
           </div>
         </div>
       </div>

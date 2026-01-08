@@ -31,12 +31,13 @@ const COLORS = [
   '#3b82f6', // Blue
 ]
 
-type Perspective = 'stage' | 'customer' | 'model'
+type Perspective = 'stage' | 'customer' | 'model' | 'value'
 
 const TABS: DonutTab[] = [
   { id: 'stage', label: 'Stage' },
   { id: 'customer', label: 'Cust.' },
   { id: 'model', label: 'Model' },
+  { id: 'value', label: 'Value' },
 ]
 
 // Helper to group pumps by key
@@ -93,14 +94,28 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
     }
 
     // Model perspective
-    return groupPumps(filteredPumps, (p) => p.model)
-      .slice(0, 8)
-      .map((m, i) => ({
-        id: m.name,
-        label: m.name,
-        value: m.value,
+    if (activePerspective === 'model') {
+      return groupPumps(filteredPumps, (p) => p.model)
+        .slice(0, 8)
+        .map((m, i) => ({
+          id: m.name,
+          label: m.name,
+          value: m.value,
+          color: COLORS[i % COLORS.length],
+        }))
+    }
+
+    // Value perspective - group by pump and show their value
+    return filteredPumps
+      .filter((p) => p.value > 0)
+      .map((p, i) => ({
+        id: p.id,
+        label: `${p.po} - ${p.model}`,
+        value: p.value,
         color: COLORS[i % COLORS.length],
       }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10)
   }, [filteredPumps, activePerspective])
 
   // Build inline detail data for selected segment
@@ -113,8 +128,11 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
         return p.stage === selectedSegment.id
       } else if (activePerspective === 'customer') {
         return p.customer === selectedSegment.id
-      } else {
+      } else if (activePerspective === 'model') {
         return p.model === selectedSegment.id
+      } else {
+        // Value perspective - segment id is pump id
+        return p.id === selectedSegment.id
       }
     })
 
@@ -123,7 +141,11 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
       id: p.id,
       label: p.po,
       value:
-        activePerspective === 'stage' ? p.model : p.stage.replace(/_/g, ' '),
+        activePerspective === 'stage'
+          ? p.model
+          : activePerspective === 'value'
+          ? `$${p.value.toLocaleString()}`
+          : p.stage.replace(/_/g, ' '),
       sublabel: activePerspective === 'customer' ? p.model : p.customer,
     }))
   }, [selectedSegment, filteredPumps, activePerspective])
@@ -147,9 +169,10 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
       onDrilldown({ stage: segment.id as Stage })
     } else if (activePerspective === 'customer') {
       onDrilldown({ customerId: segment.id })
-    } else {
+    } else if (activePerspective === 'model') {
       onDrilldown({ modelId: segment.id })
     }
+    // Value perspective doesn't drill down further
   }
 
   return (
@@ -164,7 +187,11 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
         onSegmentClick={handleSegmentClick}
         selectedSegmentId={selectedSegment?.id}
         detailData={detailData}
-        valueFormatter={(v) => `${v} units`}
+        valueFormatter={(v) =>
+          activePerspective === 'value'
+            ? `$${v.toLocaleString()}`
+            : `${v} units`
+        }
         className="h-full"
         height={420}
       />

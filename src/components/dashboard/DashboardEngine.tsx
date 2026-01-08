@@ -348,12 +348,7 @@ export function DashboardEngine() {
                   useExplicitHeight ? { height: `${chartHeight}px` } : undefined
                 }
               >
-                <div className="mb-2 flex items-start justify-between flex-shrink-0">
-                  <div>
-                    <h2 className="text-lg font-semibold tracking-tight">
-                      {cfg.title}
-                    </h2>
-                  </div>
+                <div className="mb-0 flex items-start justify-end flex-shrink-0">
                   {!isDrillMode && (
                     <button
                       onClick={() => toggleFavorite(chartId)}

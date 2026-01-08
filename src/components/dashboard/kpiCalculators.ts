@@ -9,6 +9,7 @@ export interface KpiValue {
   value: number
   formatted: string
   subtitle?: string
+  health?: 'positive' | 'neutral' | 'negative'
 }
 
 /**
@@ -48,6 +49,7 @@ function calculateActiveWip(pumps: Pump[]): KpiValue {
     value: active.length,
     formatted: `${active.length}`,
     subtitle: 'pumps in production',
+    health: 'neutral',
   }
 }
 
@@ -63,6 +65,7 @@ function calculateLateOrders(pumps: Pump[]): KpiValue {
     formatted: `${late.length}`,
     subtitle:
       late.length === 1 ? 'order behind schedule' : 'orders behind schedule',
+    health: late.length > 0 ? 'negative' : 'positive',
   }
 }
 
@@ -179,6 +182,7 @@ function calculateOnTimeRate(pumps: Pump[]): KpiValue {
     value: rate,
     formatted: `${Math.round(rate)}%`,
     subtitle: `${onTime.length} of ${closed.length} on time`,
+    health: rate >= 95 ? 'positive' : rate >= 90 ? 'neutral' : 'negative',
   }
 }
 

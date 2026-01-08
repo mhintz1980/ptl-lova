@@ -36,6 +36,7 @@ export interface Pump {
   totalPausedDays?: number // accumulated pause duration
   // derived, non-persistent:
   promiseDate?: string // from PO line
+  dateReceived?: string // ISO - when PO was received, for scheduling tiebreaker
   work_hours?: {
     fabrication: number
     assembly: number

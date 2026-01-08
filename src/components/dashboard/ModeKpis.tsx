@@ -54,22 +54,41 @@ export function ModeKpis({
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        {kpiValues.map((kpi) => (
-          <button
-            key={kpi.id}
-            onClick={
-              onKpiClick
-                ? () => onKpiClick(kpi.id, getKpiDrilldownFilter(kpi.id))
-                : undefined
-            }
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 border border-border/40 hover:bg-card/80 transition-colors"
-          >
-            <span className="text-xs font-medium text-muted-foreground">
-              {KPI_LABELS[kpi.id]}
-            </span>
-            <span className="text-sm font-bold">{kpi.formatted}</span>
-          </button>
-        ))}
+        {kpiValues.map((kpi) => {
+          const isNegative = kpi.health === 'negative'
+          const isPositive = kpi.health === 'positive'
+          return (
+            <button
+              key={kpi.id}
+              onClick={
+                onKpiClick
+                  ? () => onKpiClick(kpi.id, getKpiDrilldownFilter(kpi.id))
+                  : undefined
+              }
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300
+                ${
+                  isNegative
+                    ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 animate-glow-slow'
+                    : isPositive
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                    : 'bg-card/80 border-border/60 hover:bg-card text-muted-foreground hover:text-foreground'
+                }
+              `}
+            >
+              <span
+                className={`text-xs font-semibold uppercase tracking-wider ${
+                  isNegative || isPositive ? 'opacity-90' : 'opacity-70'
+                }`}
+              >
+                {KPI_LABELS[kpi.id]}
+              </span>
+              <span className="text-sm font-bold tracking-tight">
+                {kpi.formatted}
+              </span>
+            </button>
+          )
+        })}
       </div>
     )
   }

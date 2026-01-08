@@ -41,6 +41,7 @@ export interface CalendarStageEvent {
   subtitle: string
   customer?: string
   priority?: Pump['priority']
+  promiseDate?: Date // Promise date for risk calculation
   idleDays?: number
   week: number
   startDay: number
@@ -49,6 +50,11 @@ export interface CalendarStageEvent {
   startDate: Date
   endDate: Date
   shipDate?: Date // Final job ship date for tooltip
+  // Segment position for consolidated label display
+  segmentIndex?: number // 0-based index within pump's timeline
+  segmentCount?: number // Total segments for this pump
+  isFirstSegment?: boolean // True if this is the first visible segment
+  isLastSegment?: boolean // True if this is the last visible segment
 }
 
 export interface BuildCalendarEventsOptions {
@@ -273,6 +279,7 @@ function buildEventSegments(
     subtitle: pump.po,
     customer: pump.customer,
     priority: pump.priority,
+    promiseDate: pump.promiseDate ? new Date(pump.promiseDate) : undefined,
     idleDays,
     week,
     startDay,

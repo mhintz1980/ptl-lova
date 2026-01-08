@@ -422,8 +422,8 @@ export function DrilldownDonutChart({
 
           {/* Legend - only show if no detail panel */}
           {!hasDetail && (
-            <div className="w-full max-h-20 overflow-y-auto px-2">
-              <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center">
+            <div className="w-full flex-1 min-h-0 overflow-y-auto custom-scrollbar px-2 mt-2">
+              <div className="flex flex-wrap gap-x-1 gap-y-0.5 justify-center">
                 {segments.map((segment, index) => (
                   <motion.div
                     key={segment.id}
@@ -448,7 +448,7 @@ export function DrilldownDonutChart({
                       className="w-2 h-2 rounded-sm flex-shrink-0"
                       style={{ backgroundColor: segment.color }}
                     />
-                    <span className="text-[10px] truncate max-w-[80px]">
+                    <span className="text-[10px] truncate max-w-[60px]">
                       {segment.label}
                     </span>
                     <span className="text-[10px] text-muted-foreground">

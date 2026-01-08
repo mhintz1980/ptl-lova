@@ -6,16 +6,17 @@ import { ChartSize } from './dashboardConfig'
  */
 
 // Preset heights for common chart sizes (in pixels)
+// STANDARDIZED: All charts use 450px for consistent visual alignment
 export const CHART_HEIGHTS: Record<ChartSize, number> = {
-  mini: 350, // Compact donut charts
-  quarter: 450, // Quarter-width cards (4 per row)
-  third: 450, // Third-width cards (3 per row)
-  small: 400, // Standard charts
-  half: 450, // Half-width charts
-  'three-quarter': 450, // 3/4 width (fits next to quarter)
-  large: 500, // Expanded trend charts
-  full: 450, // Full-width charts
-  max: 600, // Full-featured panels
+  mini: 450,
+  quarter: 450,
+  third: 450,
+  small: 450,
+  half: 450,
+  'three-quarter': 450,
+  large: 450,
+  full: 450,
+  max: 600, // Full-featured panels (e.g., drill-down mode)
 } as const
 
 // Aspect ratio for donut SVG viewBox (width:height)

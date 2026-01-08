@@ -49,6 +49,10 @@ export interface AppState {
   sortField: SortField
   sortDirection: SortDirection
   schedulingStageFilters: Stage[]
+  // Schedule Page v2: Swimlane grouping
+  scheduleGroupBy: 'model' | 'customer' | 'po' | 'risk'
+  scheduleSortBy: string
+  collapsedSwimlanes: Record<string, boolean>
   lockDate: string | null // ISO date string
   capacityConfig: CapacityConfig
 
@@ -84,6 +88,12 @@ export interface AppState {
   setSort: (field: SortField, direction: SortDirection) => void
   toggleSchedulingStageFilter: (stage: Stage) => void
   clearSchedulingStageFilters: () => void
+  // Schedule Page v2: Swimlane actions
+  setScheduleGroupBy: (groupBy: 'model' | 'customer' | 'po' | 'risk') => void
+  setScheduleSortBy: (sortBy: string) => void
+  toggleSwimlaneCollapse: (swimlaneId: string) => void
+  collapseAllSwimlanes: () => void
+  expandAllSwimlanes: () => void
   setLockDate: (date: string | null) => void
   updateDepartmentStaffing: (
     stage: 'fabrication' | 'assembly' | 'ship',
@@ -151,6 +161,10 @@ export const useApp = create<AppState>()(
       sortField: 'default',
       sortDirection: 'desc',
       schedulingStageFilters: [],
+      // Schedule Page v2: Swimlane grouping defaults
+      scheduleGroupBy: 'model',
+      scheduleSortBy: 'startDate',
+      collapsedSwimlanes: {},
       lockDate: null,
       capacityConfig: DEFAULT_CAPACITY_CONFIG,
 
@@ -224,7 +238,7 @@ export const useApp = create<AppState>()(
       setFilters: (f) => set({ filters: { ...get().filters, ...f } }),
       clearFilters: () => set({ filters: {} }),
 
-      addPO: async ({ po, customer, lines, promiseDate }) => {
+      addPO: async ({ po, customer, lines, promiseDate, dateReceived }) => {
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: crypto.randomUUID(), // Use valid UUID format for Supabase
@@ -238,6 +252,7 @@ export const useApp = create<AppState>()(
             last_update: new Date().toISOString(),
             value: line.valueEach || 0,
             promiseDate: line.promiseDate || promiseDate,
+            dateReceived: dateReceived,
           }))
         )
 
@@ -550,8 +565,18 @@ export const useApp = create<AppState>()(
 
           // If same priority, sooner promiseDate first
           if (a.promiseDate && b.promiseDate) {
-            return a.promiseDate.localeCompare(b.promiseDate)
+            const promiseCompare = a.promiseDate.localeCompare(b.promiseDate)
+            if (promiseCompare !== 0) return promiseCompare
           }
+
+          // Same priority & promiseDate: earlier dateReceived first
+          if (a.dateReceived && b.dateReceived) {
+            return a.dateReceived.localeCompare(b.dateReceived)
+          }
+          // Jobs with dateReceived come before those without
+          if (a.dateReceived) return -1
+          if (b.dateReceived) return 1
+
           return 0
         })
 
@@ -688,6 +713,44 @@ export const useApp = create<AppState>()(
         }),
 
       clearSchedulingStageFilters: () => set({ schedulingStageFilters: [] }),
+
+      // Schedule Page v2: Swimlane actions
+      setScheduleGroupBy: (groupBy) => {
+        // Reset sort to a sensible default when group changes
+        const defaultSorts: Record<string, string> = {
+          model: 'customer',
+          customer: 'model',
+          po: 'model',
+          risk: 'model',
+        }
+        set({
+          scheduleGroupBy: groupBy,
+          scheduleSortBy: defaultSorts[groupBy] || 'startDate',
+        })
+      },
+      setScheduleSortBy: (sortBy) => set({ scheduleSortBy: sortBy }),
+      toggleSwimlaneCollapse: (swimlaneId) =>
+        set((state) => ({
+          collapsedSwimlanes: {
+            ...state.collapsedSwimlanes,
+            [swimlaneId]: !state.collapsedSwimlanes[swimlaneId],
+          },
+        })),
+      collapseAllSwimlanes: () =>
+        set((state) => {
+          const { pumps, scheduleGroupBy } = state
+          const allIds = new Set<string>()
+          pumps.forEach((p) => {
+            if (scheduleGroupBy === 'model') allIds.add(p.model)
+            else if (scheduleGroupBy === 'customer') allIds.add(p.customer)
+            else if (scheduleGroupBy === 'po') allIds.add(p.po)
+            else if (scheduleGroupBy === 'risk') allIds.add('late')
+          })
+          const collapsed: Record<string, boolean> = {}
+          allIds.forEach((id) => (collapsed[id] = true))
+          return { collapsedSwimlanes: collapsed }
+        }),
+      expandAllSwimlanes: () => set({ collapsedSwimlanes: {} }),
 
       // Constitution §7: Lock date affects forecast only, never truth
       setLockDate: (date) => {
