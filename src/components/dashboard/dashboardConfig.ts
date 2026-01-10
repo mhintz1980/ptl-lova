@@ -9,8 +9,8 @@ export type DashboardTopicId =
   | 'bottlenecks'
   | 'quality'
 
-// Dashboard Modes (2-mode navigation)
-export type DashboardMode = 'overview' | 'analysis'
+// Dashboard Modes (3-mode navigation)
+export type DashboardMode = 'overview' | 'analysis' | 'data'
 
 export type KpiId =
   | 'activeWip'
@@ -23,6 +23,7 @@ export type KpiId =
   | 'throughput'
   | 'onTimeRate'
 
+// ... (ChartId type remains same)
 export type ChartId =
   | 'wipByStage'
   | 'wipDonut'
@@ -61,11 +62,14 @@ export interface DashboardFilters {
   stage?: Stage
 }
 
+import { Pump } from '../../types'
+
 // Every chart component will receive this:
 export interface ChartProps {
   filters: DashboardFilters
   onDrilldown: (update: Partial<DashboardFilters>) => void
   chartHeight?: number // Optional height passed from DashboardEngine
+  onSelectPump?: (pump: Pump) => void // NEW: Allow charts to handle selection
 }
 
 export type ChartSize =
@@ -156,5 +160,12 @@ export const MODE_CONFIGS: ModeConfig[] = [
       'cycleTimeBreakdown',
       'treemap',
     ],
+  },
+  {
+    id: 'data',
+    label: 'Data',
+    icon: 'table',
+    kpis: ['activeWip', 'lateOrders', 'totalValue'],
+    chartIds: ['pumpTable'],
   },
 ]

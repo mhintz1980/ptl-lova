@@ -14,6 +14,7 @@ import {
   ChevronRight as BreadcrumbSeparator,
   Activity,
   BarChart2,
+  Table,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
@@ -30,6 +31,11 @@ const MODE_KEY = 'pumptracker.dashboard.mode'
 const MODE_ICONS: Record<DashboardMode, React.ElementType> = {
   overview: Activity,
   analysis: BarChart2,
+  data: Table,
+}
+
+interface DashboardEngineProps {
+  onSelectPump?: (pump: Pump) => void
 }
 
 interface DrillState {
@@ -38,7 +44,7 @@ interface DrillState {
   label: string
 }
 
-export function DashboardEngine() {
+export function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
   const { pumps } = useApp()
   const [mode, setMode] = useState<DashboardMode>('overview')
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS)
@@ -62,7 +68,7 @@ export function DashboardEngine() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(MODE_KEY)
-      if (raw && ['overview', 'analysis'].includes(raw)) {
+      if (raw && ['overview', 'analysis', 'data'].includes(raw)) {
         setMode(raw as DashboardMode)
       }
     } catch {
@@ -379,6 +385,7 @@ export function DashboardEngine() {
                     filters={filters}
                     onDrilldown={(update) => handleDrilldown(chartId, update)}
                     chartHeight={cfg.height}
+                    onSelectPump={onSelectPump}
                   />
                 </div>
               </motion.div>
