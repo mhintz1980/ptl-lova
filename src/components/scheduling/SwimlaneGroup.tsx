@@ -1,7 +1,7 @@
 // src/components/scheduling/SwimlaneGroup.tsx
 // Schedule Page v2: Collapsible swimlane container for grouping jobs
 
-import { ReactNode } from 'react'
+import { ReactNode, memo } from 'react'
 import { cn } from '../../lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -14,7 +14,7 @@ interface SwimlaneGroupProps {
   children: ReactNode
 }
 
-export function SwimlaneGroup({
+function SwimlaneGroupComponent({
   id,
   label,
   count,
@@ -67,3 +67,5 @@ export function SwimlaneGroup({
     </div>
   )
 }
+
+export const SwimlaneGroup = memo(SwimlaneGroupComponent)

@@ -75,6 +75,16 @@ export function UnifiedJobPill({
     }
   }, [timeline, viewStart, totalDays])
 
+  // DEBUG: Log pillBounds for debugging
+  console.log(
+    '[DEBUG UnifiedJobPill]',
+    pump.id.slice(-6),
+    'pillBounds:',
+    JSON.stringify(pillBounds),
+    'timeline.length:',
+    timeline.length
+  )
+
   // Calculate internal segment proportions
   const segments = useMemo(() => {
     if (!pillBounds || !timeline.length) return []
@@ -116,6 +126,15 @@ export function UnifiedJobPill({
       })
       .filter((seg) => seg.widthPercent > 0)
   }, [timeline, pillBounds, viewStart, totalDays])
+
+  // DEBUG: Log segments for debugging
+  console.log(
+    '[DEBUG segments]',
+    pump.id.slice(-6),
+    'segments:',
+    segments.length,
+    segments.map((s) => ({ stage: s.stage, width: s.widthPercent.toFixed(1) }))
+  )
 
   // Draggable setup using first segment as reference
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -325,6 +344,7 @@ export function UnifiedJobPill({
         content={tooltipContent}
         side="top"
         className="min-w-[220px] z-50"
+        triggerClassName="block w-full h-full"
       >
         <div
           className={cn(
@@ -351,6 +371,18 @@ export function UnifiedJobPill({
               {priorityBadge.label}
             </div>
           )}
+
+          {/* Text Overlay - Absolute positioned over segments */}
+          <div className="absolute inset-0 flex items-center px-3 z-10">
+            <span className="truncate font-bold text-xs text-white drop-shadow-md leading-tight">
+              {pump.model}
+            </span>
+            {pump.customer && (
+              <span className="ml-2 truncate text-[10px] text-white/90 drop-shadow-md hidden sm:inline-block opacity-90">
+                {pump.customer}
+              </span>
+            )}
+          </div>
 
           {/* Stage segments */}
           {segments.map((seg, i) => (

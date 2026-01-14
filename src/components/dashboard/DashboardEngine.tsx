@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, memo } from 'react'
 import {
   ChartId,
   DashboardFilters,
@@ -44,7 +44,7 @@ interface DrillState {
   label: string
 }
 
-export function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
+export const DashboardEngine = memo(function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
   const { pumps } = useApp()
   const [mode, setMode] = useState<DashboardMode>('overview')
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS)
@@ -120,11 +120,8 @@ export function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
     sourceChartId: ChartId,
     update: Partial<DashboardFilters>
   ) => {
-    console.log('Drilldown triggered:', sourceChartId, update)
     const cfg = CHART_REGISTRY[sourceChartId]
-    console.log('Chart config:', cfg)
     if (!cfg || !cfg.drillDownSequence || cfg.drillDownSequence.length === 0) {
-      console.log('No drill sequence found, falling back to filter update')
       // Fallback to old behavior: just update filters
       setFilters((prev) => ({ ...prev, ...update }))
       return
@@ -395,4 +392,4 @@ export function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
       </div>
     </div>
   )
-}
+})

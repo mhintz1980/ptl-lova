@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { ChevronRight, Home, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { cn } from '../../../lib/utils'
 
 export interface DonutSegment {
@@ -44,7 +44,7 @@ interface DrilldownDonutChartProps {
   selectedSegmentId?: string | null
 }
 
-export function DrilldownDonutChart({
+export const DrilldownDonutChart = memo(function DrilldownDonutChart({
   data,
   title,
   onSegmentClick,
@@ -67,17 +67,6 @@ export function DrilldownDonutChart({
 
   // Use controlled tab if provided, otherwise internal state
   const currentTab = activeTab ?? internalActiveTab
-  const handleTabChange = (tabId: string) => {
-    if (onTabChange) {
-      onTabChange(tabId)
-    } else {
-      setInternalActiveTab(tabId)
-    }
-    // Clear selection when tab changes
-    if (onSegmentSelect) {
-      onSegmentSelect(null)
-    }
-  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SVG DISPLAY DIMENSIONS - Computed from container height
@@ -152,7 +141,7 @@ export function DrilldownDonutChart({
     }
   })
 
-  const handleSegmentInteraction = (segment: DonutSegment) => {
+  const handleSegmentInteraction = useCallback((segment: DonutSegment) => {
     // If onSegmentSelect is provided, use it (new behavior for inline detail)
     if (onSegmentSelect) {
       onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
@@ -161,7 +150,19 @@ export function DrilldownDonutChart({
     if (onSegmentClick) {
       onSegmentClick(segment)
     }
-  }
+  }, [onSegmentSelect, onSegmentClick, selectedSegmentId])
+
+  const handleTabChangeMemo = useCallback((tabId: string) => {
+    if (onTabChange) {
+      onTabChange(tabId)
+    } else {
+      setInternalActiveTab(tabId)
+    }
+    // Clear selection when tab changes
+    if (onSegmentSelect) {
+      onSegmentSelect(null)
+    }
+  }, [onTabChange, onSegmentSelect])
 
   return (
     <Card
@@ -209,7 +210,7 @@ export function DrilldownDonutChart({
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
+                onClick={() => handleTabChangeMemo(tab.id)}
                 className={`
                   px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 backdrop-blur-sm
                   ${
@@ -520,4 +521,4 @@ export function DrilldownDonutChart({
       </CardContent>
     </Card>
   )
-}
+})

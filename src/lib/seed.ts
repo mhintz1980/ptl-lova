@@ -235,22 +235,23 @@ function generatePumpFromCatalog(
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
 
     // Generate promise date distribution for On-Time Risk chart visualization:
-    // - 40% On Track: promise date > 7 days in future
+    // - 75% On Track: promise date > 7 days in future
     // - 20% At Risk: promise date 1-7 days in future
-    // - 40% Late: promise date in the past
+    // - 5% Late: promise date in the past
     let promiseDate: Date
-    const riskSlot = i % 10
+    const globalIndex = startIndex + i
+    const riskSlot = globalIndex % 20
 
-    if (riskSlot < 4) {
-      // 40% LATE: promise date 1-30 days in the past
+    if (riskSlot === 0) {
+      // 5% LATE: promise date 1-30 days in the past
       const daysLate = Math.floor(Math.random() * 30) + 1
       promiseDate = addBusinessDays(now, -daysLate)
-    } else if (riskSlot < 6) {
+    } else if (riskSlot < 5) {
       // 20% AT RISK: promise date 1-7 days in the future
       const daysUntilDue = Math.floor(Math.random() * 7) + 1
       promiseDate = addBusinessDays(now, daysUntilDue)
     } else {
-      // 40% ON TRACK: promise date 8-45 days in the future
+      // 75% ON TRACK: promise date 8-45 days in the future
       const daysUntilDue = Math.floor(Math.random() * 38) + 8
       promiseDate = addBusinessDays(now, daysUntilDue)
     }
@@ -261,40 +262,45 @@ function generatePumpFromCatalog(
     let lastUpdate = poDate.toISOString()
     const forecastEnd = testingEnd.toISOString()
 
-    // Use pattern index (i) to distribute across stages deterministically
-    // Target distribution: ~10% QUEUE, 20% FABRICATION, 15% POWDER_COAT, 20% ASSEMBLY, 15% SHIP, 20% CLOSED
-    const stageSlot = i % 10
+    // Use pattern index (globalIndex) to distribute across stages deterministically
+    // Target distribution (mod 20):
+    // 0 = ASSEMBLY (5% -> 4 jobs)
+    // 1 = SHIP (5% -> 4 jobs)
+    // 2 = CLOSED (5% -> 4 jobs)
+    // 3-5 = QUEUE (15% -> 6 jobs)
+    // 6-12 = FABRICATION (35% -> 14 jobs)
+    // 13-19 = POWDER_COAT (35% -> 14 jobs)
+    const stageSlot = globalIndex % 20
 
     if (stageSlot === 0) {
-      // 10% in QUEUE
-      currentStage = 'QUEUE'
-      lastUpdate = poDate.toISOString()
-    } else if (stageSlot <= 2) {
-      // 20% in FABRICATION
-      currentStage = 'FABRICATION'
-      // Set last_update to a few days ago to show realistic age
-      const daysInStage = Math.floor(Math.random() * 5) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else if (stageSlot <= 4) {
-      // 20% in POWDER_COAT (includes some STAGED_FOR_POWDER)
-      currentStage = i % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
-      const daysInStage = Math.floor(Math.random() * 4) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else if (stageSlot <= 6) {
-      // 20% in ASSEMBLY
+      // 5% in ASSEMBLY (approx 4 jobs)
       currentStage = 'ASSEMBLY'
       const daysInStage = Math.floor(Math.random() * 3) + 1
       lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else if (stageSlot <= 7) {
-      // 10% in SHIP
+    } else if (stageSlot === 1) {
+      // 5% in SHIP (approx 4 jobs)
       currentStage = 'SHIP'
       const daysInStage = Math.floor(Math.random() * 2) + 1
       lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else {
-      // 20% CLOSED - completed recently
+    } else if (stageSlot === 2) {
+      // 5% CLOSED (approx 4 jobs)
       currentStage = 'CLOSED'
       const daysAgo = Math.floor(Math.random() * 14) + 1
       lastUpdate = addBusinessDays(now, -daysAgo).toISOString()
+    } else if (stageSlot <= 5) {
+      // 15% in QUEUE (approx 6 jobs)
+      currentStage = 'QUEUE'
+      lastUpdate = poDate.toISOString()
+    } else if (stageSlot <= 12) {
+      // 35% in FABRICATION (approx 14 jobs)
+      currentStage = 'FABRICATION'
+      const daysInStage = Math.floor(Math.random() * 5) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else {
+      // 35% in POWDER_COAT (approx 14 jobs) - includes STAGED roughly half/half
+      currentStage = globalIndex % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
+      const daysInStage = Math.floor(Math.random() * 4) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
     }
 
     pumps.push({
@@ -364,7 +370,7 @@ export function seed(count: number = 80): Pump[] {
       customer,
       poBase,
       orderQuantity,
-      0
+      generated
     )
 
     pumps.push(...modelPumps)
@@ -383,7 +389,7 @@ export function seed(count: number = 80): Pump[] {
       customer,
       poBase,
       remainingQuantity,
-      0
+      generated
     )
 
     pumps.push(...additionalPumps)

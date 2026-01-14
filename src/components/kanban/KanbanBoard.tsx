@@ -1,5 +1,5 @@
 // src/components/kanban/KanbanBoard.tsx
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -31,7 +31,7 @@ interface KanbanBoardProps {
   onCardClick?: (pump: Pump) => void
 }
 
-export function KanbanBoard({
+function KanbanBoardComponent({
   pumps,
   collapsed,
   onCardClick,
@@ -120,3 +120,5 @@ export function KanbanBoard({
     </DndContext>
   )
 }
+
+export const KanbanBoard = memo(KanbanBoardComponent)

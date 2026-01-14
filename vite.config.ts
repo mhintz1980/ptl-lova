@@ -15,6 +15,7 @@ export default defineConfig(() => ({
     },
   },
   build: {
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -41,19 +42,35 @@ export default defineConfig(() => ({
           if (
             id.includes('@radix-ui') ||
             id.includes('sonner') ||
-            id.includes('lucide-react')
+            id.includes('lucide-react') ||
+            id.includes('framer-motion')
           ) {
             return 'ui'
           }
 
-          if (id.includes('react-dom') || id.includes('react/jsx')) {
-            return 'react'
+          if (
+            id.includes('react-dom') ||
+            id.includes('react/jsx') ||
+            id.includes('@tanstack/react-router')
+          ) {
+            return 'vendor'
           }
 
           return 'vendor'
         },
       },
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@tanstack/react-router',
+      'recharts',
+      'framer-motion',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+    ],
   },
   test: {
     globals: true,

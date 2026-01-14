@@ -7,6 +7,7 @@ interface TooltipProps {
   content: React.ReactNode
   children: React.ReactNode
   className?: string
+  triggerClassName?: string // Custom class for the trigger wrapper
   side?: 'top' | 'bottom' | 'left' | 'right'
   align?: 'start' | 'center' | 'end'
   delay?: number
@@ -16,6 +17,7 @@ export function Tooltip({
   content,
   children,
   className,
+  triggerClassName = 'inline-block', // Default for backward compatibility
   side = 'top',
   align: _align = 'center',
   delay = 200,
@@ -120,7 +122,7 @@ export function Tooltip({
     <>
       <div
         ref={triggerRef}
-        className="inline-block"
+        className={triggerClassName}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
         onFocus={showTooltip}

@@ -29,11 +29,15 @@ export const SupabaseAdapter: DataAdapter = {
       }
 
       attempts++
-      console.error(`Supabase load error (attempt ${attempts}):`, error)
+      // Log error without exposing sensitive data
+      console.error(`Supabase load error (attempt ${attempts})):`, error.message || 'Unknown error')
 
       const delayIndex = Math.min(attempts - 1, backoffIntervals.length - 1)
       const delay = backoffIntervals[delayIndex]
-      console.log(`Retrying in ${delay}ms...`)
+      // Retry attempt logging
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Retrying in ${delay}ms...`)
+      }
 
       if (attempts >= maxAttempts) {
         console.error('Failed to load from Supabase after multiple attempts.')

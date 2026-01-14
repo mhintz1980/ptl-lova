@@ -1,9 +1,19 @@
 import { Pie, PieChart, Sector, Tooltip } from 'recharts'
 import { TooltipIndex } from 'recharts/types/state/tooltipSlice'
 
-// Types removed
-
-// PieSectorDataItem removed
+interface ActiveShapeProps {
+  cx?: number
+  cy?: number
+  midAngle?: number
+  innerRadius?: number
+  outerRadius?: number
+  startAngle?: number
+  endAngle?: number
+  fill?: string
+  payload?: { name: string }
+  percent?: number
+  value?: number
+}
 
 // #region Sample data
 const data = [
@@ -26,7 +36,7 @@ const renderActiveShape = ({
   payload,
   percent,
   value,
-}: any) => {
+}: ActiveShapeProps) => {
   const RADIAN = Math.PI / 180
   const sin = Math.sin(-RADIAN * (midAngle ?? 1))
   const cos = Math.cos(-RADIAN * (midAngle ?? 1))

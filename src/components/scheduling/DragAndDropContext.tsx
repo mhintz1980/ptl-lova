@@ -79,16 +79,23 @@ export function DragAndDropContext({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
+    console.log('[DEBUG handleDragEnd] Event:', {
+      activeId: active.id,
+      overId: over?.id,
+    })
 
     if (!over) {
+      console.log('[DEBUG handleDragEnd] No drop target, returning')
       setActiveId(null)
       setActiveData(null)
       return
     }
 
     const pump = getPumpFromActive(active)
+    console.log('[DEBUG handleDragEnd] Pump:', pump?.id, pump?.model)
 
     if (!pump) {
+      console.log('[DEBUG handleDragEnd] No pump found, returning')
       setActiveId(null)
       setActiveData(null)
       return
@@ -96,6 +103,7 @@ export function DragAndDropContext({
 
     // Handle drop on Backlog (Unschedule)
     if (over.id === 'backlog-dock') {
+      console.log('[DEBUG handleDragEnd] Dropped on backlog')
       if (pump.stage === 'QUEUE' && !pump.forecastStart) {
         // Already unscheduled, do nothing
         setActiveId(null)
@@ -112,7 +120,9 @@ export function DragAndDropContext({
 
     // Handle drop on Calendar (Schedule/Reschedule)
     const targetDate = over.id?.toString()
+    console.log('[DEBUG handleDragEnd] Target date string:', targetDate)
     if (!targetDate) {
+      console.log('[DEBUG handleDragEnd] No target date, returning')
       setActiveId(null)
       setActiveData(null)
       return
@@ -123,6 +133,7 @@ export function DragAndDropContext({
       active.data.current?.type !== 'CALENDAR_EVENT' &&
       pump.stage !== 'QUEUE'
     ) {
+      console.log('[DEBUG handleDragEnd] Not QUEUE stage, returning')
       toast.error(`Already in ${pump.stage}—move it in Kanban instead?`)
       setActiveId(null)
       setActiveData(null)
@@ -130,13 +141,25 @@ export function DragAndDropContext({
     }
 
     const dropDate = startOfDay(parse(targetDate, 'yyyy-MM-dd', new Date()))
+    console.log(
+      '[DEBUG handleDragEnd] Parsed dropDate:',
+      dropDate,
+      'isValid:',
+      !Number.isNaN(dropDate.getTime())
+    )
     if (!isValidScheduleDate(dropDate)) {
+      console.log('[DEBUG handleDragEnd] Invalid schedule date, returning')
       toast.error('Choose a future date to schedule this pump.')
       setActiveId(null)
       setActiveData(null)
       return
     }
 
+    console.log(
+      '[DEBUG handleDragEnd] Calling setForecastHint:',
+      pump.id,
+      format(dropDate, 'yyyy-MM-dd')
+    )
     setForecastHint(pump.id, format(dropDate, 'yyyy-MM-dd'))
 
     const action =

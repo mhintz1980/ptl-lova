@@ -64,6 +64,10 @@ export interface AppState {
   milestones: Milestone[]
   microTasks: MicroTask[]
 
+  // Performance: Memoized timeline cache
+  // Rebuilds only when pumps, capacityConfig, or leadTimes change
+  timelines: Record<string, import('./lib/schedule').StageBlock[]>
+
   // actions
   setAdapter: (a: DataAdapter) => void
   load: () => Promise<void>
@@ -105,6 +109,9 @@ export interface AppState {
   ) => void
   updateStagedForPowderBufferDays: (days: number) => void
   resetCapacityDefaults: () => void
+
+  // Performance: Rebuild memoized timeline cache
+  rebuildTimelines: () => void
 
   // Sandbox Actions
   enterSandbox: () => void
@@ -174,6 +181,9 @@ export const useApp = create<AppState>()(
       milestones: [],
       microTasks: [],
 
+      // Performance: Memoized timeline cache
+      timelines: {},
+
       setAdapter: (a) => set({ adapter: a }),
 
       load: async () => {
@@ -190,49 +200,56 @@ export const useApp = create<AppState>()(
             originalSnapshot: [], // Empty - no production data to restore
             adapter: SandboxAdapter,
           })
-          console.log(
-            '🧪 Dev Mode: Loaded sandbox with',
-            seedData.length,
-            'test pumps'
-          )
+          // Performance: Build timeline cache after loading dev data
+          get().rebuildTimelines()
           return
         }
 
-        let rows = await get().adapter.load()
+        try {
+          let rows = await get().adapter.load()
 
-        // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
-        let migrated = false
-        const migratedRows = rows.map((p) => {
-          let next = { ...p }
+          // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
+          let migrated = false
+          const migratedRows = rows.map((p) => {
+            let next = { ...p }
 
-          // Migration 1: Convert UNSCHEDULED/NOT STARTED to QUEUE
-          if (
-            (next.stage as string) === 'UNSCHEDULED' ||
-            (next.stage as string) === 'NOT STARTED'
-          ) {
-            next.stage = 'QUEUE' as Stage
-            migrated = true
-          }
-
-          // Migration 2: Backfill missing values
-          if (!next.value || next.value === 0) {
-            const price = getModelPrice(next.model)
-            if (price > 0) {
-              next.value = price
+            // Migration 1: Convert UNSCHEDULED/NOT STARTED to QUEUE
+            if (
+              (next.stage as string) === 'UNSCHEDULED' ||
+              (next.stage as string) === 'NOT STARTED'
+            ) {
+              next.stage = 'QUEUE' as Stage
               migrated = true
             }
+
+            // Migration 2: Backfill missing values
+            if (!next.value || next.value === 0) {
+              const price = getModelPrice(next.model)
+              if (price > 0) {
+                next.value = price
+                migrated = true
+              }
+            }
+
+            return next
+          })
+
+          if (migrated) {
+            // If we migrated, we should probably persist it back immediately or just let the next save handle it.
+            // For now, we just load it into state as QUEUE.
+            rows = migratedRows
           }
 
-          return next
-        })
-
-        if (migrated) {
-          // If we migrated, we should probably persist it back immediately or just let the next save handle it.
-          // For now, we just load it into state as QUEUE.
-          rows = migratedRows
+          set({ pumps: rows, loading: false })
+          // Performance: Build timeline cache after loading pumps
+          get().rebuildTimelines()
+        } catch (error) {
+          console.error('Failed to load pumps:', error)
+          set({ loading: false })
+          toast.error('Failed to load data. Please refresh the page.', {
+            duration: 5000,
+          })
         }
-
-        set({ pumps: rows, loading: false })
       },
 
       setFilters: (f) => set({ filters: { ...get().filters, ...f } }),
@@ -256,10 +273,26 @@ export const useApp = create<AppState>()(
           }))
         )
 
-        const newPumps = [...get().pumps, ...expanded]
+        const currentPumps = get().pumps
+        const newPumps = [...currentPumps, ...expanded]
         set({ pumps: newPumps })
-        // Await the save - errors propagate to caller for handling
-        await get().adapter.upsertMany(expanded)
+        // Performance: Rebuild timelines when pumps are added
+        get().rebuildTimelines()
+
+        try {
+          // Await the save - errors propagate to caller for handling
+          await get().adapter.upsertMany(expanded)
+        } catch (error) {
+          console.error('Failed to add pumps:', error)
+          // Rollback: Remove added pumps from state
+          set({ pumps: currentPumps })
+          get().rebuildTimelines()
+          toast.error(
+            `Failed to add purchase order ${po}. Changes have been rolled back. Please try again.`,
+            { duration: 5000 }
+          )
+          throw error // Re-throw for caller to handle if needed
+        }
       },
 
       // Constitution §3: Kanban Truth Rules
@@ -352,6 +385,8 @@ export const useApp = create<AppState>()(
           p.id === id ? { ...p, ...patch } : p
         )
         set({ pumps: newPumps })
+        // Performance: Rebuild timelines when stage changes
+        get().rebuildTimelines()
 
         // 4. Persist to adapter
         get()
@@ -370,6 +405,14 @@ export const useApp = create<AppState>()(
           p.id === id ? { ...p, ...patch, last_update: now } : p
         )
         set({ pumps: newPumps })
+        // Performance: Rebuild timelines if forecast dates changed
+        if (
+          'forecastStart' in patch ||
+          'forecastEnd' in patch ||
+          'stage' in patch
+        ) {
+          get().rebuildTimelines()
+        }
         get()
           .adapter.update(id, { ...patch, last_update: now })
           .catch((err) => {
@@ -448,14 +491,26 @@ export const useApp = create<AppState>()(
 
       // Constitution §7: Set forecast hint (projection only)
       setForecastHint: (id, dropDate) => {
+        console.log('[DEBUG setForecastHint] Called with:', { id, dropDate })
         // When dropping on calendar, we set stage to QUEUE (conceptually "Scheduled Queue")
         // The distinction is purely whether forecastStart is set.
         const pump = get().pumps.find((p) => p.id === id)
-        if (!pump) return
+        if (!pump) {
+          console.log('[DEBUG setForecastHint] Pump not found:', id)
+          return
+        }
 
         // Calculate end date based on lead time
         const leadTimes = get().getModelLeadTimes(pump.model)
-        if (!leadTimes) return
+        if (!leadTimes) {
+          console.log(
+            '[DEBUG setForecastHint] No lead times for model:',
+            pump.model
+          )
+          return
+        }
+
+        console.log('[DEBUG setForecastHint] Lead times found:', leadTimes)
 
         const capacityConfig = get().capacityConfig
 
@@ -474,6 +529,10 @@ export const useApp = create<AppState>()(
             )
           : {}
         const timeline = timelines[id] ?? []
+        console.log('[DEBUG setForecastHint] Timeline built:', {
+          pumpId: id,
+          timelineLength: timeline.length,
+        })
         const end =
           timeline.length > 0
             ? timeline[timeline.length - 1].end
@@ -488,6 +547,10 @@ export const useApp = create<AppState>()(
           last_update: new Date().toISOString(),
         }
 
+        console.log(
+          '[DEBUG setForecastHint] Calling updatePump with patch:',
+          patch
+        )
         get().updatePump(id, patch)
       },
 
@@ -681,6 +744,8 @@ export const useApp = create<AppState>()(
 
       replaceDataset: (rows) => {
         set({ pumps: rows })
+        // Performance: Rebuild timelines when dataset is replaced
+        get().rebuildTimelines()
         get().adapter.replaceAll(rows)
       },
 
@@ -802,6 +867,10 @@ export const useApp = create<AppState>()(
             }
           }
 
+          // Performance: Rebuild timelines when capacity changes
+          // Use setTimeout to avoid calling set() during state update
+          setTimeout(() => get().rebuildTimelines(), 0)
+
           return {
             capacityConfig: {
               ...state.capacityConfig,
@@ -811,16 +880,21 @@ export const useApp = create<AppState>()(
         }),
 
       updatePowderCoatVendor: (vendorId, config) =>
-        set((state) => ({
-          capacityConfig: {
-            ...state.capacityConfig,
-            powderCoat: {
-              vendors: state.capacityConfig.powderCoat.vendors.map((vendor) =>
-                vendor.id === vendorId ? { ...vendor, ...config } : vendor
-              ),
+        set((state) => {
+          const updated = {
+            capacityConfig: {
+              ...state.capacityConfig,
+              powderCoat: {
+                vendors: state.capacityConfig.powderCoat.vendors.map((vendor) =>
+                  vendor.id === vendorId ? { ...vendor, ...config } : vendor
+                ),
+              },
             },
-          },
-        })),
+          }
+          // Performance: Rebuild timelines when capacity changes
+          setTimeout(() => get().rebuildTimelines(), 0)
+          return updated
+        }),
 
       updateStagedForPowderBufferDays: (days) => {
         const normalized = Math.max(0, Math.floor(days))
@@ -830,13 +904,10 @@ export const useApp = create<AppState>()(
         }
 
         set({ capacityConfig: nextCapacityConfig })
+        // Performance: Rebuild timelines when capacity changes
+        get().rebuildTimelines()
 
-        const { pumps, getModelLeadTimes } = get()
-        const timelines = buildCapacityAwareTimelines(
-          pumps,
-          nextCapacityConfig,
-          getModelLeadTimes
-        )
+        const { pumps, timelines } = get()
 
         pumps.forEach((pump) => {
           if (!pump.forecastStart) return
@@ -857,8 +928,22 @@ export const useApp = create<AppState>()(
         })
       },
 
-      resetCapacityDefaults: () =>
-        set({ capacityConfig: DEFAULT_CAPACITY_CONFIG }),
+      resetCapacityDefaults: () => {
+        set({ capacityConfig: DEFAULT_CAPACITY_CONFIG })
+        // Performance: Rebuild timelines when capacity resets
+        get().rebuildTimelines()
+      },
+
+      // Performance: Rebuild memoized timeline cache
+      rebuildTimelines: () => {
+        const { pumps, capacityConfig, getModelLeadTimes } = get()
+        const timelines = buildCapacityAwareTimelines(
+          pumps,
+          capacityConfig,
+          getModelLeadTimes
+        )
+        set({ timelines })
+      },
 
       // Sandbox Actions
       enterSandbox: () => {
@@ -972,21 +1057,21 @@ export const useApp = create<AppState>()(
       getModelLeadTimes: (model) => getCatalogLeadTimes(model),
 
       getStageSegments: (id) => {
-        const { pumps, capacityConfig, getModelLeadTimes } = get()
-        // This is expensive to re-calc on every render if called often.
-        // Ideally should be memoized or computed once per pump update.
-        // For now, calculating on fly.
+        const { timelines, pumps } = get()
+        // Performance: Return cached timeline if available
+        if (timelines[id]) {
+          return timelines[id]
+        }
+
+        // Backward compatibility: If pump exists but not in cache, return undefined
+        // The caller should trigger rebuildTimelines() if needed
         const pump = pumps.find((p) => p.id === id)
         if (!pump || !pump.forecastStart) return undefined
 
-        // We need to rebuild just for this pump, but capacity awareness requires global context.
-        // So we might need to rely on the global buildCapacityAwareTimelines
-        const timelines = buildCapacityAwareTimelines(
-          pumps,
-          capacityConfig,
-          getModelLeadTimes
-        )
-        return timelines[id]
+        // Fallback: rebuild cache and return result
+        // This ensures we always have valid data, even if cache is stale
+        get().rebuildTimelines()
+        return get().timelines[id]
       },
 
       isPumpLocked: (id) => {
@@ -1029,7 +1114,8 @@ export const useApp = create<AppState>()(
         capacityConfig: state.capacityConfig,
         schedulingStageFilters: state.schedulingStageFilters,
         lockDate: state.lockDate,
-        // Do NOT persist pumps or adapter state; let load() handle it.
+        // Do NOT persist pumps, adapter, or timelines; let load() rebuild them.
+        // Timelines are performance cache and will be rebuilt on load via rebuildTimelines()
       }),
     }
   )

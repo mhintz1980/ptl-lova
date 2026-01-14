@@ -8,14 +8,16 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from 'recharts'
 import { ChartProps } from '../dashboardConfig'
+import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 // --- Types ---
 export interface TrendDataPoint {
   label: string // e.g. "W1", "Jan"
   value: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface TrendAreaChartProps extends ChartProps {
@@ -52,8 +54,10 @@ export function TrendAreaChart({
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           onClick={(e: any) => {
-            if (onPointClick && e && e.activePayload && e.activePayload[0]) {
-              onPointClick(e.activePayload[0].payload)
+            const target = e.target as SVGElement
+            const payload = target.getAttribute('data_payload')
+            if (onPointClick && payload) {
+              onPointClick(JSON.parse(payload) as TrendDataPoint)
             }
           }}
         >
@@ -114,7 +118,7 @@ export function TrendAreaChart({
               strokeWidth: 2,
               fill: color,
               stroke: '#fff',
-              onClick: (_e: any, payload: any) =>
+              onClick: (_e: React.MouseEvent<SVGCircleElement>, payload: { payload: TrendDataPoint }) =>
                 onPointClick?.(payload.payload),
               style: { cursor: onPointClick ? 'pointer' : 'default' },
             }}

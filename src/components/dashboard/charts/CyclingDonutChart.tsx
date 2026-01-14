@@ -12,7 +12,7 @@ export interface PerspectiveData {
   value: number
   id: string // used for filtering/drilldown
   color?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface DonutPerspective {

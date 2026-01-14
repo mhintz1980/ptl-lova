@@ -1,5 +1,5 @@
 // src/components/dashboard/PumpTable.tsx
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useMemo, useState, memo } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Pump, Priority, Stage } from '../../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
@@ -134,10 +134,10 @@ const _getBatchProgress = (_pumps: Pump[]): number => {
 }
 */
 
-export const PumpTable: React.FC<PumpTableProps> = ({
+export const PumpTable = memo(function PumpTable({
   pumps,
   onSelectPump,
-}) => {
+}: PumpTableProps) {
   const [expandedPOs, setExpandedPOs] = useState<Set<string>>(new Set())
 
   const purchaseOrders = useMemo<PurchaseOrderGroup[]>(() => {
@@ -214,15 +214,25 @@ export const PumpTable: React.FC<PumpTableProps> = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]" />
-              <TableHead className="w-[120px]">PO #</TableHead>
-              <TableHead className="w-[140px]">Customer</TableHead>
-              <TableHead className="w-[180px]">
+              <TableHead className="w-[calc((100%-40px)/7)]">PO #</TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)]">
+                Customer
+              </TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)]">
                 Timeline (Start → Promise)
               </TableHead>
-              <TableHead className="w-[140px]">Progress</TableHead>
-              <TableHead className="w-[80px] text-center">Health</TableHead>
-              <TableHead className="w-[60px] text-center">Wgt</TableHead>
-              <TableHead className="text-right">Value</TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)]">
+                Progress
+              </TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)] text-center">
+                Health
+              </TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)] text-center">
+                Wgt
+              </TableHead>
+              <TableHead className="w-[calc((100%-40px)/7)] text-right">
+                Value
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -306,4 +316,4 @@ export const PumpTable: React.FC<PumpTableProps> = ({
       </CardContent>
     </Card>
   )
-}
+})

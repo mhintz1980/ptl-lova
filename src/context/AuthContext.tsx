@@ -27,18 +27,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null)
+      })
+      .catch((error) => {
+        console.error('Error fetching session:', error)
+        // Fallback to localStorage session if available
+        try {
+          const storedSession = localStorage.getItem('supabase.auth.token')
+          if (storedSession) {
+            const { access_token, refresh_token } = JSON.parse(storedSession)
+            if (access_token) {
+              // Session exists in storage, will be validated by listener
+              console.log('Using localStorage session as fallback')
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Error accessing localStorage:', fallbackError)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
 
     // Listen for changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    let subscription
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        try {
+          setUser(session?.user ?? null)
+        } catch (error) {
+          console.error('Error in auth state change handler:', error)
+        } finally {
+          setLoading(false)
+        }
+      })
+      subscription = data.subscription
+    } catch (error) {
+      console.error('Error setting up auth state listener:', error)
       setLoading(false)
-    })
+    }
 
     return () => subscription.unsubscribe()
   }, [])

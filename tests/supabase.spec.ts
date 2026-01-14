@@ -28,7 +28,6 @@ describe('SupabaseAdapter', () => {
 
   it('should retry loading data on failure', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const error = new Error('Network error');
     const selectSpy = vi.fn()
@@ -45,17 +44,13 @@ describe('SupabaseAdapter', () => {
     expect(supabase.from).toHaveBeenCalledTimes(3);
     expect(selectSpy).toHaveBeenCalledTimes(3);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
-    expect(consoleLogSpy).toHaveBeenCalledWith('Retrying in 500ms...');
-    expect(consoleLogSpy).toHaveBeenCalledWith('Retrying in 1000ms...');
     expect(data).toEqual([{ id: '1', name: 'Test Pump' }]);
 
     consoleErrorSpy.mockRestore();
-    consoleLogSpy.mockRestore();
   });
 
   it('should throw an error after max retries', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const error = new Error('Network error');
     const selectSpy = vi.fn().mockResolvedValue({ data: null, error });
@@ -68,11 +63,7 @@ describe('SupabaseAdapter', () => {
     expect(supabase.from).toHaveBeenCalledTimes(3);
     expect(selectSpy).toHaveBeenCalledTimes(3);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(4);
-    expect(consoleLogSpy).toHaveBeenCalledWith('Retrying in 500ms...');
-    expect(consoleLogSpy).toHaveBeenCalledWith('Retrying in 1000ms...');
-    expect(consoleLogSpy).toHaveBeenCalledWith('Retrying in 1500ms...');
 
     consoleErrorSpy.mockRestore();
-    consoleLogSpy.mockRestore();
   });
 });

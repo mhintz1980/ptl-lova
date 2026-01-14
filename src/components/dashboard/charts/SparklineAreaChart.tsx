@@ -5,7 +5,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 export interface SparklineDataPoint {
   label: string
   value: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface SparklineAreaChartProps {

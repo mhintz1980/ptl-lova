@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ResponsiveContainer, Treemap, Tooltip } from 'recharts'
+import { ResponsiveContainer, Treemap, Tooltip, TooltipProps } from 'recharts'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
@@ -36,7 +36,19 @@ const truncateText = (text: string, maxChars: number): string => {
 }
 
 // Custom Content with smart text orientation
-const AnimatedTreemapContent = (props: any) => {
+interface TreemapContentProps {
+  x: number
+  y: number
+  width: number
+  height: number
+  index: number
+  name: string
+  value: number
+  colors: string[]
+  onClick: (node: { name: string; value: number; count: number }) => void
+}
+
+const AnimatedTreemapContent = (props: TreemapContentProps) => {
   const { x, y, width, height, index, name, value, colors, onClick } = props
 
   if (!width || !height) return null
@@ -139,9 +151,9 @@ const AnimatedTreemapContent = (props: any) => {
   )
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: TooltipProps<any, any>) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload
+    const data = payload[0].payload as { name: string; value: number; count: number }
     return (
       <div className="bg-popover border border-border p-3 rounded-xl shadow-xl backdrop-blur-md">
         <p className="font-medium text-base">{data.name}</p>
@@ -240,8 +252,8 @@ export const TreemapChart: React.FC<ChartProps> = ({
 
   const totalValue = data.reduce((acc, d) => acc + d.value, 0)
 
-  const handleNodeClick = (node: any) => {
-    const update: any = {}
+  const handleNodeClick = (node: { name: string; value: number; count: number }) => {
+    const update: Partial<Record<string, string>> = {}
     if (viewMode === 'stage') update.stage = node.name.replace(/ /g, '_')
     else if (viewMode === 'customer') update.customerId = node.name
     else if (viewMode === 'model') update.modelId = node.name
