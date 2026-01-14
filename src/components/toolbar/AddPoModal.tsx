@@ -216,6 +216,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
             onClick={handleCancel}
             disabled={isSaving}
             className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
