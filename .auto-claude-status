@@ -3,7 +3,7 @@
   "spec": "006-add-aria-labels-to-form-controls-in-addpomodal",
   "state": "building",
   "subtasks": {
-    "completed": 4,
+    "completed": 5,
     "total": 6,
     "in_progress": 1,
     "failed": 0
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 61,
+    "number": 62,
     "started_at": "2026-01-14T08:23:00.628259"
   },
-  "last_update": "2026-01-14T13:38:02.472550"
+  "last_update": "2026-01-14T13:39:32.649949"
 }
