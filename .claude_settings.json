@@ -1,0 +1,44 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Read(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/**)",
+      "Write(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/**)",
+      "Edit(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/**)",
+      "Glob(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/**)",
+      "Grep(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/**)",
+      "Read(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/.auto-claude/specs/002-global-keyboard-shortcuts-hook/**)",
+      "Write(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/.auto-claude/specs/002-global-keyboard-shortcuts-hook/**)",
+      "Edit(/home/markimus/projects/ptl-lova/.auto-claude/worktrees/tasks/002-global-keyboard-shortcuts-hook/.auto-claude/specs/002-global-keyboard-shortcuts-hook/**)",
+      "Read(/home/markimus/projects/ptl-lova/.auto-claude/**)",
+      "Write(/home/markimus/projects/ptl-lova/.auto-claude/**)",
+      "Edit(/home/markimus/projects/ptl-lova/.auto-claude/**)",
+      "Glob(/home/markimus/projects/ptl-lova/.auto-claude/**)",
+      "Grep(/home/markimus/projects/ptl-lova/.auto-claude/**)",
+      "Read(/home/markimus/projects/ptl-lova/.worktrees/**)",
+      "Write(/home/markimus/projects/ptl-lova/.worktrees/**)",
+      "Edit(/home/markimus/projects/ptl-lova/.worktrees/**)",
+      "Glob(/home/markimus/projects/ptl-lova/.worktrees/**)",
+      "Grep(/home/markimus/projects/ptl-lova/.worktrees/**)",
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__context7__resolve-library-id(*)",
+      "mcp__context7__get-library-docs(*)",
+      "mcp__graphiti-memory__search_nodes(*)",
+      "mcp__graphiti-memory__search_facts(*)",
+      "mcp__graphiti-memory__add_episode(*)",
+      "mcp__graphiti-memory__get_episodes(*)",
+      "mcp__graphiti-memory__get_entity_edge(*)"
+    ]
+  }
+}
