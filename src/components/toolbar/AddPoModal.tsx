@@ -328,6 +328,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                             }
                             className="h-11 w-full rounded-lg bg-transparent px-3 text-sm text-foreground focus:outline-none"
                             required
+                            aria-label={`Model for line ${index + 1}`}
                           >
                             <option
                               value=""
