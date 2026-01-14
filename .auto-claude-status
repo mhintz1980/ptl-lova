@@ -3,23 +3,23 @@
   "spec": "002-global-keyboard-shortcuts-hook",
   "state": "building",
   "subtasks": {
-    "completed": 1,
+    "completed": 2,
     "total": 9,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Core Hook Implementation",
+    "current": "Shortcuts Help Modal",
     "id": null,
-    "total": 2
+    "total": 1
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 3,
+    "number": 4,
     "started_at": "2026-01-14T03:12:14.677320"
   },
-  "last_update": "2026-01-14T03:19:58.320612"
+  "last_update": "2026-01-14T03:21:48.508259"
 }
