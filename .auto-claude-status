@@ -3,7 +3,7 @@
   "spec": "002-global-keyboard-shortcuts-hook",
   "state": "building",
   "subtasks": {
-    "completed": 4,
+    "completed": 5,
     "total": 9,
     "in_progress": 1,
     "failed": 0
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 6,
-    "started_at": "2026-01-14T03:12:14.677320"
+    "number": 1,
+    "started_at": "2026-01-14T08:22:31.429447"
   },
-  "last_update": "2026-01-14T03:28:05.651461"
+  "last_update": "2026-01-14T08:22:31.495647"
 }
