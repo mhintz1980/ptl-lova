@@ -427,6 +427,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                             )
                           }
                           className="h-11 w-full rounded-lg bg-transparent px-3 text-sm text-foreground focus:outline-none"
+                          aria-label={`Priority for line ${index + 1}`}
                         >
                           {priorityOptions.map((option) => (
                             <option
