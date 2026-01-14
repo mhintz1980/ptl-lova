@@ -41,3 +41,6 @@ master-agents/openai.chatgpt-0.5.52.vsix
 .agent/
 .claude/
 .gemini/
+
+# Auto Claude data directory
+.auto-claude/
