@@ -1,5 +1,23 @@
 # AGENTS.md — Repository Operating Manual
 
+---
+
+> [!CAUTION]
+>
+> ## 🚨 MAIN BRANCH IS LIVE IN PRODUCTION 🚨
+>
+> **Real users are using this application RIGHT NOW.**
+>
+> - **NEVER push directly to `main`** — always use feature branches
+> - **NEVER merge to `main` without explicit user approval**
+> - **NEVER run destructive operations** (data resets, schema changes) without asking first
+> - **ALWAYS check `git branch` before making changes**
+>
+> If you break `main`, you break it for real users. There is no "undo" button.
+> **When in doubt, ASK.**
+
+---
+
 This file is the **default contract** for humans and AI agents working in this repo.
 If anything conflicts with project-specific docs/specs, **project docs win**.
 
