@@ -3,7 +3,7 @@
   "spec": "010-fix-useapp-getstate-anti-pattern-in-maincalendargr",
   "state": "building",
   "subtasks": {
-    "completed": 2,
+    "completed": 3,
     "total": 4,
     "in_progress": 1,
     "failed": 0
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 59,
+    "number": 60,
     "started_at": "2026-01-14T08:22:45.648990"
   },
-  "last_update": "2026-01-14T13:38:12.628119"
+  "last_update": "2026-01-14T13:39:39.221041"
 }
