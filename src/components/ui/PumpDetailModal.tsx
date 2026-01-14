@@ -26,6 +26,7 @@ import {
   getPumpStageMoveEvents,
   getStagedForPowderHistory,
 } from '../../lib/stage-history'
+import { EventHistoryTimeline } from './EventHistoryTimeline'
 
 // Constitution §2.1: Canonical production stages for progress bar
 const PROGRESS_STAGES: Stage[] = [
@@ -187,6 +188,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
   const [isEditing, setIsEditing] = useState(false)
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
+  const [isEventHistoryOpen, setIsEventHistoryOpen] = useState(false)
   const [formData, setFormData] = useState<Pump | null>(null)
 
   // Data sources for dropdowns
@@ -198,6 +200,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
       setFormData({ ...currentPump })
       setIsEditing(false)
       setIsAdvancedOpen(false)
+      setIsEventHistoryOpen(false)
     }
   }, [currentPump?.id]) // Only reset when opening a different pump
 
@@ -820,6 +823,31 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Event History Section */}
+            <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden shadow-inner backdrop-blur-sm">
+              <button
+                onClick={() => setIsEventHistoryOpen(!isEventHistoryOpen)}
+                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
+              >
+                <div className="flex items-center gap-2">
+                  {isEventHistoryOpen ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                    Event History
+                  </span>
+                </div>
+              </button>
+
+              {isEventHistoryOpen && (
+                <div className="p-6 pt-0 border-t border-white/5 animate-in slide-in-from-top-2 duration-300">
+                  <EventHistoryTimeline pumpId={currentPump.id} />
+                </div>
+              )}
             </div>
 
             {/* Model Defaults Section */}
