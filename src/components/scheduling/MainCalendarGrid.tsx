@@ -58,7 +58,8 @@ export function MainCalendarGrid({
   onEventDoubleClick: _onEventDoubleClick,
   visibleStages = [],
 }: MainCalendarGridProps) {
-  const { getModelLeadTimes } = useApp.getState()
+  // Use proper hook pattern instead of getState() anti-pattern
+  const { getModelLeadTimes, capacityConfig } = useApp()
   const scheduleGroupBy = useApp((state) => state.scheduleGroupBy)
   const scheduleSortBy = useApp((state) => state.scheduleSortBy)
 
@@ -76,7 +77,7 @@ export function MainCalendarGrid({
 
   // Build timelines for all pumps
   const pumpTimelines = useMemo(() => {
-    const { capacityConfig } = useApp.getState()
+    // Use the capacity-aware projection engine
     const timelinesMap = projectCapacityAwareTimelines(
       pumps,
       capacityConfig,
@@ -102,7 +103,7 @@ export function MainCalendarGrid({
       .filter((item): item is { pump: Pump; timeline: StageBlock[] } =>
         Boolean(item)
       )
-  }, [pumps, getModelLeadTimes, stageFilter])
+  }, [pumps, capacityConfig, getModelLeadTimes, stageFilter])
 
   // Group pumps by selected criteria
   const groupedPumps = useMemo((): GroupedPumps => {
