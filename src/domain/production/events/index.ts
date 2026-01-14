@@ -10,6 +10,8 @@ export type { PumpStageMoved, PumpStageMovedContext } from './PumpStageMoved'
 export { pumpStageMoved } from './PumpStageMoved'
 export type { PumpScheduled, PumpScheduleCleared } from './PumpScheduled'
 export { pumpScheduled, pumpScheduleCleared } from './PumpScheduled'
+export type { PriorityChanged } from './PriorityChanged'
+export { priorityChanged } from './PriorityChanged'
 
 /**
  * Union type of all production domain events.
@@ -19,3 +21,4 @@ export type ProductionEvent =
   | import('./PumpStageMoved').PumpStageMoved
   | import('./PumpScheduled').PumpScheduled
   | import('./PumpScheduled').PumpScheduleCleared
+  | import('./PriorityChanged').PriorityChanged
