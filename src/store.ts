@@ -34,6 +34,7 @@ import { pumpStageMoved } from './domain/production/events/PumpStageMoved'
 import { pumpPaused } from './domain/production/events/PumpPaused'
 import { pumpResumed } from './domain/production/events/PumpResumed'
 import { lockDateChanged } from './domain/production/events/LockDateChanged'
+import { priorityChanged } from './domain/production/events/PriorityChanged'
 import { WORK_STAGES } from './lib/stage-constants'
 
 // --- Store Definition ---
@@ -330,6 +331,16 @@ export const useApp = create<AppState>()(
       },
 
       updatePump: (id, patch) => {
+        const pump = get().pumps.find((p) => p.id === id)
+
+        // Emit PriorityChanged event if priority is being modified
+        if (pump && patch.priority !== undefined && patch.priority !== pump.priority) {
+          const event = priorityChanged(id, pump.priority, patch.priority)
+          eventStore.append(event).catch((err) => {
+            console.error('Failed to persist priority change event:', err)
+          })
+        }
+
         const now = new Date().toISOString()
         const newPumps = get().pumps.map((p) =>
           p.id === id ? { ...p, ...patch, last_update: now } : p
