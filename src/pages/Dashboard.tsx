@@ -10,10 +10,7 @@ interface DashboardProps {
   onSelectPump: (pump: Pump) => void
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  pumps,
-  onSelectPump,
-}) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onSelectPump }) => {
   // DashboardEngine handles data connection from store.
   // We pass onSelectPump so charts/tables can trigger the main app's selection/modal logic.
 
@@ -30,5 +27,3 @@ export const Dashboard: React.FC<DashboardProps> = ({
     </div>
   )
 }
-
-

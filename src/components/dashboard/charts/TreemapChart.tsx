@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ResponsiveContainer, Treemap, Tooltip, TooltipProps } from 'recharts'
+import { ResponsiveContainer, Treemap, Tooltip } from 'recharts'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
@@ -44,6 +44,7 @@ interface TreemapContentProps {
   index: number
   name: string
   value: number
+  count?: number
   colors: string[]
   onClick: (node: { name: string; value: number; count: number }) => void
 }
@@ -99,7 +100,9 @@ const AnimatedTreemapContent = (props: TreemapContentProps) => {
           transformBox: 'fill-box',
           transformOrigin: 'center',
         }}
-        onClick={() => onClick(props)}
+        onClick={() =>
+          onClick({ name, value, count: (props as any).count ?? 1 })
+        }
       />
       {canShowText && (
         <text
@@ -151,9 +154,14 @@ const AnimatedTreemapContent = (props: TreemapContentProps) => {
   )
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps<any, any>) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload as { name: string; value: number; count: number }
+const CustomTooltip = (props: any) => {
+  const { active, payload: tooltipPayload } = props
+  if (active && tooltipPayload && tooltipPayload.length) {
+    const data = tooltipPayload[0].payload as {
+      name: string
+      value: number
+      count: number
+    }
     return (
       <div className="bg-popover border border-border p-3 rounded-xl shadow-xl backdrop-blur-md">
         <p className="font-medium text-base">{data.name}</p>
@@ -252,7 +260,11 @@ export const TreemapChart: React.FC<ChartProps> = ({
 
   const totalValue = data.reduce((acc, d) => acc + d.value, 0)
 
-  const handleNodeClick = (node: { name: string; value: number; count: number }) => {
+  const handleNodeClick = (node: {
+    name: string
+    value: number
+    count: number
+  }) => {
     const update: Partial<Record<string, string>> = {}
     if (viewMode === 'stage') update.stage = node.name.replace(/ /g, '_')
     else if (viewMode === 'customer') update.customerId = node.name
@@ -334,6 +346,13 @@ export const TreemapChart: React.FC<ChartProps> = ({
                 fill="#8884d8"
                 content={
                   <AnimatedTreemapContent
+                    x={0}
+                    y={0}
+                    width={0}
+                    height={0}
+                    index={0}
+                    name=""
+                    value={0}
                     colors={COLORS}
                     onClick={handleNodeClick}
                   />

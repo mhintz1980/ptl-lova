@@ -1,5 +1,5 @@
 // src/components/toolbar/ExportModal.tsx
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useApp } from '../../store'
 import { Button } from '../ui/Button'
 import { X, Download } from 'lucide-react'
@@ -103,9 +103,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
               <Download className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">
-                Export Data
-              </h2>
+              <h2 className="text-xl font-bold text-foreground">Export Data</h2>
               <p className="text-sm text-muted-foreground">
                 {pumpCount} pump{pumpCount !== 1 ? 's' : ''} will be exported
               </p>

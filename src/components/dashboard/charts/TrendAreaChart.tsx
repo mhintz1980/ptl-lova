@@ -8,10 +8,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts'
 import { ChartProps } from '../dashboardConfig'
-import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 // --- Types ---
 export interface TrendDataPoint {
@@ -118,8 +116,8 @@ export function TrendAreaChart({
               strokeWidth: 2,
               fill: color,
               stroke: '#fff',
-              onClick: (_e: React.MouseEvent<SVGCircleElement>, payload: { payload: TrendDataPoint }) =>
-                onPointClick?.(payload.payload),
+              onClick: ((_e: any, payload: any) =>
+                onPointClick?.(payload.payload)) as any,
               style: { cursor: onPointClick ? 'pointer' : 'default' },
             }}
           />

@@ -27,7 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Check active session
-    supabase.auth.getSession()
+    supabase.auth
+      .getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null)
       })
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const storedSession = localStorage.getItem('supabase.auth.token')
           if (storedSession) {
-            const { access_token, refresh_token } = JSON.parse(storedSession)
+            const { access_token } = JSON.parse(storedSession)
             if (access_token) {
               // Session exists in storage, will be validated by listener
               console.log('Using localStorage session as fallback')
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
     // Listen for changes
-    let subscription
+    let subscription: { unsubscribe: () => void } | undefined
     try {
       const { data } = supabase.auth.onAuthStateChange((_event, session) => {
         try {
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     }
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [])
 
   const signInWithPassword = async (email: string, password: string) => {

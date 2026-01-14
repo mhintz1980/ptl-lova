@@ -1,16 +1,16 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react'
 
 interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  includeStack?: boolean;
+  children: ReactNode
+  fallback?: ReactNode
+  onError?: (error: Error, errorInfo: ErrorInfo) => void
+  includeStack?: boolean
 }
 
 interface State {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
+  hasError: boolean
+  error: Error | null
+  errorInfo: ErrorInfo | null
 }
 
 /**
@@ -29,39 +29,39 @@ interface State {
  */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
+    super(props)
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
-    };
+    }
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return {
       hasError: true,
       error,
-    };
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Update state with error info
     this.setState({
       errorInfo,
-    });
+    })
 
     // Log error to console
-    console.error('ErrorBoundary caught an error:', error);
-    console.error('Error Info:', errorInfo);
+    console.error('ErrorBoundary caught an error:', error)
+    console.error('Error Info:', errorInfo)
 
     // Call custom error handler if provided
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(error, errorInfo)
     }
 
     // Log to error tracking service (placeholder for integration)
     // Example: Sentry, LogRocket, etc.
-    this.logToErrorService(error, errorInfo);
+    this.logToErrorService(error, errorInfo)
   }
 
   /**
@@ -79,9 +79,9 @@ export class ErrorBoundary extends Component<Props, State> {
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
-    };
+    }
 
-    console.error('Error Log:', JSON.stringify(errorLog, null, 2));
+    console.error('Error Log:', JSON.stringify(errorLog, null, 2))
   }
 
   /**
@@ -92,14 +92,14 @@ export class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-    });
-  };
+    })
+  }
 
   render(): ReactNode {
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       // Default error UI
@@ -119,8 +119,8 @@ export class ErrorBoundary extends Component<Props, State> {
             Something went wrong
           </h2>
           <p style={{ marginBottom: '1rem' }}>
-            We apologize for the inconvenience. An error has occurred and this page
-            could not be displayed.
+            We apologize for the inconvenience. An error has occurred and this
+            page could not be displayed.
           </p>
 
           {this.state.error && (
@@ -162,7 +162,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 {this.props.includeStack && this.state.error.stack && (
                   <>
                     <strong
-                      style={{ display: 'block', marginTop: '1rem', marginBottom: '0.5rem' }}
+                      style={{
+                        display: 'block',
+                        marginTop: '1rem',
+                        marginBottom: '0.5rem',
+                      }}
                     >
                       Stack Trace:
                     </strong>
@@ -181,27 +185,32 @@ export class ErrorBoundary extends Component<Props, State> {
                   </>
                 )}
 
-                {this.props.includeStack && this.state.errorInfo?.componentStack && (
-                  <>
-                    <strong
-                      style={{ display: 'block', marginTop: '1rem', marginBottom: '0.5rem' }}
-                    >
-                      Component Stack:
-                    </strong>
-                    <pre
-                      style={{
-                        padding: '0.5rem',
-                        backgroundColor: '#f7fafc',
-                        borderRadius: '4px',
-                        overflow: 'auto',
-                        fontSize: '0.875rem',
-                        maxHeight: '200px',
-                      }}
-                    >
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  </>
-                )}
+                {this.props.includeStack &&
+                  this.state.errorInfo?.componentStack && (
+                    <>
+                      <strong
+                        style={{
+                          display: 'block',
+                          marginTop: '1rem',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        Component Stack:
+                      </strong>
+                      <pre
+                        style={{
+                          padding: '0.5rem',
+                          backgroundColor: '#f7fafc',
+                          borderRadius: '4px',
+                          overflow: 'auto',
+                          fontSize: '0.875rem',
+                          maxHeight: '200px',
+                        }}
+                      >
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    </>
+                  )}
               </div>
             </details>
           )}
@@ -220,23 +229,29 @@ export class ErrorBoundary extends Component<Props, State> {
               transition: 'background-color 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#2c5282';
+              e.currentTarget.style.backgroundColor = '#2c5282'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#3182ce';
+              e.currentTarget.style.backgroundColor = '#3182ce'
             }}
           >
             Try Again
           </button>
 
-          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#718096' }}>
+          <p
+            style={{
+              marginTop: '1rem',
+              fontSize: '0.875rem',
+              color: '#718096',
+            }}
+          >
             If the problem persists, please contact support or refresh the page.
           </p>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 
@@ -258,6 +273,6 @@ export const DefaultErrorFallback = () => (
     <h2>Something went wrong</h2>
     <p>Please refresh the page or contact support if the problem persists.</p>
   </div>
-);
+)
 
-export default ErrorBoundary;
+export default ErrorBoundary
