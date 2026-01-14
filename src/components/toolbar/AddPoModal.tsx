@@ -11,7 +11,6 @@ import {
   Edit2,
   StickyNote,
   Trash2,
-  Check,
   AlertCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'

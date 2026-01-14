@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, memo } from 'react'
+import type { Pump } from '../../types'
 import {
   ChartId,
   DashboardFilters,

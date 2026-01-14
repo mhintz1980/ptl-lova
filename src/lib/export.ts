@@ -10,8 +10,8 @@ function filterColumns(
   columns?: string[]
 ): Record<string, unknown>[] {
   if (!columns || columns.length === 0) {
-    // Return all columns
-    return pumps
+    // Return all columns - cast to Record type for papaparse compatibility
+    return pumps as unknown as Record<string, unknown>[]
   }
 
   return pumps.map((pump) => {
