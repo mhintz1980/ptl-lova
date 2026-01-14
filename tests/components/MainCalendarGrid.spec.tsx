@@ -29,8 +29,19 @@ const mockGetModelLeadTimes = vi.fn().mockReturnValue({
 });
 
 vi.mock("../../src/store", () => {
-  const mockUseApp = (() => ({ filters: {} })) as (() => { filters: Record<string, unknown> }) & {
-    getState: () => { getModelLeadTimes: typeof mockGetModelLeadTimes; capacityConfig: typeof DEFAULT_CAPACITY_CONFIG };
+  const mockUseApp = (() => ({
+    filters: {},
+    getModelLeadTimes: mockGetModelLeadTimes,
+    capacityConfig: DEFAULT_CAPACITY_CONFIG,
+  })) as (() => {
+    filters: Record<string, unknown>;
+    getModelLeadTimes: typeof mockGetModelLeadTimes;
+    capacityConfig: typeof DEFAULT_CAPACITY_CONFIG;
+  }) & {
+    getState: () => {
+      getModelLeadTimes: typeof mockGetModelLeadTimes;
+      capacityConfig: typeof DEFAULT_CAPACITY_CONFIG;
+    };
   };
   mockUseApp.getState = () => ({
     getModelLeadTimes: mockGetModelLeadTimes,

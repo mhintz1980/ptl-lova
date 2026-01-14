@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "010-fix-useapp-getstate-anti-pattern-in-maincalendargr",
+  "state": "planning",
+  "subtasks": {
+    "completed": 0,
+    "total": 0,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Fix State Subscription Pattern",
+    "id": null,
+    "total": 2
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 2,
+    "started_at": "2026-01-14T08:22:45.648990"
+  },
+  "last_update": "2026-01-14T08:27:09.366038"
+}

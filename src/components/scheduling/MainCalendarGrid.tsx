@@ -101,7 +101,7 @@ export function MainCalendarGrid({
   onEventDoubleClick,
   visibleStages = [],
 }: MainCalendarGridProps) {
-  const { getModelLeadTimes } = useApp.getState()
+  const { getModelLeadTimes, capacityConfig } = useApp()
 
   const today = useMemo(() => startOfDay(new Date()), [])
   const viewStart = useMemo(
@@ -115,8 +115,6 @@ export function MainCalendarGrid({
   )
 
   const pumpTimelines = useMemo(() => {
-    const { capacityConfig } = useApp.getState()
-
     // Use the capacity-aware projection engine
     const timelinesMap = projectCapacityAwareTimelines(
       pumps,
@@ -146,7 +144,7 @@ export function MainCalendarGrid({
           return aStart - bStart
         })
     )
-  }, [pumps, getModelLeadTimes])
+  }, [pumps, capacityConfig, getModelLeadTimes])
 
   const DroppableCell = ({ date }: { date: Date }) => {
     const dateId = format(date, 'yyyy-MM-dd')
