@@ -242,6 +242,17 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     }).format(value)
   }
 
+  // Reset form when modal closes (for consistency with Cancel/X button behavior)
+  // This ensures form resets whether closed via Escape, Cancel button, or X button
+  const prevOpenRef = React.useRef(isOpen)
+  useEffect(() => {
+    if (prevOpenRef.current && !isOpen) {
+      // Modal just closed - reset form for next time
+      resetForm()
+    }
+    prevOpenRef.current = isOpen
+  }, [isOpen, resetForm])
+
   if (!isOpen) return null
 
   // --- Sub-components (could be extracted) ---

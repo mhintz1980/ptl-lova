@@ -410,12 +410,6 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
           currentPump.isPaused && 'grayscale-[50%]'
         )}
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            e.preventDefault()
-            onClose()
-          }
-        }}
       >
         {/* PAUSED stamp - large rubber stamp style */}
         {currentPump.isPaused && (

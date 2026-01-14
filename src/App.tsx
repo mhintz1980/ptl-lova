@@ -8,9 +8,11 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import { useApp } from './store'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { AddPoModal } from './components/toolbar/AddPoModal'
 import { PumpDetailModal } from './components/ui/PumpDetailModal'
 import { SettingsModal } from './components/ui/SettingsModal'
+import { ShortcutsHelpModal } from './components/ui/ShortcutsHelpModal'
 import { Dashboard } from './pages/Dashboard'
 import { Kanban } from './pages/Kanban'
 import { SchedulingView } from './components/scheduling/SchedulingView'
@@ -65,9 +67,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function MainApp() {
   const { load, pumps, filters, sortField, sortDirection, loading } = useApp()
+  const { register } = useKeyboardShortcuts()
   // ... existing code ...
   const [isAddPoModalOpen, setIsAddPoModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false)
   const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
 
   const location = useLocation()
@@ -76,6 +80,63 @@ function MainApp() {
   useEffect(() => {
     load()
   }, [load])
+
+  // Register keyboard shortcuts
+  useEffect(() => {
+    // Ctrl+N: Open Add PO modal
+    register({
+      key: 'n',
+      ctrlKey: true,
+      handler: () => setIsAddPoModalOpen(true),
+      description: 'Open Add PO modal',
+    })
+
+    // Ctrl+F: Focus search input
+    register({
+      key: 'f',
+      ctrlKey: true,
+      handler: () => {
+        const searchInput = document.querySelector<HTMLInputElement>(
+          'input[type="search"], input[placeholder*="search" i]'
+        )
+        if (searchInput) {
+          searchInput.focus()
+        }
+      },
+      description: 'Focus search',
+    })
+
+    // Ctrl+/: Open shortcuts help
+    register({
+      key: '/',
+      ctrlKey: true,
+      handler: () => setIsShortcutsHelpOpen(true),
+      description: 'Show keyboard shortcuts',
+    })
+
+    // Escape: Close any open modal
+    register({
+      key: 'Escape',
+      handler: () => {
+        if (isAddPoModalOpen) {
+          setIsAddPoModalOpen(false)
+        } else if (isSettingsModalOpen) {
+          setIsSettingsModalOpen(false)
+        } else if (isShortcutsHelpOpen) {
+          setIsShortcutsHelpOpen(false)
+        } else if (selectedPump) {
+          setSelectedPump(null)
+        }
+      },
+      description: 'Close any modal',
+    })
+  }, [
+    register,
+    isAddPoModalOpen,
+    isSettingsModalOpen,
+    isShortcutsHelpOpen,
+    selectedPump,
+  ])
 
   const filteredPumps = useMemo(() => {
     const filtered = applyFilters(pumps, filters)
@@ -149,6 +210,11 @@ function MainApp() {
       <PumpDetailModal
         pump={selectedPump}
         onClose={() => setSelectedPump(null)}
+      />
+
+      <ShortcutsHelpModal
+        isOpen={isShortcutsHelpOpen}
+        onClose={() => setIsShortcutsHelpOpen(false)}
       />
     </ProtectedRoute>
   )
