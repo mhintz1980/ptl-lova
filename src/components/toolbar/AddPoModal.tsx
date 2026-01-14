@@ -246,6 +246,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                   onChange={(e) => setCustomer(e.target.value)}
                   placeholder="Select or type customer name"
                   required
+                  aria-label="Customer name"
                   className="flex h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
                 <datalist id="customer-options">
