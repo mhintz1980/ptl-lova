@@ -1,11 +1,12 @@
 // src/components/ui/EventHistoryTimeline.tsx
 import { useEffect, useState } from 'react'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { ArrowRight, Pause, Play, Clock } from 'lucide-react'
 import { Badge } from './Badge'
 import { ScrollArea } from './ScrollArea'
 import { eventStore } from '../../infrastructure/events/EventStore'
 import { STAGE_LABELS } from '../../lib/stage-constants'
+import { cn } from '../../lib/utils'
 import type { DomainEvent } from '../../domain/production/events/DomainEvent'
 import type { PumpStageMoved } from '../../domain/production/events/PumpStageMoved'
 import type { PumpPaused } from '../../domain/production/events/PumpPaused'
@@ -17,9 +18,32 @@ interface EventHistoryTimelineProps {
 
 type TimelineEvent = PumpStageMoved | PumpPaused | PumpResumed
 
+// Event type color schemes for consistent visual coding
+const EVENT_COLORS = {
+  PumpStageMoved: {
+    icon: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/30',
+    glow: 'shadow-blue-500/20',
+  },
+  PumpPaused: {
+    icon: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/30',
+    glow: 'shadow-amber-500/20',
+  },
+  PumpResumed: {
+    icon: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/30',
+    glow: 'shadow-emerald-500/20',
+  },
+} as const
+
 export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
   const [events, setEvents] = useState<DomainEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [, setTimestamp] = useState(Date.now())
 
   useEffect(() => {
     async function fetchEvents() {
@@ -38,7 +62,6 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
         )
         setEvents(sorted)
       } catch (error) {
-        console.error('Failed to fetch pump events:', error)
         setEvents([])
       } finally {
         setLoading(false)
@@ -48,10 +71,24 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
     fetchEvents()
   }, [pumpId])
 
+  // Update relative timestamps every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimestamp(Date.now())
+    }, 60000) // 60 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-        <Clock className="mr-2 h-4 w-4 animate-spin" />
+      <div
+        className="flex items-center justify-center py-8 text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading event history"
+      >
+        <Clock className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
         Loading events...
       </div>
     )
@@ -59,8 +96,12 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
 
   if (events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" />
+      <div
+        className="flex flex-col items-center justify-center py-8 text-center"
+        role="status"
+        aria-label="No events available"
+      >
+        <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" aria-hidden="true" />
         <p className="text-sm text-muted-foreground">No events yet</p>
         <p className="text-xs text-muted-foreground/70">
           Events will appear here as the pump moves through stages
@@ -71,7 +112,11 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
 
   return (
     <ScrollArea className="h-[300px] pr-4">
-      <div className="space-y-4">
+      <ol
+        className="space-y-4"
+        role="list"
+        aria-label="Event history timeline"
+      >
         {events.map((event, index) => (
           <TimelineEventItem
             key={`${event.eventType}-${event.occurredAt.getTime()}-${index}`}
@@ -79,7 +124,7 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
             isLast={index === events.length - 1}
           />
         ))}
-      </div>
+      </ol>
     </ScrollArea>
   )
 }
@@ -91,39 +136,69 @@ interface TimelineEventItemProps {
 
 function TimelineEventItem({ event, isLast }: TimelineEventItemProps) {
   const formattedTime = format(event.occurredAt, 'MMM d, yyyy h:mm a')
+  const relativeTime = formatDistanceToNow(event.occurredAt, { addSuffix: true })
+  const colors = EVENT_COLORS[event.eventType]
+
+  // Get event type label for accessibility
+  const eventTypeLabel = event.eventType === 'PumpStageMoved'
+    ? 'Stage moved'
+    : event.eventType === 'PumpPaused'
+    ? 'Pump paused'
+    : 'Pump resumed'
 
   return (
-    <div className="relative flex gap-3">
+    <li
+      className="relative flex gap-3 group"
+      role="listitem"
+      aria-label={`${eventTypeLabel} ${relativeTime}`}
+    >
       {/* Timeline connector line */}
       {!isLast && (
-        <div className="absolute left-[11px] top-6 h-full w-[2px] bg-border/50" />
+        <div
+          className="absolute left-[11px] top-8 h-full w-[2px] bg-gradient-to-b from-border/50 to-transparent"
+          aria-hidden="true"
+        />
       )}
 
-      {/* Event icon */}
-      <div className="relative z-10 mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-border bg-card">
+      {/* Event icon with color-coded styling */}
+      <div
+        className={cn(
+          'relative z-10 mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200',
+          colors.bg,
+          colors.border,
+          'group-hover:shadow-md',
+          `group-hover:${colors.glow}`,
+          'group-hover:scale-110'
+        )}
+        aria-hidden="true"
+      >
         {event.eventType === 'PumpStageMoved' && (
-          <ArrowRight className="h-3 w-3 text-blue-500" />
+          <ArrowRight className={cn('h-3 w-3', colors.icon)} />
         )}
         {event.eventType === 'PumpPaused' && (
-          <Pause className="h-3 w-3 text-yellow-500" />
+          <Pause className={cn('h-3 w-3', colors.icon)} />
         )}
         {event.eventType === 'PumpResumed' && (
-          <Play className="h-3 w-3 text-green-500" />
+          <Play className={cn('h-3 w-3', colors.icon)} />
         )}
       </div>
 
       {/* Event content */}
-      <div className="flex-1 pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1">
+      <div className="flex-1 pb-2 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+          <div className="flex-1 min-w-0">
             <EventContent event={event} />
           </div>
-          <time className="text-xs text-muted-foreground" dateTime={event.occurredAt.toISOString()}>
-            {formattedTime}
+          <time
+            className="text-xs text-muted-foreground font-medium whitespace-nowrap sm:text-right"
+            dateTime={event.occurredAt.toISOString()}
+            title={formattedTime}
+          >
+            {relativeTime}
           </time>
         </div>
       </div>
-    </div>
+    </li>
   )
 }
 
@@ -139,16 +214,16 @@ function EventContent({ event }: EventContentProps) {
     const toLabel = STAGE_LABELS[event.toStage] ?? event.toStage
 
     return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Badge variant="info" className="text-xs">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="info" className="text-xs font-semibold">
             Stage Move
           </Badge>
         </div>
-        <p className="text-sm">
+        <p className="text-sm leading-relaxed">
           <span className="text-muted-foreground">{fromLabel}</span>
-          <ArrowRight className="mx-1 inline h-3 w-3" />
-          <span className="font-medium">{toLabel}</span>
+          <ArrowRight className="mx-1.5 inline h-3.5 w-3.5 text-blue-400" aria-hidden="true" />
+          <span className="font-semibold text-foreground">{toLabel}</span>
         </p>
       </div>
     )
@@ -156,17 +231,19 @@ function EventContent({ event }: EventContentProps) {
 
   if (event.eventType === 'PumpPaused') {
     return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Badge variant="warning" className="text-xs">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="warning" className="text-xs font-semibold">
             Paused
           </Badge>
           {event.reason === 'auto' && (
-            <span className="text-xs text-muted-foreground">(automatic)</span>
+            <span className="text-xs text-muted-foreground italic" aria-label="Automatically paused">
+              (automatic)
+            </span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Paused in {STAGE_LABELS[event.stage] ?? event.stage}
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Paused in <span className="font-medium">{STAGE_LABELS[event.stage] ?? event.stage}</span>
         </p>
       </div>
     )
@@ -174,17 +251,17 @@ function EventContent({ event }: EventContentProps) {
 
   if (event.eventType === 'PumpResumed') {
     return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Badge variant="success" className="text-xs">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="success" className="text-xs font-semibold">
             Resumed
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Resumed in {STAGE_LABELS[event.stage] ?? event.stage}
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Resumed in <span className="font-medium">{STAGE_LABELS[event.stage] ?? event.stage}</span>
           {event.pausedDays > 0 && (
             <span className="ml-1">
-              (paused {event.pausedDays} {event.pausedDays === 1 ? 'day' : 'days'})
+              (paused <span className="font-medium">{event.pausedDays}</span> {event.pausedDays === 1 ? 'day' : 'days'})
             </span>
           )}
         </p>
