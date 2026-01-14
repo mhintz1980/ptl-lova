@@ -229,11 +229,8 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
               onMouseEnter={() => setActiveSlice(index)}
               onFocus={() => setActiveSlice(index)}
               onClick={() => {
-                console.log('Legend item clicked:', nameKey, item[nameKey]);
                 if (onDrilldown) {
                   onDrilldown(String(nameKey), item[nameKey]);
-                } else {
-                  console.log('onDrilldown is missing');
                 }
               }}
               title={`${label} – ${valueFormatter(value, item)} (${percentage}%)`}

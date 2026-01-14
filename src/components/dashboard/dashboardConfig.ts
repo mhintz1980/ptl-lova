@@ -9,8 +9,8 @@ export type DashboardTopicId =
   | 'bottlenecks'
   | 'quality'
 
-// Dashboard Modes (new navigation paradigm)
-export type DashboardMode = 'operations' | 'value' | 'production'
+// Dashboard Modes (3-mode navigation)
+export type DashboardMode = 'overview' | 'analysis' | 'data'
 
 export type KpiId =
   | 'activeWip'
@@ -23,6 +23,7 @@ export type KpiId =
   | 'throughput'
   | 'onTimeRate'
 
+// ... (ChartId type remains same)
 export type ChartId =
   | 'wipByStage'
   | 'wipDonut'
@@ -42,6 +43,15 @@ export type ChartId =
   | 'stageGenericPipeline'
   | 'cycleTimeBreakdown'
   | 'drilldownCharts'
+  | 'onTimeRisk' // NEW: Shows On Track / At Risk / Late
+  // ---- Bento Grid Components ----
+  | 'kpiProductivity'
+  | 'kpiOnTime'
+  | 'kpiRevenue'
+  | 'insightEfficiency'
+  | 'insightRework'
+  | 'insightUtilization'
+  | 'insightScrap'
 
 // ---- Shared filters for drilldown ----
 export interface DashboardFilters {
@@ -52,13 +62,26 @@ export interface DashboardFilters {
   stage?: Stage
 }
 
+import { Pump } from '../../types'
+
 // Every chart component will receive this:
 export interface ChartProps {
   filters: DashboardFilters
   onDrilldown: (update: Partial<DashboardFilters>) => void
+  chartHeight?: number // Optional height passed from DashboardEngine
+  onSelectPump?: (pump: Pump) => void // NEW: Allow charts to handle selection
 }
 
-export type ChartSize = 'small' | 'large' | 'max'
+export type ChartSize =
+  | 'mini'
+  | 'small'
+  | 'third'
+  | 'large'
+  | 'max'
+  | 'quarter'
+  | 'half'
+  | 'three-quarter'
+  | 'full'
 
 export interface ChartConfig {
   id: ChartId
@@ -66,6 +89,9 @@ export interface ChartConfig {
   description?: string
   component: ComponentType<ChartProps>
   defaultSize?: ChartSize
+  height?: number // Explicit height in pixels (overrides defaultSize height)
+  containerClass?: string // NEW: Tailwind classes for the outer wrapper (e.g. "min-h-[200px]")
+  aspectRatio?: number // SVG aspect ratio override (width/height)
   drillDownSequence?: ChartId[]
 }
 
@@ -113,31 +139,33 @@ export interface ModeConfig {
 
 export const MODE_CONFIGS: ModeConfig[] = [
   {
-    id: 'operations',
-    label: 'Operations',
+    id: 'overview',
+    label: 'Overview',
     icon: 'activity',
-    kpis: ['activeWip', 'lateOrders', 'capacityUtil'],
-    // Use LateOrdersList instead of Chart here? Maybe keep both or swap.
-    // Plan: "Operations: WIP Cycling Donut, Late Orders List, Workload Proportional Bars"
-    chartIds: ['wipByStage', 'lateOrdersList', 'capacityByDept'],
+    kpis: ['activeWip', 'lateOrders', 'onTimeRate'],
+    // Row 1: 4 quarter-width charts
+    // Row 2: Optional additional charts
+    chartIds: ['wipByStage', 'capacityByDept', 'lateOrdersList', 'onTimeRisk'],
   },
   {
-    id: 'value',
-    label: 'Value',
-    icon: 'dollar-sign',
-    kpis: ['totalValue', 'avgOrderValue', 'topCustomer'],
-    chartIds: ['totalPoValue', 'treemap', 'valueByCustomer'],
-  },
-  {
-    id: 'production',
-    label: 'Production',
+    id: 'analysis',
+    label: 'Analysis',
     icon: 'bar-chart-2',
-    kpis: ['avgLeadTime', 'throughput', 'onTimeRate'],
+    kpis: ['avgLeadTime', 'throughput', 'totalValue'],
+    // Row 1: Value Trend (half) + Throughput Trend (half)
+    // Row 2: Cycle Time Breakdown (quarter) + Treemap (three-quarter)
     chartIds: [
-      'drilldownCharts',
+      'totalPoValue',
       'throughputTrend',
-      'stageGenericPipeline',
       'cycleTimeBreakdown',
+      'treemap',
     ],
+  },
+  {
+    id: 'data',
+    label: 'Data',
+    icon: 'table',
+    kpis: ['activeWip', 'lateOrders', 'totalValue'],
+    chartIds: ['pumpTable'],
   },
 ]

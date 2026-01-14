@@ -1,5 +1,23 @@
 # AGENTS.md — Repository Operating Manual
 
+---
+
+> [!CAUTION]
+>
+> ## 🚨 MAIN BRANCH IS LIVE IN PRODUCTION 🚨
+>
+> **Real users are using this application RIGHT NOW.**
+>
+> - **NEVER push directly to `main`** — always use feature branches
+> - **NEVER merge to `main` without explicit user approval**
+> - **NEVER run destructive operations** (data resets, schema changes) without asking first
+> - **ALWAYS check `git branch` before making changes**
+>
+> If you break `main`, you break it for real users. There is no "undo" button.
+> **When in doubt, ASK.**
+
+---
+
 This file is the **default contract** for humans and AI agents working in this repo.
 If anything conflicts with project-specific docs/specs, **project docs win**.
 
@@ -19,6 +37,10 @@ If anything conflicts with project-specific docs/specs, **project docs win**.
 > The application is in **Cloud Mode** using a shared Supabase database.
 > **DO NOT** reset data, clear tables, or run seed scripts without explicit user authorization.
 > Read [`docs/status/current-work.md`](docs/status/current-work.md) before starting any task.
+>
+> **Local Dev is Safe**: When running `pnpm dev`, the app auto-enters **Sandbox Mode** with test data.
+> Production is never touched unless you explicitly click "Commit to Live".
+> See [`docs/development.md`](docs/development.md#-sandbox-testing-mode-critical) for details.
 
 ---
 

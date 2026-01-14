@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
-import { DrilldownDonutChart, DonutSegment } from './DrilldownDonutChart'
+import {
+  DrilldownDonutChart,
+  DonutSegment,
+  DonutTab,
+  DetailRow,
+} from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getPumpsByCustomer, getWorkloadByStage } from '../kpiCalculators'
@@ -26,12 +31,13 @@ const COLORS = [
   '#3b82f6', // Blue
 ]
 
-type Perspective = 'stage' | 'customer' | 'model'
+type Perspective = 'stage' | 'customer' | 'model' | 'value'
 
-const TABS: { id: Perspective; label: string }[] = [
-  { id: 'stage', label: 'By Stage' },
-  { id: 'customer', label: 'By Customer' },
-  { id: 'model', label: 'By Model' },
+const TABS: DonutTab[] = [
+  { id: 'stage', label: 'Stage' },
+  { id: 'customer', label: 'Cust.' },
+  { id: 'model', label: 'Model' },
+  { id: 'value', label: 'Value' },
 ]
 
 // Helper to group pumps by key
@@ -50,6 +56,9 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
   const { pumps } = useApp()
   const [activePerspective, setActivePerspective] =
     useState<Perspective>('stage')
+  const [selectedSegment, setSelectedSegment] = useState<DonutSegment | null>(
+    null
+  )
 
   // Filter out CLOSED pumps + apply filters
   const filteredPumps = useMemo(() => {
@@ -85,17 +94,74 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
     }
 
     // Model perspective
-    return groupPumps(filteredPumps, (p) => p.model)
-      .slice(0, 8)
-      .map((m, i) => ({
-        id: m.name,
-        label: m.name,
-        value: m.value,
+    if (activePerspective === 'model') {
+      return groupPumps(filteredPumps, (p) => p.model)
+        .slice(0, 8)
+        .map((m, i) => ({
+          id: m.name,
+          label: m.name,
+          value: m.value,
+          color: COLORS[i % COLORS.length],
+        }))
+    }
+
+    // Value perspective - group by pump and show their value
+    return filteredPumps
+      .filter((p) => p.value > 0)
+      .map((p, i) => ({
+        id: p.id,
+        label: `${p.po} - ${p.model}`,
+        value: p.value,
         color: COLORS[i % COLORS.length],
       }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10)
   }, [filteredPumps, activePerspective])
 
-  // Handle segment click → drill down
+  // Build inline detail data for selected segment
+  const detailData = useMemo((): DetailRow[] => {
+    if (!selectedSegment) return []
+
+    // Get pumps matching the selection
+    const matchingPumps = filteredPumps.filter((p) => {
+      if (activePerspective === 'stage') {
+        return p.stage === selectedSegment.id
+      } else if (activePerspective === 'customer') {
+        return p.customer === selectedSegment.id
+      } else if (activePerspective === 'model') {
+        return p.model === selectedSegment.id
+      } else {
+        // Value perspective - segment id is pump id
+        return p.id === selectedSegment.id
+      }
+    })
+
+    // Return pump details (PO, model/stage, customer)
+    return matchingPumps.slice(0, 10).map((p) => ({
+      id: p.id,
+      label: p.po,
+      value:
+        activePerspective === 'stage'
+          ? p.model
+          : activePerspective === 'value'
+          ? `$${p.value.toLocaleString()}`
+          : p.stage.replace(/_/g, ' '),
+      sublabel: activePerspective === 'customer' ? p.model : p.customer,
+    }))
+  }, [selectedSegment, filteredPumps, activePerspective])
+
+  // Handle segment selection
+  const handleSegmentSelect = (segment: DonutSegment | null) => {
+    setSelectedSegment(segment)
+  }
+
+  // Handle tab change
+  const handleTabChange = (tabId: string) => {
+    setActivePerspective(tabId as Perspective)
+    setSelectedSegment(null) // Clear selection when switching tabs
+  }
+
+  // Handle drill-down when user wants to see more (optional, via onDrilldown)
   const handleSegmentClick = (segment: DonutSegment) => {
     if (!onDrilldown) return
 
@@ -103,42 +169,32 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
       onDrilldown({ stage: segment.id as Stage })
     } else if (activePerspective === 'customer') {
       onDrilldown({ customerId: segment.id })
-    } else {
+    } else if (activePerspective === 'model') {
       onDrilldown({ modelId: segment.id })
     }
+    // Value perspective doesn't drill down further
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Perspective Tabs */}
-      <div className="flex gap-1 mb-3 px-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActivePerspective(tab.id)}
-            className={`
-              px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200
-              ${
-                activePerspective === tab.id
-                  ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Donut Chart */}
-      <div className="flex-1 min-h-0">
-        <DrilldownDonutChart
-          data={donutData}
-          title=""
-          onSegmentClick={handleSegmentClick}
-          valueFormatter={(v) => `${v} units`}
-        />
-      </div>
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+      <DrilldownDonutChart
+        data={donutData}
+        title=""
+        tabs={TABS}
+        activeTab={activePerspective}
+        onTabChange={handleTabChange}
+        onSegmentSelect={handleSegmentSelect}
+        onSegmentClick={handleSegmentClick}
+        selectedSegmentId={selectedSegment?.id}
+        detailData={detailData}
+        valueFormatter={(v) =>
+          activePerspective === 'value'
+            ? `$${v.toLocaleString()}`
+            : `${v} units`
+        }
+        className="h-full"
+        height={420}
+      />
     </div>
   )
 }

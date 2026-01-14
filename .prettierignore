@@ -1,9 +1,6 @@
-# Ignore artifacts
-.vite
-.serena
-dist
-playwright-report
-test-results
-
-# Ignore dependencies
 node_modules
+dist
+build
+coverage
+*.min.js
+package-lock.json

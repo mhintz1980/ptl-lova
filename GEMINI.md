@@ -10,10 +10,14 @@
 
 ### 1. The Prime Directive: "Where is the work?"
 
+> [!CAUTION] > **`main` BRANCH IS LIVE IN PRODUCTION WITH REAL USERS.**
+> Never push to main. Never merge without explicit approval. If you break main, real users suffer.
+
 **Always** read [`docs/status/current-work.md`](docs/status/current-work.md) **FIRST** in every new conversation.
 
 - It tells you the active branch, deployment status, and the immediate **Next Actions**.
 - **Do not** hallucinate next steps. Trust this file.
+- **Do not** merge to `main` or run destructive operations without asking.
 
 ### 2. The Documentation Map: "Where do I look/write?"
 
@@ -43,6 +47,7 @@
 
 - **Refactor Status**: We recently completed a major "Constitution Refactor" and "DDD implementation".
 - **Deployment**: We are in **BETA** (Cloud Mode). Shared data. Do not reset without asking.
+- **🧪 Local Dev is Safe**: `pnpm dev` auto-enters **Sandbox Mode** with test data — production is never touched.
 - **Key Docs**:
   - Refactor History: [`docs/agents/opus-4.5-refactor-prompt.md`](docs/agents/opus-4.5-refactor-prompt.md)
   - Domain Logic: [`DDD_BLUEPRINT-OPUS.md`](DDD_BLUEPRINT-OPUS.md)

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { ChevronRight, Home } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 
 export interface TreemapSegment {
   id: string
@@ -29,7 +29,7 @@ interface TreemapRect {
   segment: TreemapSegment
 }
 
-export function DrilldownTreemapChart({
+export const DrilldownTreemapChart = memo(function DrilldownTreemapChart({
   data,
   title,
   onSegmentClick,
@@ -406,4 +406,4 @@ export function DrilldownTreemapChart({
       </CardContent>
     </Card>
   )
-}
+})

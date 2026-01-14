@@ -84,4 +84,90 @@ describe('StageColumn', () => {
     expect(header).not.toBeNull()
     expect(header?.getAttribute('data-over-limit')).toBe('true')
   })
+
+  it('shows empty state message when column has no pumps', () => {
+    render(<StageColumn stage="FABRICATION" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No pumps in fabrication. Drag from Queue to start production.')
+    ).toBeTruthy()
+  })
+
+  it('does not show empty state when column has pumps', () => {
+    render(<StageColumn stage="FABRICATION" pumps={[basePump]} collapsed={false} />)
+
+    expect(
+      screen.queryByText('No pumps in fabrication. Drag from Queue to start production.')
+    ).toBeNull()
+  })
+
+  it('shows correct empty state message for QUEUE stage', () => {
+    render(<StageColumn stage="QUEUE" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No orders in queue. Add a new PO to get started.')
+    ).toBeTruthy()
+  })
+
+  it('shows correct empty state message for STAGED_FOR_POWDER stage', () => {
+    render(<StageColumn stage="STAGED_FOR_POWDER" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No pumps staged. Items here await powder coating.')
+    ).toBeTruthy()
+  })
+
+  it('shows correct empty state message for POWDER_COAT stage', () => {
+    render(<StageColumn stage="POWDER_COAT" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No pumps at powder coat. Items are at external vendor.')
+    ).toBeTruthy()
+  })
+
+  it('shows correct empty state message for ASSEMBLY stage', () => {
+    render(<StageColumn stage="ASSEMBLY" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No pumps in assembly. Drag completed fabrication here.')
+    ).toBeTruthy()
+  })
+
+  it('shows correct empty state message for SHIP stage', () => {
+    render(<StageColumn stage="SHIP" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No pumps ready to ship. Complete assembly to ship orders.')
+    ).toBeTruthy()
+  })
+
+  it('shows correct empty state message for CLOSED stage', () => {
+    render(<StageColumn stage="CLOSED" pumps={[]} collapsed={false} />)
+
+    expect(
+      screen.getByText('No completed orders. Shipped orders appear here.')
+    ).toBeTruthy()
+  })
+
+  it('does not show empty state when column is collapsed', () => {
+    useApp.setState((state) => ({
+      collapsedStages: {
+        ...state.collapsedStages,
+        FABRICATION: true,
+      },
+    }))
+
+    const { container } = render(
+      <StageColumn stage="FABRICATION" pumps={[]} collapsed={false} />
+    )
+
+    // When collapsed, the empty state should not be rendered
+    expect(
+      screen.queryByText('No pumps in fabrication. Drag from Queue to start production.')
+    ).toBeNull()
+
+    // Verify the column content area is not rendered when collapsed
+    const contentArea = container.querySelector('.space-y-3')
+    expect(contentArea).toBeNull()
+  })
 })

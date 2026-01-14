@@ -4,6 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Slow glow animation for health indicators - 4s cycle */
+@keyframes glow-slow {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.5);
+  }
+}
+
+.animate-glow-slow {
+  animation: glow-slow 4s ease-in-out infinite;
+}
+
 /* PumpTracker neon layered system */
 
 @layer base {
@@ -53,16 +70,20 @@
     --scroll-thumb: rgba(94, 234, 212, 0.4);
     --scroll-thumb-hover: rgba(94, 234, 212, 0.65);
 
-    --stage-unscheduled-bg: linear-gradient(135deg,
-        rgba(148, 163, 184, 0.28),
-        rgba(148, 163, 184, 0.18));
+    --stage-unscheduled-bg: linear-gradient(
+      135deg,
+      rgba(148, 163, 184, 0.28),
+      rgba(148, 163, 184, 0.18)
+    );
     --stage-unscheduled-solid: rgba(15, 23, 42, 0.85);
     --stage-unscheduled-border: rgba(226, 232, 240, 0.2);
     --stage-unscheduled-foreground: #e2e8f0;
 
-    --stage-not-started-bg: linear-gradient(135deg,
-        rgba(148, 163, 184, 0.45),
-        rgba(148, 163, 184, 0.35));
+    --stage-not-started-bg: linear-gradient(
+      135deg,
+      rgba(148, 163, 184, 0.45),
+      rgba(148, 163, 184, 0.35)
+    );
     --stage-not-started-solid: rgba(15, 23, 42, 0.85);
     --stage-not-started-border: rgba(226, 232, 240, 0.25);
     --stage-not-started-foreground: #f8fafc;
@@ -100,33 +121,47 @@
     --calendar-weekend-bg: rgba(20, 24, 38, 0.75);
     --calendar-weekend-header: rgba(59, 130, 246, 0.12);
 
-    --body-gradient: linear-gradient(135deg,
-        rgba(5, 5, 10, 0.95) 0%,
-        rgba(15, 15, 24, 0.98) 50%,
-        rgba(5, 5, 10, 0.96) 100%);
-    --ambient-gradient: linear-gradient(135deg,
-        #050505 0%,
-        #0f0f18 60%,
-        #050505 100%);
-    --ambient-overlay: radial-gradient(circle at 20% 20%,
+    --body-gradient: linear-gradient(
+      135deg,
+      rgba(5, 5, 10, 0.95) 0%,
+      rgba(15, 15, 24, 0.98) 50%,
+      rgba(5, 5, 10, 0.96) 100%
+    );
+    --ambient-gradient: linear-gradient(
+      135deg,
+      #050505 0%,
+      #0f0f18 60%,
+      #050505 100%
+    );
+    --ambient-overlay: radial-gradient(
+        circle at 20% 20%,
         rgba(59, 130, 246, 0.15),
-        transparent 55%),
-      radial-gradient(circle at 80% 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 80% 0%,
         rgba(236, 72, 153, 0.15),
-        transparent 70%);
-    --ambient-grid: repeating-linear-gradient(0deg,
+        transparent 70%
+      );
+    --ambient-grid: repeating-linear-gradient(
+        0deg,
         rgba(94, 234, 212, 0.05) 0,
         rgba(94, 234, 212, 0.05) 1px,
         transparent 1px,
-        transparent 32px),
-      repeating-linear-gradient(90deg,
+        transparent 32px
+      ),
+      repeating-linear-gradient(
+        90deg,
         rgba(94, 234, 212, 0.05) 0,
         rgba(94, 234, 212, 0.05) 1px,
         transparent 1px,
-        transparent 32px);
-    --layer-depth-bg: linear-gradient(160deg,
-        rgba(15, 18, 28, 0.95),
-        rgba(5, 5, 10, 0.85));
+        transparent 32px
+      );
+    --layer-depth-bg: linear-gradient(
+      160deg,
+      rgba(15, 18, 28, 0.95),
+      rgba(5, 5, 10, 0.85)
+    );
     --layer-depth-shadow: var(--shadow-lg), 0 0 25px rgba(34, 211, 238, 0.2);
     --layer-l2-bg: rgba(12, 14, 22, 0.9);
     --layer-l2-shadow: var(--shadow-md), 0 0 35px rgba(236, 72, 153, 0.15);
@@ -166,83 +201,111 @@
     --glass-bg: rgba(255, 255, 255, 0.88);
     --glass-border: rgba(15, 23, 42, 0.08);
 
-    --body-gradient: linear-gradient(135deg,
-        rgba(247, 247, 251, 0.98) 0%,
-        rgba(237, 240, 248, 0.98) 50%,
-        rgba(244, 247, 251, 0.98) 100%);
-    --ambient-gradient: linear-gradient(135deg,
-        #f7f7fb 0%,
-        #eef1fb 45%,
-        #f9f9ff 100%);
-    --ambient-overlay: radial-gradient(circle at 20% 20%,
+    --body-gradient: linear-gradient(
+      135deg,
+      rgba(247, 247, 251, 0.98) 0%,
+      rgba(237, 240, 248, 0.98) 50%,
+      rgba(244, 247, 251, 0.98) 100%
+    );
+    --ambient-gradient: linear-gradient(
+      135deg,
+      #f7f7fb 0%,
+      #eef1fb 45%,
+      #f9f9ff 100%
+    );
+    --ambient-overlay: radial-gradient(
+        circle at 20% 20%,
         rgba(59, 130, 246, 0.12),
-        transparent 55%),
-      radial-gradient(circle at 80% 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 80% 0%,
         rgba(236, 72, 153, 0.12),
-        transparent 70%);
-    --ambient-grid: repeating-linear-gradient(0deg,
+        transparent 70%
+      );
+    --ambient-grid: repeating-linear-gradient(
+        0deg,
         rgba(37, 99, 235, 0.08) 0,
         rgba(37, 99, 235, 0.08) 1px,
         transparent 1px,
-        transparent 32px),
-      repeating-linear-gradient(90deg,
+        transparent 32px
+      ),
+      repeating-linear-gradient(
+        90deg,
         rgba(37, 99, 235, 0.08) 0,
         rgba(37, 99, 235, 0.08) 1px,
         transparent 1px,
-        transparent 32px);
+        transparent 32px
+      );
 
-    --stage-unscheduled-bg: linear-gradient(135deg,
-        rgba(226, 232, 240, 0.9),
-        rgba(203, 213, 225, 0.8));
+    --stage-unscheduled-bg: linear-gradient(
+      135deg,
+      rgba(226, 232, 240, 0.9),
+      rgba(203, 213, 225, 0.8)
+    );
     --stage-unscheduled-solid: rgba(255, 255, 255, 0.95);
     --stage-unscheduled-border: rgba(148, 163, 184, 0.35);
     --stage-unscheduled-foreground: #1e293b;
 
-    --stage-not-started-bg: linear-gradient(135deg,
-        rgba(203, 213, 225, 0.9),
-        rgba(226, 232, 240, 0.9));
+    --stage-not-started-bg: linear-gradient(
+      135deg,
+      rgba(203, 213, 225, 0.9),
+      rgba(226, 232, 240, 0.9)
+    );
     --stage-not-started-solid: rgba(255, 255, 255, 0.96);
     --stage-not-started-border: rgba(148, 163, 184, 0.4);
     --stage-not-started-foreground: #0f172a;
 
-    --stage-fabrication-bg: linear-gradient(135deg,
-        rgba(96, 165, 250, 0.85),
-        rgba(14, 165, 233, 0.85));
+    --stage-fabrication-bg: linear-gradient(
+      135deg,
+      rgba(96, 165, 250, 0.85),
+      rgba(14, 165, 233, 0.85)
+    );
     --stage-fabrication-solid: rgba(239, 246, 255, 0.95);
     --stage-fabrication-border: rgba(59, 130, 246, 0.4);
     --stage-fabrication-foreground: #0f172a;
 
-    --stage-powder-bg: linear-gradient(135deg,
-        rgba(196, 181, 253, 0.92),
-        rgba(248, 196, 249, 0.9));
+    --stage-powder-bg: linear-gradient(
+      135deg,
+      rgba(196, 181, 253, 0.92),
+      rgba(248, 196, 249, 0.9)
+    );
     --stage-powder-solid: rgba(252, 245, 255, 0.96);
     --stage-powder-border: rgba(168, 85, 247, 0.35);
     --stage-powder-foreground: #211830;
 
-    --stage-assembly-bg: linear-gradient(135deg,
-        rgba(253, 230, 138, 0.95),
-        rgba(254, 215, 170, 0.92));
+    --stage-assembly-bg: linear-gradient(
+      135deg,
+      rgba(253, 230, 138, 0.95),
+      rgba(254, 215, 170, 0.92)
+    );
     --stage-assembly-solid: rgba(255, 248, 237, 0.96);
     --stage-assembly-border: rgba(245, 158, 11, 0.35);
     --stage-assembly-foreground: #422006;
 
-    --stage-testing-bg: linear-gradient(135deg,
-        rgba(254, 202, 202, 0.95),
-        rgba(254, 240, 138, 0.9));
+    --stage-testing-bg: linear-gradient(
+      135deg,
+      rgba(254, 202, 202, 0.95),
+      rgba(254, 240, 138, 0.9)
+    );
     --stage-testing-solid: rgba(255, 247, 237, 0.96);
     --stage-testing-border: rgba(248, 113, 113, 0.4);
     --stage-testing-foreground: #451a03;
 
-    --stage-shipping-bg: linear-gradient(135deg,
-        rgba(187, 247, 208, 0.95),
-        rgba(190, 242, 100, 0.92));
+    --stage-shipping-bg: linear-gradient(
+      135deg,
+      rgba(187, 247, 208, 0.95),
+      rgba(190, 242, 100, 0.92)
+    );
     --stage-shipping-solid: rgba(236, 253, 245, 0.96);
     --stage-shipping-border: rgba(34, 197, 94, 0.35);
     --stage-shipping-foreground: #14532d;
 
-    --stage-closed-bg: linear-gradient(135deg,
-        rgba(191, 219, 254, 0.95),
-        rgba(199, 210, 254, 0.92));
+    --stage-closed-bg: linear-gradient(
+      135deg,
+      rgba(191, 219, 254, 0.95),
+      rgba(199, 210, 254, 0.92)
+    );
     --stage-closed-solid: rgba(240, 249, 255, 0.96);
     --stage-closed-border: rgba(59, 130, 246, 0.35);
     --stage-closed-foreground: #172554;
@@ -253,9 +316,11 @@
     --scroll-track: rgba(241, 245, 249, 0.9);
     --scroll-thumb: rgba(148, 163, 184, 0.7);
     --scroll-thumb-hover: rgba(100, 116, 139, 0.8);
-    --layer-depth-bg: linear-gradient(160deg,
-        rgba(255, 255, 255, 0.92),
-        rgba(239, 242, 250, 0.9));
+    --layer-depth-bg: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(239, 242, 250, 0.9)
+    );
     --layer-depth-shadow: 0 28px 80px rgba(15, 23, 42, 0.08),
       0 0 25px rgba(59, 130, 246, 0.15);
     --layer-l2-bg: rgba(255, 255, 255, 0.92);
@@ -315,9 +380,11 @@
     position: absolute;
     inset: -4px;
     border-radius: 999px;
-    background: radial-gradient(circle,
-        rgba(59, 130, 246, 0.4),
-        transparent 65%);
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.4),
+      transparent 65%
+    );
     opacity: 0;
     transition: opacity 200ms ease;
     z-index: -1;
@@ -400,6 +467,32 @@
     --stage-color-foreground: var(--stage-not-started-foreground);
   }
 
+  /* Queue stage - uses unscheduled styling (gray) */
+  .stage-color-queue {
+    --stage-color-bg: var(--stage-unscheduled-bg);
+    --stage-color-solid: var(--stage-unscheduled-solid);
+    --stage-color-border: var(--stage-unscheduled-border);
+    --stage-color-foreground: var(--stage-unscheduled-foreground);
+  }
+
+  /* Staged for Powder - salmon/orange waiting for vendor pickup */
+  .stage-color-staged {
+    --stage-color-bg: linear-gradient(135deg, #f97316, #fb923c);
+    --stage-color-solid: rgba(34, 17, 0, 0.85);
+    --stage-color-border: rgba(251, 146, 60, 0.5);
+    --stage-color-foreground: #fff7ed;
+    --stage-color-shadow: 0 6px 18px rgba(249, 115, 22, 0.25);
+  }
+
+  /* Ship stage - uses shipping styling (green) */
+  .stage-color-ship {
+    --stage-color-bg: var(--stage-shipping-bg);
+    --stage-color-solid: var(--stage-shipping-solid);
+    --stage-color-border: var(--stage-shipping-border);
+    --stage-color-foreground: var(--stage-shipping-foreground);
+    --stage-color-shadow: 0 6px 18px rgba(34, 197, 94, 0.25);
+  }
+
   .stage-color-fabrication {
     --stage-color-bg: var(--stage-fabrication-bg);
     --stage-color-solid: var(--stage-fabrication-solid);
@@ -454,6 +547,25 @@
 
   .calendar-weekend-header {
     background-color: var(--calendar-weekend-header);
+  }
+
+  /* Weekend diagonal stripe pattern for unified job pills */
+  .weekend-pattern {
+    position: relative;
+  }
+  .weekend-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.15) 3px,
+      rgba(0, 0, 0, 0.15) 6px
+    );
+    pointer-events: none;
+    border-radius: inherit;
   }
 }
 

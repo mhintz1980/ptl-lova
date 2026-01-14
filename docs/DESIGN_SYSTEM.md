@@ -260,6 +260,28 @@ className = 'md:col-span-8 col-span-12' // large
 className = 'md:col-span-12 col-span-12' // max
 ```
 
+### Donut Chart Standard
+
+**Geometry:**
+
+- **Display Size**: `250px` width, `225px` height
+- **ViewBox**: `0 0 400 360`
+- **Center**: `cx=200`, `cy=180` (perfect vertical alignment)
+- **Radius**: `outer=160`, `inner=80`
+
+**Layout:**
+
+- **Header**: Standard relative positioning (`!relative`)
+- **Content**: Flex column, centered (`justify-center items-center`)
+- **Spacing**: `gap-2` between donut and legend
+
+**Typography:**
+
+- **Center Label**: `text-sm text-muted-foreground` (e.g., "Total")
+- **Center Value**: `text-2xl font-bold`
+- **Segment Label**: `text-sm font-medium` (inside donut)
+- **Legend Text**: `text-[10px]`
+
 ---
 
 ### Drill-Down Charts
@@ -281,7 +303,7 @@ interface Pump {
   stage: Stage
   priority: Priority
   powder_color?: string
-  last_update: string  // ✅ USE THIS for age calculations (ISO timestamp)
+  last_update: string // ✅ USE THIS for age calculations (ISO timestamp)
   value: number
   forecastEnd?: string
   forecastStart?: string
@@ -305,7 +327,7 @@ interface Pump {
 ```tsx
 // ✅ CORRECT - All required imports
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'motion/react'  // ← CRITICAL for transitions
+import { motion, AnimatePresence } from 'motion/react' // ← CRITICAL for transitions
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
 import { DrilldownDonutChart, DonutSegment } from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
@@ -325,7 +347,8 @@ const ageInMs = Date.now() - new Date(pump.last_update).getTime()
 const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
 
 // ❌ WRONG - Using non-existent properties
-const ageInMs = Date.now() - new Date(pump.stageEntryTime || pump.createdAt).getTime()
+const ageInMs =
+  Date.now() - new Date(pump.stageEntryTime || pump.createdAt).getTime()
 // TypeScript error: Property 'stageEntryTime' does not exist on type 'Pump'
 ```
 
@@ -353,16 +376,18 @@ export function MyChart({ onDrilldown }: ChartProps) {
 ```tsx
 // ✅ CORRECT - Prevent page jumping on drill-down
 return (
-  <div className="w-full h-full flex flex-col min-h-[300px]">  {/* ← Outer container with fixed height */}
+  <div className="w-full h-full flex flex-col min-h-[300px]">
+    {' '}
+    {/* ← Outer container with fixed height */}
     <AnimatePresence mode="wait">
       {drilldownPath.length === 0 ? (
         <motion.div
           key="donut"
-          initial={{ opacity: 0 }}  // ← Opacity-only, no layout shifts
+          initial={{ opacity: 0 }} // ← Opacity-only, no layout shifts
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="w-full h-full"  // ← Fill container
+          className="w-full h-full" // ← Fill container
         >
           <DrilldownDonutChart />
         </motion.div>
@@ -386,7 +411,7 @@ return (
 return (
   <div>
     {drilldownPath.length === 0 ? (
-      <DrilldownDonutChart />  // ← No consistent container height
+      <DrilldownDonutChart /> // ← No consistent container height
     ) : (
       <DrilldownChart3D />
     )}

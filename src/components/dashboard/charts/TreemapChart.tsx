@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ResponsiveContainer, Treemap, Tooltip } from 'recharts'
+import { ResponsiveContainer, Treemap, Tooltip, TooltipProps } from 'recharts'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
@@ -8,8 +8,15 @@ import { Pump } from '../../../types'
 import { Badge } from '../../ui/Badge'
 
 // --- Types ---
-type ViewMode = 'customer' | 'model'
+type ViewMode = 'stage' | 'customer' | 'model' | 'value'
 type TimeFilter = 'all' | 'week' | 'quarter' | 'year'
+
+const VIEW_MODE_LABELS: Record<ViewMode, string> = {
+  stage: 'Stage',
+  customer: 'Cust.',
+  model: 'Model',
+  value: 'Value',
+}
 
 const COLORS = [
   '#06b6d4', // cyan
@@ -22,11 +29,53 @@ const COLORS = [
   '#ec4899', // pink
 ]
 
-// Custom Content
-const AnimatedTreemapContent = (props: any) => {
+// Helper to truncate text to fit within a given width
+const truncateText = (text: string, maxChars: number): string => {
+  if (text.length <= maxChars) return text
+  return text.slice(0, maxChars - 1) + '…'
+}
+
+// Custom Content with smart text orientation
+interface TreemapContentProps {
+  x: number
+  y: number
+  width: number
+  height: number
+  index: number
+  name: string
+  value: number
+  colors: string[]
+  onClick: (node: { name: string; value: number; count: number }) => void
+}
+
+const AnimatedTreemapContent = (props: TreemapContentProps) => {
   const { x, y, width, height, index, name, value, colors, onClick } = props
 
   if (!width || !height) return null
+
+  // Calculate if we should show text, and in what orientation
+  const minSizeForText = 30
+  const canShowText = width >= minSizeForText && height >= minSizeForText
+
+  // Determine if text should be vertical (when cell is taller than wide)
+  const isVertical = height > width * 1.5
+
+  // Calculate available space for text
+  const availableSpace = isVertical ? height - 20 : width - 10
+  const fontSize = 10 // Match donut legend: text-[10px]
+  const valueFontSize = 9 // Match donut legend sublabel: text-[9px]
+  const charsPerPixel = 0.14 // Adjusted for 10px font
+  const maxChars = Math.floor(availableSpace * charsPerPixel)
+
+  const displayName = truncateText(name, Math.max(3, maxChars))
+
+  // For value text
+  const canShowValue = isVertical ? height > 80 : width > 60 && height > 50
+  const formattedValue = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value)
 
   return (
     <g>
@@ -52,51 +101,62 @@ const AnimatedTreemapContent = (props: any) => {
         }}
         onClick={() => onClick(props)}
       />
-      {width > 60 && height > 30 && (
+      {canShowText && (
         <text
           x={x + width / 2}
-          y={y + height / 2 - 8}
+          y={y + height / 2 - (canShowValue ? 8 : 0)}
           textAnchor="middle"
+          dominantBaseline="middle"
           fill="#fff"
-          fontSize={13}
-          fontWeight="bold"
+          fontSize={fontSize}
+          fontWeight="normal"
           style={{
             pointerEvents: 'none',
             textShadow: '0 1px 2px rgba(0,0,0,0.5)',
           }}
+          transform={
+            isVertical
+              ? `rotate(-90, ${x + width / 2}, ${
+                  y + height / 2 - (canShowValue ? 8 : 0)
+                })`
+              : undefined
+          }
         >
-          {name}
+          {displayName}
         </text>
       )}
-      {width > 60 && height > 50 && (
+      {canShowValue && (
         <text
           x={x + width / 2}
-          y={y + height / 2 + 10}
+          y={y + height / 2 + (isVertical ? 20 : 10)}
           textAnchor="middle"
-          fill="rgba(255,255,255,0.9)"
-          fontSize={11}
+          dominantBaseline="middle"
+          fill="rgba(255,255,255,0.7)"
+          fontSize={valueFontSize}
+          fontWeight="normal"
           style={{
             pointerEvents: 'none',
             textShadow: '0 1px 2px rgba(0,0,0,0.5)',
           }}
+          transform={
+            isVertical
+              ? `rotate(-90, ${x + width / 2}, ${y + height / 2 + 20})`
+              : undefined
+          }
         >
-          {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0,
-          }).format(value)}
+          {formattedValue}
         </text>
       )}
     </g>
   )
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: TooltipProps<any, any>) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload
+    const data = payload[0].payload as { name: string; value: number; count: number }
     return (
       <div className="bg-popover border border-border p-3 rounded-xl shadow-xl backdrop-blur-md">
-        <p className="font-bold text-base">{data.name}</p>
+        <p className="font-medium text-base">{data.name}</p>
         <div className="mt-1 space-y-0.5">
           <p className="text-sm text-cyan-400 font-mono">
             Value:{' '}
@@ -120,7 +180,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
   onDrilldown,
 }) => {
   const { pumps } = useApp()
-  const [viewMode, setViewMode] = useState<ViewMode>('customer')
+  const [viewMode, setViewMode] = useState<ViewMode>('stage')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
 
   // 1. Filter Logic
@@ -138,7 +198,6 @@ export const TreemapChart: React.FC<ChartProps> = ({
     const startOfYear = new Date(now.getFullYear(), 0, 1)
 
     return baseFiltered.filter((p: Pump) => {
-      // Use promiseDate for filtering if available
       if (!p.promiseDate) return true
       const d = new Date(p.promiseDate)
 
@@ -153,18 +212,28 @@ export const TreemapChart: React.FC<ChartProps> = ({
   const data = useMemo(() => {
     const groups: Record<string, { value: number; count: number }> = {}
 
+    if (viewMode === 'value') {
+      // Value mode: show individual pumps by value
+      return filteredPumps
+        .filter((p: Pump) => p.value > 0)
+        .map((p: Pump) => ({
+          name: `${p.po} - ${p.model}`,
+          value: p.value,
+          count: 1,
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 20)
+    }
+
     filteredPumps.forEach((p: Pump) => {
-      // Treat CLOSED as valid for "All time value" charts usually, but if "Active Wip" maybe no.
-      // Current design: This is "Production Treemap" or "Value". Often implies history or active load.
-      // If we filter by 'year', we definitely want CLOSED items in that year.
-      // If 'all', maybe active?
-      // Let's assume this chart shows EVERYTHING matching filters (including closed) unless filters.stage says otherwise.
-
-      // Removed status check, using implicit stage filter from filteredPumps if set.
-      // If no stage filter, it shows all stages.
-
-      const key = viewMode === 'customer' ? p.customer : p.model
-      // Assuming p.value is the price.
+      let key: string
+      if (viewMode === 'stage') {
+        key = p.stage.replace(/_/g, ' ')
+      } else if (viewMode === 'customer') {
+        key = p.customer
+      } else {
+        key = p.model
+      }
       const val = (p as any).value || 0
 
       if (!groups[key]) groups[key] = { value: 0, count: 0 }
@@ -172,7 +241,6 @@ export const TreemapChart: React.FC<ChartProps> = ({
       groups[key].count += 1
     })
 
-    // Transform to array
     return Object.entries(groups)
       .map(([name, stats]) => ({
         name,
@@ -184,20 +252,22 @@ export const TreemapChart: React.FC<ChartProps> = ({
 
   const totalValue = data.reduce((acc, d) => acc + d.value, 0)
 
-  const handleNodeClick = (node: any) => {
-    const update: any = {}
-    if (viewMode === 'customer') update.customerId = node.name
-    else update.modelId = node.name
-    onDrilldown(update)
+  const handleNodeClick = (node: { name: string; value: number; count: number }) => {
+    const update: Partial<Record<string, string>> = {}
+    if (viewMode === 'stage') update.stage = node.name.replace(/ /g, '_')
+    else if (viewMode === 'customer') update.customerId = node.name
+    else if (viewMode === 'model') update.modelId = node.name
+    // Value mode doesn't drill down further
+    if (Object.keys(update).length > 0) onDrilldown(update)
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Controls Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2 flex-shrink-0">
         {/* Left: View Switcher */}
         <div className="flex bg-muted/30 p-1 rounded-lg">
-          {(['customer', 'model'] as const).map((m) => (
+          {(['stage', 'customer', 'model', 'value'] as const).map((m) => (
             <button
               key={m}
               onClick={() => setViewMode(m)}
@@ -207,7 +277,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              By {m.charAt(0).toUpperCase() + m.slice(1)}
+              {VIEW_MODE_LABELS[m]}
             </button>
           ))}
         </div>
@@ -230,10 +300,10 @@ export const TreemapChart: React.FC<ChartProps> = ({
             ))}
           </div>
 
-          {/* Total Value - Now properly positioned in header */}
+          {/* Total Value */}
           <div className="text-right pl-3 border-l border-border/50">
             <p className="text-xs text-muted-foreground">Total Value</p>
-            <p className="text-sm font-bold text-cyan-400">
+            <p className="text-sm font-medium text-cyan-400">
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
@@ -244,8 +314,8 @@ export const TreemapChart: React.FC<ChartProps> = ({
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="flex-1 min-h-0 relative">
+      {/* Chart container - fills remaining space */}
+      <div className="relative flex-1 min-h-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${viewMode}-${timeFilter}`}
@@ -274,13 +344,13 @@ export const TreemapChart: React.FC<ChartProps> = ({
             </ResponsiveContainer>
           </motion.div>
         </AnimatePresence>
-      </div>
 
-      {data.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <p className="text-muted-foreground">No data for selected period</p>
-        </div>
-      )}
+        {data.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p className="text-muted-foreground">No data for selected period</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

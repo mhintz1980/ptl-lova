@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, memo } from 'react'
+import type { Pump } from '../../types'
 import {
   ChartId,
   DashboardFilters,
@@ -13,8 +14,8 @@ import {
   Home,
   ChevronRight as BreadcrumbSeparator,
   Activity,
-  DollarSign,
   BarChart2,
+  Table,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
@@ -29,9 +30,13 @@ const FAVORITES_KEY = 'pumptracker.dashboard.favorites'
 const MODE_KEY = 'pumptracker.dashboard.mode'
 
 const MODE_ICONS: Record<DashboardMode, React.ElementType> = {
-  operations: Activity,
-  value: DollarSign,
-  production: BarChart2,
+  overview: Activity,
+  analysis: BarChart2,
+  data: Table,
+}
+
+interface DashboardEngineProps {
+  onSelectPump?: (pump: Pump) => void
 }
 
 interface DrillState {
@@ -40,9 +45,11 @@ interface DrillState {
   label: string
 }
 
-export function DashboardEngine() {
+export const DashboardEngine = memo(function DashboardEngine({
+  onSelectPump,
+}: DashboardEngineProps) {
   const { pumps } = useApp()
-  const [mode, setMode] = useState<DashboardMode>('operations')
+  const [mode, setMode] = useState<DashboardMode>('overview')
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS)
   const [favoriteChartIds, setFavoriteChartIds] = useState<ChartId[]>([])
   const [showFavorites, setShowFavorites] = useState(false)
@@ -64,7 +71,7 @@ export function DashboardEngine() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(MODE_KEY)
-      if (raw && ['operations', 'value', 'production'].includes(raw)) {
+      if (raw && ['overview', 'analysis', 'data'].includes(raw)) {
         setMode(raw as DashboardMode)
       }
     } catch {
@@ -116,11 +123,8 @@ export function DashboardEngine() {
     sourceChartId: ChartId,
     update: Partial<DashboardFilters>
   ) => {
-    console.log('Drilldown triggered:', sourceChartId, update)
     const cfg = CHART_REGISTRY[sourceChartId]
-    console.log('Chart config:', cfg)
     if (!cfg || !cfg.drillDownSequence || cfg.drillDownSequence.length === 0) {
-      console.log('No drill sequence found, falling back to filter update')
       // Fallback to old behavior: just update filters
       setFilters((prev) => ({ ...prev, ...update }))
       return
@@ -171,53 +175,61 @@ export function DashboardEngine() {
 
   return (
     <div className="flex flex-col gap-6 p-2 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
-      {/* Header / Controls */}
+      {/* Header / Controls - Condensed Layout */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {isDrillMode ? (
-              <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm px-4 py-2.5">
-                <nav className="flex items-center text-sm font-medium text-muted-foreground">
-                  <button
-                    onClick={() => handleBreadcrumbClick(-1)}
-                    className="hover:text-foreground flex items-center gap-1 transition-colors"
-                  >
-                    <Home className="h-4 w-4" />
-                    Dashboard
-                  </button>
-                  {drillStack.map((step, idx) => (
-                    <div key={idx} className="flex items-center">
-                      <BreadcrumbSeparator className="h-4 w-4 mx-1 opacity-70" />
-                      <button
-                        onClick={() => handleBreadcrumbClick(idx)}
-                        className={`hover:text-foreground transition-colors ${
-                          idx === drillStack.length - 1
-                            ? 'text-foreground font-semibold'
-                            : ''
-                        }`}
-                        disabled={idx === drillStack.length - 1}
-                      >
-                        {step.label}
-                      </button>
-                    </div>
-                  ))}
-                </nav>
-              </div>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  {showFavorites ? 'My Dashboard' : currentModeConfig.label}
-                </h1>
-                {hasActiveFilters && !isDrillMode && (
-                  <Badge variant="secondary" className="animate-in zoom-in">
-                    Filtered
-                  </Badge>
-                )}
-              </>
-            )}
-          </div>
+        {/* Left: KPIs or Breadcrumbs */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {isDrillMode ? (
+            <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm px-4 py-2.5">
+              <nav className="flex items-center text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleBreadcrumbClick(-1)}
+                  className="hover:text-foreground flex items-center gap-1 transition-colors"
+                >
+                  <Home className="h-4 w-4" />
+                  Dashboard
+                </button>
+                {drillStack.map((step, idx) => (
+                  <div key={idx} className="flex items-center">
+                    <BreadcrumbSeparator className="h-4 w-4 mx-1 opacity-70" />
+                    <button
+                      onClick={() => handleBreadcrumbClick(idx)}
+                      className={`hover:text-foreground transition-colors ${
+                        idx === drillStack.length - 1
+                          ? 'text-foreground font-semibold'
+                          : ''
+                      }`}
+                      disabled={idx === drillStack.length - 1}
+                    >
+                      {step.label}
+                    </button>
+                  </div>
+                ))}
+              </nav>
+            </div>
+          ) : (
+            <>
+              {/* KPIs inline in header (not below) */}
+              {!showFavorites && (
+                <ModeKpis
+                  pumps={pumps}
+                  mode={mode}
+                  onKpiClick={(_kpiId, filter) => {
+                    setFilters((prev) => ({ ...prev, ...filter }))
+                  }}
+                  compact={true}
+                />
+              )}
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="animate-in zoom-in">
+                  Filtered
+                </Badge>
+              )}
+            </>
+          )}
         </div>
 
+        {/* Right: Mode Chips + Favorites + Clear Filters */}
         <div className="flex items-center gap-3">
           {hasActiveFilters && !isDrillMode && (
             <Button
@@ -227,13 +239,13 @@ export function DashboardEngine() {
               className="gap-2 text-muted-foreground hover:text-foreground"
             >
               <FilterX className="h-4 w-4" />
-              Clear Filters
+              Clear
             </Button>
           )}
 
           {!isDrillMode && (
             <>
-              {/* Mode Toggle Buttons */}
+              {/* Mode Toggle Chips */}
               <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
                 {MODE_CONFIGS.map((m) => {
                   const ModeIcon = MODE_ICONS[m.id]
@@ -269,18 +281,6 @@ export function DashboardEngine() {
         </div>
       </div>
 
-      {/* Mode KPIs - Only show when not drilling and not showing favorites */}
-      {!isDrillMode && !showFavorites && (
-        <ModeKpis
-          pumps={pumps}
-          mode={mode}
-          onKpiClick={(_kpiId, filter) => {
-            // For now, just apply filters. Could enhance to drill to specific chart.
-            setFilters((prev) => ({ ...prev, ...filter }))
-          }}
-        />
-      )}
-
       {/* Filters summary (for drilldowns) - only show if NOT in drill mode (breadcrumbs handle context there) */}
       {hasActiveFilters && !isDrillMode && (
         <div className="flex gap-2 flex-wrap">
@@ -304,7 +304,7 @@ export function DashboardEngine() {
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 grid-cols-12 grid-flow-dense flex-1 auto-rows-fr ${
+        className={`grid gap-6 grid-cols-12 grid-flow-dense auto-rows-min ${
           isDrillMode ? 'grid-cols-1' : ''
         }`}
       >
@@ -316,14 +316,26 @@ export function DashboardEngine() {
             const ChartComponent = cfg.component
             const isFav = favoriteChartIds.includes(chartId)
 
-            // Map size to 12-column grid: small=4, large=8, max=12
+            // Map size to 12-column grid
+            const sizeToColSpan: Record<string, string> = {
+              max: 'md:col-span-12 col-span-12',
+              full: 'md:col-span-12 col-span-12',
+              'three-quarter': 'md:col-span-9 col-span-12',
+              large: 'md:col-span-8 col-span-12',
+              half: 'md:col-span-6 col-span-12',
+              third: 'md:col-span-4 col-span-12',
+              small: 'md:col-span-4 col-span-12',
+              quarter: 'md:col-span-3 col-span-12',
+              mini: 'md:col-span-3 col-span-12',
+            }
             const colSpan = isDrillMode
               ? 'col-span-12'
-              : cfg.defaultSize === 'max'
-              ? 'md:col-span-12 col-span-12'
-              : cfg.defaultSize === 'large'
-              ? 'md:col-span-8 col-span-12'
-              : 'md:col-span-4 col-span-12' // small
+              : sizeToColSpan[cfg.defaultSize || 'small']
+
+            // Apply fixed height from registry (default 450px)
+            // If containerClass is present, we assume it handles height (unless explicit height is also provided)
+            const chartHeight = cfg.height || 450
+            const useExplicitHeight = !cfg.containerClass && !isDrillMode
 
             return (
               <motion.div
@@ -333,16 +345,16 @@ export function DashboardEngine() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
+                // [HIERARCHY-1] THE DASHBOARD CARD (OUTER WRAPPER)
+                // Controls width (col-span) and fixed height for consistent rows
+                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
                   isDrillMode ? 'min-h-[calc(100vh-200px)]' : ''
-                }`}
+                } ${cfg.containerClass || ''}`}
+                style={
+                  useExplicitHeight ? { height: `${chartHeight}px` } : undefined
+                }
               >
-                <div className="mb-4 flex items-start justify-between flex-shrink-0">
-                  <div>
-                    <h2 className="text-lg font-semibold tracking-tight">
-                      {cfg.title}
-                    </h2>
-                  </div>
+                <div className="mb-0 flex items-start justify-end flex-shrink-0">
                   {!isDrillMode && (
                     <button
                       onClick={() => toggleFavorite(chartId)}
@@ -361,15 +373,19 @@ export function DashboardEngine() {
                 </div>
 
                 <div
+                  // [HIERARCHY-2] THE CHART CONTENT WRAPPER
+                  // Clips overflow and allows content to dictate height (min-h-0)
                   className={
                     isDrillMode
-                      ? 'flex-1 w-full relative overflow-hidden min-h-0'
-                      : 'flex-1 w-full relative overflow-hidden min-h-0'
+                      ? 'w-full relative overflow-hidden min-h-0'
+                      : 'w-full relative overflow-hidden min-h-0'
                   }
                 >
                   <ChartComponent
                     filters={filters}
                     onDrilldown={(update) => handleDrilldown(chartId, update)}
+                    chartHeight={cfg.height}
+                    onSelectPump={onSelectPump}
                   />
                 </div>
               </motion.div>
@@ -379,4 +395,4 @@ export function DashboardEngine() {
       </div>
     </div>
   )
-}
+})

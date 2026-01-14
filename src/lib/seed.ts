@@ -57,6 +57,19 @@ export function getModelPrice(modelCode: string): number {
   return getEffectivePrice(model.price, model.model)
 }
 
+// Get model BOM components (engine/gearbox) for AddPoModal auto-population
+export function getModelBom(modelCode: string): {
+  engine: string | null
+  gearbox: string | null
+} {
+  const model = CATALOG_MODELS.find((m) => m.model === modelCode)
+  if (!model) return { engine: null, gearbox: null }
+  return {
+    engine: getBomComponent(model.bom.engine, 'engine'),
+    gearbox: getBomComponent(model.bom.gearbox, 'gearbox'),
+  }
+}
+
 // Constitution §2.1: Transform legacy work_hours to canonical format
 export function getModelWorkHours(
   modelCode: string
@@ -154,13 +167,26 @@ function genSerial(): number {
 // Business day calculation (excludes weekends)
 function addBusinessDays(startDate: Date, days: number): Date {
   const result = new Date(startDate)
-  let businessDays = 0
 
+  // Handle negative days (going backwards)
+  if (days < 0) {
+    let businessDays = 0
+    while (businessDays > days) {
+      result.setDate(result.getDate() - 1)
+      const dayOfWeek = result.getDay()
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        businessDays--
+      }
+    }
+    return result
+  }
+
+  // Handle positive days (going forward)
+  let businessDays = 0
   while (businessDays < days) {
     result.setDate(result.getDate() + 1)
     const dayOfWeek = result.getDay()
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      // Not Saturday (6) or Sunday (0)
       businessDays++
     }
   }
@@ -221,38 +247,73 @@ function generatePumpFromCatalog(
     )
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
 
-    // Generate promise date (2-7 days before scheduled end)
-    // Some pumps (20%) will have promise dates in the past to create "late orders"
-    const promiseDaysBefore = Math.floor(Math.random() * 6) + 2 // 2-7 days
-    const isIntentionallyLate = Math.random() < 0.2 // 20% chance
-    const promiseDate = isIntentionallyLate
-      ? addBusinessDays(now, -Math.floor(Math.random() * 10) - 1) // 1-10 days ago
-      : addBusinessDays(testingEnd, -promiseDaysBefore)
+    // Generate promise date distribution for On-Time Risk chart visualization:
+    // - 75% On Track: promise date > 7 days in future
+    // - 20% At Risk: promise date 1-7 days in future
+    // - 5% Late: promise date in the past
+    let promiseDate: Date
+    const globalIndex = startIndex + i
+    const riskSlot = globalIndex % 20
 
-    // Determine current stage based on dates
+    if (riskSlot === 0) {
+      // 5% LATE: promise date 1-30 days in the past
+      const daysLate = Math.floor(Math.random() * 30) + 1
+      promiseDate = addBusinessDays(now, -daysLate)
+    } else if (riskSlot < 5) {
+      // 20% AT RISK: promise date 1-7 days in the future
+      const daysUntilDue = Math.floor(Math.random() * 7) + 1
+      promiseDate = addBusinessDays(now, daysUntilDue)
+    } else {
+      // 75% ON TRACK: promise date 8-45 days in the future
+      const daysUntilDue = Math.floor(Math.random() * 38) + 8
+      promiseDate = addBusinessDays(now, daysUntilDue)
+    }
+
+    // Determine current stage using deterministic index-based distribution
+    // This ensures pumps are spread across all stages for dashboard visualization
     let currentStage: Stage = 'QUEUE'
     let lastUpdate = poDate.toISOString()
     const forecastEnd = testingEnd.toISOString()
 
-    const nowTime = now.getTime()
-    if (nowTime >= testingEnd.getTime()) {
-      currentStage = Math.random() > 0.6 ? 'CLOSED' : 'SHIP' // 40% CLOSED, 60% SHIP
-      lastUpdate = testingEnd.toISOString()
-    } else if (nowTime >= assemblyEnd.getTime()) {
-      currentStage = 'SHIP' // Constitution §2.1: merged testing+shipping
-      lastUpdate = assemblyEnd.toISOString()
-    } else if (nowTime >= powderCoatEnd.getTime()) {
+    // Use pattern index (globalIndex) to distribute across stages deterministically
+    // Target distribution (mod 20):
+    // 0 = ASSEMBLY (5% -> 4 jobs)
+    // 1 = SHIP (5% -> 4 jobs)
+    // 2 = CLOSED (5% -> 4 jobs)
+    // 3-5 = QUEUE (15% -> 6 jobs)
+    // 6-12 = FABRICATION (35% -> 14 jobs)
+    // 13-19 = POWDER_COAT (35% -> 14 jobs)
+    const stageSlot = globalIndex % 20
+
+    if (stageSlot === 0) {
+      // 5% in ASSEMBLY (approx 4 jobs)
       currentStage = 'ASSEMBLY'
-      lastUpdate = powderCoatEnd.toISOString()
-    } else if (nowTime >= fabricationEnd.getTime()) {
-      currentStage = 'POWDER_COAT' // Constitution §2.2: underscore
-      lastUpdate = fabricationEnd.toISOString()
-    } else if (nowTime >= fabricationStart.getTime()) {
-      currentStage = 'FABRICATION'
-      lastUpdate = fabricationStart.toISOString()
-    } else {
+      const daysInStage = Math.floor(Math.random() * 3) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else if (stageSlot === 1) {
+      // 5% in SHIP (approx 4 jobs)
+      currentStage = 'SHIP'
+      const daysInStage = Math.floor(Math.random() * 2) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else if (stageSlot === 2) {
+      // 5% CLOSED (approx 4 jobs)
+      currentStage = 'CLOSED'
+      const daysAgo = Math.floor(Math.random() * 14) + 1
+      lastUpdate = addBusinessDays(now, -daysAgo).toISOString()
+    } else if (stageSlot <= 5) {
+      // 15% in QUEUE (approx 6 jobs)
       currentStage = 'QUEUE'
       lastUpdate = poDate.toISOString()
+    } else if (stageSlot <= 12) {
+      // 35% in FABRICATION (approx 14 jobs)
+      currentStage = 'FABRICATION'
+      const daysInStage = Math.floor(Math.random() * 5) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
+    } else {
+      // 35% in POWDER_COAT (approx 14 jobs) - includes STAGED roughly half/half
+      currentStage = globalIndex % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
+      const daysInStage = Math.floor(Math.random() * 4) + 1
+      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
     }
 
     pumps.push({
@@ -322,7 +383,7 @@ export function seed(count: number = 80): Pump[] {
       customer,
       poBase,
       orderQuantity,
-      0
+      generated
     )
 
     pumps.push(...modelPumps)
@@ -341,7 +402,7 @@ export function seed(count: number = 80): Pump[] {
       customer,
       poBase,
       remainingQuantity,
-      0
+      generated
     )
 
     pumps.push(...additionalPumps)

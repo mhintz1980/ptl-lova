@@ -118,7 +118,7 @@ export function KpiCard({
         )}
         onClick={onClick}
       >
-        <CardContent className="p-5">
+        <CardContent className="p-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <motion.div

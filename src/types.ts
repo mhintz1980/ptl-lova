@@ -36,6 +36,7 @@ export interface Pump {
   totalPausedDays?: number // accumulated pause duration
   // derived, non-persistent:
   promiseDate?: string // from PO line
+  dateReceived?: string // ISO - when PO was received, for scheduling tiebreaker
   work_hours?: {
     fabrication: number
     assembly: number
@@ -51,6 +52,9 @@ export interface PoLine {
   promiseDate?: string // ISO
   valueEach?: number
   priority?: Priority
+  engine?: string // Engine model, auto-populated from catalog but editable
+  gearbox?: string // Gearbox model, auto-populated from catalog but editable
+  notes?: string // User notes for the line item
 }
 
 export interface AddPoPayload {

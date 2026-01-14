@@ -1,10 +1,14 @@
-import { useMemo } from 'react'
-import { ProportionalBarChart } from './ProportionalBarChart'
+import { useMemo, useState } from 'react'
+import {
+  DrilldownDonutChart,
+  DonutSegment,
+  DetailRow,
+} from './DrilldownDonutChart'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getCapacityByDept } from '../kpiCalculators'
 
-// Mapping department names to colors (optional) or keeping default cyan
+// Department colors
 const DEPT_COLORS: Record<string, string> = {
   Fabrication: '#3b82f6', // blue
   'Powder Coat': '#f97316', // orange
@@ -12,43 +16,87 @@ const DEPT_COLORS: Record<string, string> = {
   'Testing & Shipping': '#8b5cf6', // violet
 }
 
+// Map stages to departments
+const STAGE_TO_DEPT: Record<string, string> = {
+  QUEUE: 'Fabrication',
+  FABRICATION: 'Fabrication',
+  STAGED_FOR_POWDER: 'Powder Coat',
+  POWDER_COAT: 'Powder Coat',
+  ASSEMBLY: 'Assembly',
+  TESTING: 'Testing & Shipping',
+  SHIPPING: 'Testing & Shipping',
+}
+
 export function WorkloadByDeptProportional({
   filters,
   onDrilldown,
 }: ChartProps) {
   const { pumps } = useApp()
+  const [selectedSegment, setSelectedSegment] = useState<DonutSegment | null>(
+    null
+  )
 
-  // Assuming we might filter by model or customer if selected,
-  // but usually Capacity is "All Active" or filtered subset.
-  // Let's respect filters.
+  // Filter pumps
   const filteredPumps = useMemo(() => {
     return pumps.filter((p) => {
-      if (p.stage === 'CLOSED') return false // Capacity usually active only
+      if (p.stage === 'CLOSED') return false
       if (filters.customerId && p.customer !== filters.customerId) return false
       if (filters.modelId && p.model !== filters.modelId) return false
-      // filters.stage? If we filter by stage, we arguably only show that dept?
-      // But usually this chart IS the stage breakdown.
-      // Let's show all depts but filtered content.
       return true
     })
   }, [pumps, filters])
 
-  const data = useMemo(() => {
+  // Convert to donut data
+  const donutData = useMemo((): DonutSegment[] => {
     const raw = getCapacityByDept(filteredPumps)
     return raw.map((r) => ({
       id: r.name,
-      name: r.name, // "Fabrication", etc.
-      value: r.value, // count
-      limit: r.limit,
+      label: r.name,
+      value: r.value,
       color: DEPT_COLORS[r.name] || '#06b6d4',
+      sublabel: r.limit ? `Limit: ${r.limit}` : undefined,
     }))
   }, [filteredPumps])
 
+  // Build inline detail data - pumps in selected department
+  const detailData = useMemo((): DetailRow[] => {
+    if (!selectedSegment) return []
+
+    const pumpsInDept = filteredPumps.filter((p) => {
+      const dept = STAGE_TO_DEPT[p.stage] || 'Unknown'
+      return dept === selectedSegment.id
+    })
+
+    return pumpsInDept.slice(0, 10).map((p) => ({
+      id: p.id,
+      label: p.po,
+      value: p.stage.replace(/_/g, ' '),
+      sublabel: p.customer,
+    }))
+  }, [selectedSegment, filteredPumps])
+
+  const handleSegmentSelect = (segment: DonutSegment | null) => {
+    setSelectedSegment(segment)
+  }
+
+  const handleSegmentClick = (segment: DonutSegment) => {
+    if (onDrilldown) {
+      onDrilldown({ department: segment.id as any })
+    }
+  }
+
   return (
-    <ProportionalBarChart
-      items={data}
-      filters={filters}
-      onDrilldown={onDrilldown}
-    />
+    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+      <DrilldownDonutChart
+        data={donutData}
+        title=""
+        onSegmentSelect={handleSegmentSelect}
+        onSegmentClick={handleSegmentClick}
+        selectedSegmentId={selectedSegment?.id}
+        detailData={detailData}
+        valueFormatter={(v) => `${v} pumps`}
+        height={420}
+      />
+    </div>
   )
 }
