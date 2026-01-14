@@ -57,6 +57,19 @@ export function getModelPrice(modelCode: string): number {
   return getEffectivePrice(model.price, model.model)
 }
 
+// Get model BOM components (engine/gearbox) for AddPoModal auto-population
+export function getModelBom(modelCode: string): {
+  engine: string | null
+  gearbox: string | null
+} {
+  const model = CATALOG_MODELS.find((m) => m.model === modelCode)
+  if (!model) return { engine: null, gearbox: null }
+  return {
+    engine: getBomComponent(model.bom.engine, 'engine'),
+    gearbox: getBomComponent(model.bom.gearbox, 'gearbox'),
+  }
+}
+
 // Constitution §2.1: Transform legacy work_hours to canonical format
 export function getModelWorkHours(
   modelCode: string

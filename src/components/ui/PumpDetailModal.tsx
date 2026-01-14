@@ -204,17 +204,17 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
   // Focus management for accessibility
   const modalRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
-  
+
   useEffect(() => {
     if (currentPump) {
       // Store the previously focused element
       previousFocusRef.current = document.activeElement as HTMLElement
-      
+
       // Focus the modal after it opens
       requestAnimationFrame(() => {
         modalRef.current?.focus()
       })
-      
+
       // Cleanup: restore focus when modal closes
       return () => {
         previousFocusRef.current?.focus()
@@ -439,7 +439,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
           {/* Header */}
           <div className="mb-4 flex items-center justify-between relative z-10 border-b border-white/5 pb-4">
             <div>
-              <h2 id="pump-detail-title" className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight">
+              <h2
+                id="pump-detail-title"
+                className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight"
+              >
                 Pump Details
                 <span className="text-blue-400 font-mono text-lg ml-2">
                   {currentPump.serial !== null
@@ -505,7 +508,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               {/* Exit button - visible in both modes */}
               <button
                 onClick={onClose}
-                className="h-8 w-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                className="h-8 w-8 rounded-full flex items-center justify-center border border-border/50 bg-muted/30 text-muted-foreground transition-all hover:bg-red-500/90 hover:text-white hover:border-red-500 hover:shadow-[0_0_12px_rgba(239,68,68,0.5)]"
                 title="Close"
               >
                 <X className="h-4 w-4" />
@@ -683,11 +686,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                     {isEditing ? (
                       <Input
                         type="number"
-                        value={
-                          formData.serial === null
-                            ? ''
-                            : formData.serial
-                        }
+                        value={formData.serial === null ? '' : formData.serial}
                         onChange={(e) =>
                           handleChange(
                             'serial',

@@ -5,6 +5,7 @@ import { useApp } from '../../store'
 import { Badge } from '../ui/Badge'
 import { differenceInCalendarDays, parseISO, isAfter } from 'date-fns'
 import { AlertCircle, CheckCircle } from 'lucide-react'
+import { formatDate } from '../../lib/format'
 
 export function LateOrdersList({ onDrilldown }: ChartProps) {
   const { pumps } = useApp()
@@ -52,7 +53,7 @@ export function LateOrdersList({ onDrilldown }: ChartProps) {
 
   return (
     <div className="w-full h-full overflow-y-auto pr-1 custom-scrollbar">
-      <div className="space-y-2">
+      <div className="space-y-1">
         <AnimatePresence>
           {latePumps.map((pump, idx) => (
             <motion.div
@@ -109,7 +110,7 @@ export function LateOrdersList({ onDrilldown }: ChartProps) {
                   <span>{pump.daysLate}d Late</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground mt-1">
-                  Due {pump.promiseDate}
+                  Due {formatDate(pump.promiseDate)}
                 </span>
               </motion.div>
             </motion.div>

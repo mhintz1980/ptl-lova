@@ -44,7 +44,9 @@ interface DrillState {
   label: string
 }
 
-export const DashboardEngine = memo(function DashboardEngine({ onSelectPump }: DashboardEngineProps) {
+export const DashboardEngine = memo(function DashboardEngine({
+  onSelectPump,
+}: DashboardEngineProps) {
   const { pumps } = useApp()
   const [mode, setMode] = useState<DashboardMode>('overview')
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS)
@@ -344,7 +346,7 @@ export const DashboardEngine = memo(function DashboardEngine({ onSelectPump }: D
                 transition={{ duration: 0.2 }}
                 // [HIERARCHY-1] THE DASHBOARD CARD (OUTER WRAPPER)
                 // Controls width (col-span) and fixed height for consistent rows
-                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
+                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
                   isDrillMode ? 'min-h-[calc(100vh-200px)]' : ''
                 } ${cfg.containerClass || ''}`}
                 style={

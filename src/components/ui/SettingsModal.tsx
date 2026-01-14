@@ -54,14 +54,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full hover:bg-muted"
+            className="h-8 w-8 rounded-full flex items-center justify-center border border-border/50 bg-muted/30 text-muted-foreground transition-all hover:bg-red-500/90 hover:text-white hover:border-red-500 hover:shadow-[0_0_12px_rgba(239,68,68,0.5)]"
+            title="Close"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
 
         <div className="space-y-8">
@@ -120,8 +119,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         {stage === 'fabrication'
                           ? '~4'
                           : stage === 'assembly'
-                            ? '~2'
-                            : '~1'}{' '}
+                          ? '~2'
+                          : '~1'}{' '}
                         days/pump
                       </span>
                     </div>

@@ -90,7 +90,7 @@ export function PumpCard({
       {...attributes}
       {...listeners}
       className={cn(
-        'group relative overflow-hidden rounded-xl border bg-card/90 pl-5 pr-4 py-4 shadow-layer-md transition-all duration-200',
+        'group relative overflow-hidden rounded-xl border bg-card/90 p-3 shadow-layer-md transition-all duration-200',
         isGhost
           ? 'border-dashed border-yellow-500 bg-yellow-50/50'
           : 'border-border',
@@ -156,8 +156,8 @@ export function PumpCard({
         </div>
       )}
 
-      <div className="flex items-start gap-3">
-        <div className="flex-1 space-y-1">
+      <div className="flex items-start gap-2">
+        <div className="flex-1 space-y-0.5">
           <div className="flex items-center text-sm font-semibold text-foreground">
             <span className="truncate" title={pump.model}>
               {pump.model}
@@ -177,9 +177,7 @@ export function PumpCard({
             <span
               className="block truncate"
               title={
-                pump.serial === null
-                  ? 'Unassigned'
-                  : `Serial #${pump.serial}`
+                pump.serial === null ? 'Unassigned' : `Serial #${pump.serial}`
               }
             >
               {pump.serial === null ? (
@@ -193,7 +191,7 @@ export function PumpCard({
       </div>
 
       {!collapsed && (
-        <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+        <div className="mt-2 space-y-0.5 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>PO</span>
             <span className="font-medium text-foreground">{pump.po}</span>
@@ -226,7 +224,7 @@ export function PumpCard({
                 <span className="font-bold">{pump.totalPausedDays}</span>
               </div>
             )}
-          <div className="flex items-center justify-between border-t border-border/60 pt-2 text-[11px]">
+          <div className="flex items-center justify-between border-t border-border/60 pt-1.5 text-[11px]">
             <span>Last update</span>
             <span className="text-foreground/80">
               {formatDate(pump.last_update)}

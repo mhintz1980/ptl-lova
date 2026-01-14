@@ -52,6 +52,9 @@ export interface PoLine {
   promiseDate?: string // ISO
   valueEach?: number
   priority?: Priority
+  engine?: string // Engine model, auto-populated from catalog but editable
+  gearbox?: string // Gearbox model, auto-populated from catalog but editable
+  notes?: string // User notes for the line item
 }
 
 export interface AddPoPayload {
