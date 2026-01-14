@@ -3,7 +3,7 @@
   "spec": "003-priority-change-domain-event",
   "state": "building",
   "subtasks": {
-    "completed": 1,
+    "completed": 3,
     "total": 4,
     "in_progress": 1,
     "failed": 0
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 3,
+    "number": 5,
     "started_at": "2026-01-14T03:12:12.044734"
   },
-  "last_update": "2026-01-14T03:18:23.739386"
+  "last_update": "2026-01-14T03:22:52.778889"
 }
