@@ -67,6 +67,24 @@ All project documents live under [`docs/`](docs/README.md):
 - **ARIA Labels**: Screen reader support throughout
 - **Focus Management**: Proper focus trapping and restoration in modals
 
+### Keyboard Shortcuts
+
+PumpTracker Lite includes global keyboard shortcuts for faster navigation and productivity:
+
+| Shortcut | Action | Description |
+| -------- | ------ | ----------- |
+| `Ctrl+N` (or `⌘N` on Mac) | Add Purchase Order | Opens the Add PO modal to create a new purchase order |
+| `Ctrl+F` (or `⌘F` on Mac) | Focus Search | Focuses the search input in the toolbar for quick filtering |
+| `Ctrl+/` (or `⌘/` on Mac) | Show Shortcuts | Opens the keyboard shortcuts help modal |
+| `Escape` | Close Modal | Closes any open modal (Add PO, Settings, Pump Details, Shortcuts Help) |
+
+**Features:**
+- Shortcuts work globally across all views (Dashboard, Kanban, Scheduling)
+- Smart detection prevents shortcuts from interfering with form inputs (except `Escape`)
+- Cross-platform support: `Ctrl` on Windows/Linux, `⌘` on macOS
+- Shortcuts state is persisted in localStorage
+- Access the shortcuts help modal anytime with `Ctrl+/` to see all available shortcuts
+
 ## 🏗️ Architecture
 
 ### Technology Stack
