@@ -2,7 +2,7 @@
 import { Pump, Stage } from "../../types";
 import { PumpCard } from "./PumpCard";
 import { useDroppable } from "@dnd-kit/core";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Inbox } from "lucide-react";
 import { useApp } from "../../store";
 import { cn } from "../../lib/utils";
 import { useMemo } from "react";
@@ -42,6 +42,17 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
     ASSEMBLY: "bg-amber-500",
     SHIP: "bg-emerald-500",
     CLOSED: "bg-green-500",
+  };
+
+  // Contextual empty state messages
+  const emptyStateMessages: Record<Stage, string> = {
+    QUEUE: "No orders in queue. Add a new PO to get started.",
+    FABRICATION: "No pumps in fabrication. Drag from Queue to start production.",
+    STAGED_FOR_POWDER: "No pumps staged. Items here await powder coating.",
+    POWDER_COAT: "No pumps at powder coat. Items are at external vendor.",
+    ASSEMBLY: "No pumps in assembly. Drag completed fabrication here.",
+    SHIP: "No pumps ready to ship. Complete assembly to ship orders.",
+    CLOSED: "No completed orders. Shipped orders appear here.",
   };
 
   return (
@@ -98,8 +109,9 @@ export function StageColumn({ stage, pumps, collapsed, onCardClick, activeId }: 
               )
             ))}
             {pumps.length === 0 && (
-              <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
-                Drop pumps here
+              <div className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 text-center text-xs text-muted-foreground">
+                <Inbox className="h-5 w-5 opacity-50" />
+                <span>{emptyStateMessages[stage]}</span>
               </div>
             )}
           </div>
