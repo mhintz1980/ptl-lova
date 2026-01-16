@@ -192,8 +192,46 @@ export const useApp = create<AppState>()(
 
         // DEV MODE: Auto-enter sandbox with seed data to protect production
         if (import.meta.env.DEV) {
+          // ═══════════════════════════════════════════════════════════════════════
+          // 🧪 SANDBOX MODE ACTIVATED
+          // ═══════════════════════════════════════════════════════════════════════
+          console.warn(`
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🧪  SANDBOX MODE ACTIVATED - DEVELOPMENT ENVIRONMENT DETECTED  🧪          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  WHY: You are running 'pnpm dev' which auto-enables sandbox mode.            ║
+║       This protects production data from accidental modifications.           ║
+║                                                                              ║
+║  WHAT THIS MEANS:                                                            ║
+║  ❌ ALL database writes are DISABLED (using SandboxAdapter)                  ║
+║  ❌ Your changes will NOT be saved to Supabase                               ║
+║  ❌ All data will be LOST on page refresh                                    ║
+║  ✅ You're working with generated seed data (40 test pumps)                  ║
+║                                                                              ║
+║  TO SAVE DATA TO PRODUCTION:                                                 ║
+║  1. Deploy to production environment, OR                                     ║
+║  2. Run 'pnpm build && pnpm preview' for local production mode               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+`)
+          console.log(
+            '🧪 [Store] Sandbox mode - Loading seed data at:',
+            new Date().toISOString()
+          )
+
           const { seed } = await import('./lib/seed')
           const seedData = seed(40) // Generate 40 test pumps for good chart coverage
+
+          console.log(
+            '🧪 [Store] Sandbox mode - Generated',
+            seedData.length,
+            'test pumps'
+          )
+          console.log(
+            '🧪 [Store] Sandbox mode - Using SandboxAdapter (all writes = no-op)'
+          )
+
           set({
             pumps: seedData,
             loading: false,
@@ -203,6 +241,8 @@ export const useApp = create<AppState>()(
           })
           // Performance: Build timeline cache after loading dev data
           get().rebuildTimelines()
+
+          console.log('✅ [Store] Sandbox mode initialization complete')
           return
         }
 
@@ -404,7 +444,11 @@ export const useApp = create<AppState>()(
         const pump = get().pumps.find((p) => p.id === id)
 
         // Emit PriorityChanged event if priority is being modified
-        if (pump && patch.priority !== undefined && patch.priority !== pump.priority) {
+        if (
+          pump &&
+          patch.priority !== undefined &&
+          patch.priority !== pump.priority
+        ) {
           const event = priorityChanged(id, pump.priority, patch.priority)
           eventStore.append(event).catch((err) => {
             console.error('Failed to persist priority change event:', err)
