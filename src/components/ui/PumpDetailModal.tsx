@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { Pump, Priority, Stage, STAGES } from '../../types'
+import { Pump, Stage, STAGES } from '../../types'
 import {
   type StageDurations,
   type StageBlock,
@@ -27,6 +27,7 @@ import {
   getStagedForPowderHistory,
 } from '../../lib/stage-history'
 import { EventHistoryTimeline } from './EventHistoryTimeline'
+import { PrioritySelect } from './PrioritySelect'
 
 // Constitution §2.1: Canonical production stages for progress bar
 const PROGRESS_STAGES: Stage[] = [
@@ -101,8 +102,8 @@ function TimelineProgress({
                     isCompleted
                       ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]}`
                       : isCurrent
-                      ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]} animate-pulse`
-                      : 'bg-transparent'
+                        ? `bg-gradient-to-r ${STAGE_BAR_COLORS[stage]} animate-pulse`
+                        : 'bg-transparent'
                   )}
                   style={{ width: fillWidth }}
                 />
@@ -168,7 +169,7 @@ interface PumpFormData extends Pump {
   testing_days?: number
 }
 
-const PRIORITIES: Priority[] = ['Low', 'Normal', 'High', 'Rush', 'Urgent']
+// Removed: PRIORITIES constant - now handled by PrioritySelect
 
 export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
   const {
@@ -726,19 +727,13 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                             </option>
                           ))}
                         </select>
-                        <select
-                          className="h-8 rounded-md border border-white/10 bg-background/40 px-2 text-xs shadow-sm transition-colors text-foreground text-right"
+                        <PrioritySelect
                           value={formData.priority}
-                          onChange={(e) =>
-                            handleChange('priority', e.target.value as Priority)
+                          onChange={(priority) =>
+                            handleChange('priority', priority)
                           }
-                        >
-                          {PRIORITIES.map((p) => (
-                            <option key={p} value={p}>
-                              {p}
-                            </option>
-                          ))}
-                        </select>
+                          size="sm"
+                        />
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
@@ -752,8 +747,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                               formData.priority === 'Rush'
                               ? 'text-rose-500 bg-rose-500/10 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]'
                               : formData.priority === 'High'
-                              ? 'text-orange-500 bg-orange-500/10 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.15)]'
-                              : 'text-muted-foreground/60 bg-muted/20 border-white/5'
+                                ? 'text-orange-500 bg-orange-500/10 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.15)]'
+                                : 'text-muted-foreground/60 bg-muted/20 border-white/5'
                           )}
                         >
                           {formData.priority}
@@ -1035,10 +1030,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                               {row.kind === 'work' && row.stage
                                 ? `${calculateManHours(row.days, row.stage)}H`
                                 : row.kind === 'vendor'
-                                ? 'WORK DAYS'
-                                : row.actualDays !== undefined
-                                ? `Actual: ${row.actualDays}D`
-                                : 'Actual: -'}
+                                  ? 'WORK DAYS'
+                                  : row.actualDays !== undefined
+                                    ? `Actual: ${row.actualDays}D`
+                                    : 'Actual: -'}
                             </div>
                           </div>
                         </div>
