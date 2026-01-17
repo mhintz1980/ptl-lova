@@ -5,6 +5,7 @@ import { DrilldownDonutChart, DonutSegment } from './charts/DrilldownDonutChart'
 import { ChartProps, DashboardFilters } from './dashboardConfig'
 import { useApp } from '../../store'
 import { applyDashboardFilters } from './utils'
+import { formatCurrency } from '../../lib/format'
 
 interface ValueChartProps {
   pumps: Pump[]
@@ -31,24 +32,18 @@ const TABS: { id: Perspective; label: string }[] = [
   { id: 'model', label: 'By Model' },
 ]
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 const aggregatePoValue = (pumps: Pump[], type: 'customer' | 'model') => {
-  const groups = pumps.reduce((acc, pump) => {
-    const key = type === 'customer' ? pump.customer : pump.model
-    if (!acc[key]) {
-      acc[key] = 0
-    }
-    acc[key] += pump.value || 0
-    return acc
-  }, {} as Record<string, number>)
+  const groups = pumps.reduce(
+    (acc, pump) => {
+      const key = type === 'customer' ? pump.customer : pump.model
+      if (!acc[key]) {
+        acc[key] = 0
+      }
+      acc[key] += pump.value || 0
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   return Object.entries(groups)
     .map(([name, value]) => ({ name, value }))

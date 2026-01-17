@@ -34,20 +34,12 @@ export function applyFilters(rows: Pump[], f: Filters): Pump[] {
 }
 
 export function genSerial(existing: Pump[]): number {
-  const used = new Set(existing.map((p) => p.serial).filter((s): s is number => s !== null))
+  const used = new Set(
+    existing.map((p) => p.serial).filter((s): s is number => s !== null)
+  )
   for (let s = 1000; s <= 9999; s++) {
     if (!used.has(s)) return s
   }
   // Fallback: use a random serial if 1000-9999 are all used (unlikely for Lite)
   return Math.floor(1000 + Math.random() * 9000)
-}
-
-export function formatCurrency(value: number): string {
-  if (value >= 1_000_000) {
-    return `$${(value / 1_000_000).toFixed(1)}M`
-  }
-  if (value >= 1_000) {
-    return `$${(value / 1_000).toFixed(0)}K`
-  }
-  return `$${value.toFixed(0)}`
 }

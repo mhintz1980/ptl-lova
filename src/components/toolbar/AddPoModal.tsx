@@ -16,6 +16,7 @@ import {
 import { toast } from 'sonner'
 import { getModelPrice, getModelBom, getCatalogData } from '../../lib/seed'
 import { cn } from '../../lib/utils'
+import { formatCurrency } from '../../lib/format'
 
 interface AddPoModalProps {
   isOpen: boolean
@@ -231,15 +232,6 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
       { totalPumps: 0, totalValue: 0 }
     )
   }, [lines])
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
 
   // Reset form when modal closes (for consistency with Cancel/X button behavior)
   // This ensures form resets whether closed via Escape, Cancel button, or X button
