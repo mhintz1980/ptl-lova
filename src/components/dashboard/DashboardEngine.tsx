@@ -20,6 +20,7 @@ import {
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
 import { ModeKpis } from './ModeKpis'
+import { DateRangePicker } from './DateRangePicker'
 import { useApp } from '../../store'
 
 const EMPTY_FILTERS: DashboardFilters = {
@@ -245,6 +246,15 @@ export const DashboardEngine = memo(function DashboardEngine({
 
           {!isDrillMode && (
             <>
+              {/* Date Range Filter */}
+              <DateRangePicker
+                from={filters.dateRange.from}
+                to={filters.dateRange.to}
+                onChange={(dateRange) =>
+                  setFilters((prev) => ({ ...prev, dateRange }))
+                }
+              />
+
               {/* Mode Toggle Chips */}
               <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
                 {MODE_CONFIGS.map((m) => {
