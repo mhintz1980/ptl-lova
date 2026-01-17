@@ -1,21 +1,21 @@
 /**
  * EventStore - Persists domain events to localStorage
- * 
+ *
  * This is the foundation for event sourcing, enabling:
  * - Audit trail of all stage transitions
  * - Reconstruction of actual timeline from events
  * - Future migration to backend event store
  */
 
-import type { DomainEvent } from '../../domain/production/events/DomainEvent';
+import type { DomainEvent } from '../../domain/production/events/DomainEvent'
 
-export const EVENTS_STORAGE_KEY = 'pumptracker-events';
+export const EVENTS_STORAGE_KEY = 'pumptracker-events'
 
 export interface EventStore {
-  append(event: DomainEvent): Promise<void>;
-  getEvents(aggregateId: string): Promise<DomainEvent[]>;
-  getAllEvents(): Promise<DomainEvent[]>;
-  clear(): Promise<void>;
+  append(event: DomainEvent): Promise<void>
+  getEvents(aggregateId: string): Promise<DomainEvent[]>
+  getAllEvents(): Promise<DomainEvent[]>
+  clear(): Promise<void>
 }
 
 /**
@@ -23,39 +23,41 @@ export interface EventStore {
  */
 class LocalStorageEventStore implements EventStore {
   async append(event: DomainEvent): Promise<void> {
-    const events = await this.getAllEvents();
-    events.push(event);
-    localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
+    const events = await this.getAllEvents()
+    events.push(event)
+    localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events))
   }
 
   async getEvents(aggregateId: string): Promise<DomainEvent[]> {
-    const allEvents = await this.getAllEvents();
-    return allEvents.filter(e => e.aggregateId === aggregateId);
+    const allEvents = await this.getAllEvents()
+    return allEvents.filter((e) => e.aggregateId === aggregateId)
   }
 
   async getAllEvents(): Promise<DomainEvent[]> {
-    const raw = localStorage.getItem(EVENTS_STORAGE_KEY);
-    if (!raw) return [];
-    
+    const raw = localStorage.getItem(EVENTS_STORAGE_KEY)
+    if (!raw) return []
+
     try {
-      const events = JSON.parse(raw);
+      const events = JSON.parse(raw) as Array<
+        Record<string, unknown> & { occurredAt: string }
+      >
       // Reconstruct Date objects from ISO strings
-      return events.map((e: any) => ({
+      return events.map((e) => ({
         ...e,
-        occurredAt: new Date(e.occurredAt)
-      }));
+        occurredAt: new Date(e.occurredAt),
+      })) as DomainEvent[]
     } catch (error) {
-      console.error('Failed to parse events from localStorage:', error);
-      return [];
+      console.error('Failed to parse events from localStorage:', error)
+      return []
     }
   }
 
   async clear(): Promise<void> {
-    localStorage.removeItem(EVENTS_STORAGE_KEY);
+    localStorage.removeItem(EVENTS_STORAGE_KEY)
   }
 }
 
 /**
  * Singleton instance
  */
-export const eventStore: EventStore = new LocalStorageEventStore();
+export const eventStore: EventStore = new LocalStorageEventStore()

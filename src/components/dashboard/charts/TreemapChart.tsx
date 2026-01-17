@@ -154,7 +154,12 @@ const AnimatedTreemapContent = (props: TreemapContentProps) => {
   )
 }
 
-const CustomTooltip = (props: any) => {
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{ payload: { name: string; value: number; count: number } }>
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
   const { active, payload: tooltipPayload } = props
   if (active && tooltipPayload && tooltipPayload.length) {
     const data = tooltipPayload[0].payload as {
