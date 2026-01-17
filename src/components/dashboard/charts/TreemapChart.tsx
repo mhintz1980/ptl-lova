@@ -342,7 +342,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
             transition={{ duration: 0.3 }}
             className="w-full h-full"
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={350}>
               <Treemap
                 data={data}
                 dataKey="value"
