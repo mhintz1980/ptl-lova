@@ -85,8 +85,8 @@ export function LoginPage() {
                 }
               />
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+            <Button className="w-full" type="submit" loading={isLoading}>
+              Sign in
             </Button>
           </form>
         </CardContent>
