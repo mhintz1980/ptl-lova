@@ -62,6 +62,7 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
         )
         setEvents(sorted)
       } catch (error) {
+        console.error('Failed to fetch pump events:', error)
         setEvents([])
       } finally {
         setLoading(false)
@@ -101,7 +102,10 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
         role="status"
         aria-label="No events available"
       >
-        <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" aria-hidden="true" />
+        <Clock
+          className="mb-2 h-8 w-8 text-muted-foreground/50"
+          aria-hidden="true"
+        />
         <p className="text-sm text-muted-foreground">No events yet</p>
         <p className="text-xs text-muted-foreground/70">
           Events will appear here as the pump moves through stages
@@ -112,11 +116,7 @@ export function EventHistoryTimeline({ pumpId }: EventHistoryTimelineProps) {
 
   return (
     <ScrollArea className="h-[300px] pr-4">
-      <ol
-        className="space-y-4"
-        role="list"
-        aria-label="Event history timeline"
-      >
+      <ol className="space-y-4" role="list" aria-label="Event history timeline">
         {events.map((event, index) => (
           <TimelineEventItem
             key={`${event.eventType}-${event.occurredAt.getTime()}-${index}`}
@@ -136,15 +136,18 @@ interface TimelineEventItemProps {
 
 function TimelineEventItem({ event, isLast }: TimelineEventItemProps) {
   const formattedTime = format(event.occurredAt, 'MMM d, yyyy h:mm a')
-  const relativeTime = formatDistanceToNow(event.occurredAt, { addSuffix: true })
+  const relativeTime = formatDistanceToNow(event.occurredAt, {
+    addSuffix: true,
+  })
   const colors = EVENT_COLORS[event.eventType]
 
   // Get event type label for accessibility
-  const eventTypeLabel = event.eventType === 'PumpStageMoved'
-    ? 'Stage moved'
-    : event.eventType === 'PumpPaused'
-    ? 'Pump paused'
-    : 'Pump resumed'
+  const eventTypeLabel =
+    event.eventType === 'PumpStageMoved'
+      ? 'Stage moved'
+      : event.eventType === 'PumpPaused'
+        ? 'Pump paused'
+        : 'Pump resumed'
 
   return (
     <li
@@ -209,7 +212,7 @@ interface EventContentProps {
 function EventContent({ event }: EventContentProps) {
   if (event.eventType === 'PumpStageMoved') {
     const fromLabel = event.fromStage
-      ? STAGE_LABELS[event.fromStage] ?? event.fromStage
+      ? (STAGE_LABELS[event.fromStage] ?? event.fromStage)
       : 'New'
     const toLabel = STAGE_LABELS[event.toStage] ?? event.toStage
 
@@ -222,7 +225,10 @@ function EventContent({ event }: EventContentProps) {
         </div>
         <p className="text-sm leading-relaxed">
           <span className="text-muted-foreground">{fromLabel}</span>
-          <ArrowRight className="mx-1.5 inline h-3.5 w-3.5 text-blue-400" aria-hidden="true" />
+          <ArrowRight
+            className="mx-1.5 inline h-3.5 w-3.5 text-blue-400"
+            aria-hidden="true"
+          />
           <span className="font-semibold text-foreground">{toLabel}</span>
         </p>
       </div>
@@ -237,13 +243,19 @@ function EventContent({ event }: EventContentProps) {
             Paused
           </Badge>
           {event.reason === 'auto' && (
-            <span className="text-xs text-muted-foreground italic" aria-label="Automatically paused">
+            <span
+              className="text-xs text-muted-foreground italic"
+              aria-label="Automatically paused"
+            >
               (automatic)
             </span>
           )}
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Paused in <span className="font-medium">{STAGE_LABELS[event.stage] ?? event.stage}</span>
+          Paused in{' '}
+          <span className="font-medium">
+            {STAGE_LABELS[event.stage] ?? event.stage}
+          </span>
         </p>
       </div>
     )
@@ -258,10 +270,14 @@ function EventContent({ event }: EventContentProps) {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Resumed in <span className="font-medium">{STAGE_LABELS[event.stage] ?? event.stage}</span>
+          Resumed in{' '}
+          <span className="font-medium">
+            {STAGE_LABELS[event.stage] ?? event.stage}
+          </span>
           {event.pausedDays > 0 && (
             <span className="ml-1">
-              (paused <span className="font-medium">{event.pausedDays}</span> {event.pausedDays === 1 ? 'day' : 'days'})
+              (paused <span className="font-medium">{event.pausedDays}</span>{' '}
+              {event.pausedDays === 1 ? 'day' : 'days'})
             </span>
           )}
         </p>

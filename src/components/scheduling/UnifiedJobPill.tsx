@@ -339,6 +339,8 @@ export function UnifiedJobPill({
         height: 28,
       }}
       onClick={handleClick}
+      data-testid="calendar-event"
+      data-stage={pump.stage}
     >
       <Tooltip
         content={tooltipContent}
@@ -396,6 +398,8 @@ export function UnifiedJobPill({
               style={{
                 width: `${seg.widthPercent}%`,
               }}
+              data-testid="calendar-segment"
+              data-stage={seg.stage}
             />
           ))}
         </div>

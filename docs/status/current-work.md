@@ -61,6 +61,18 @@
 - [x] **Database Schema**: Made `serial` column nullable to fix "Add PO" error.
 - [x] **Verification**: Confirmed "No move past Fabrication" rule still protects the workflow.
 
+## Completed: Fix Unit Tests ✅ (2026-01-18)
+
+- [x] **Global Fix**: Added `localStorage` mock to `vitest.setup.ts` to satisfy `zustand` persistence.
+- [x] **Component Fixes**: Resolved failures in `EventHistoryTimeline` (text assertions), `DashboardSkeleton` (selectors), and `MainCalendarGrid` (missing identifiers).
+- [x] **Result**: All ~317 unit tests passing.
+
+## Completed: Branch Consolidation ✅ (2026-01-17)
+
+- [x] **Batch Merge**: Merged all outstanding feature branches (`dashboard-improvements`, `database-logging`, etc.) into `main`.
+- [x] **Cleanup**: Verified all changes from the last 5 days are correctly integrated.
+- [x] **Build Verification**: Confirmed `main` builds successfully after consolidation.
+
 ## Completed: Support Operations Setup ✅ (2025-12-29)
 
 - [x] **New SOPs**: Created `docs/process/support-operations.md` for common admin tasks.

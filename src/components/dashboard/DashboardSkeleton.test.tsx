@@ -6,12 +6,13 @@ describe('DashboardSkeleton', () => {
     render(<DashboardSkeleton />)
 
     // Main container should be present
-    const container = screen.getByRole('generic', { name: '' })
+    const container = screen.getByTestId('dashboard-skeleton')
     expect(container).toBeInTheDocument()
   })
 
   it('renders correct number of KPI placeholders', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // KPI skeleton elements have h-10 w-32 classes
     const kpiSkeletons = container.querySelectorAll('.h-10.w-32')
@@ -19,23 +20,30 @@ describe('DashboardSkeleton', () => {
   })
 
   it('renders mode toggle placeholders', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // Mode toggle skeletons have h-9 class
-    const modeToggleSkeletons = container.querySelectorAll('.h-9.w-48, .h-9.w-24')
+    const modeToggleSkeletons = container.querySelectorAll(
+      '.h-9.w-48, .h-9.w-24'
+    )
     expect(modeToggleSkeletons).toHaveLength(2)
   })
 
   it('renders three chart cards in first row', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // Chart cards have col-span-12 md:col-span-4 h-[450px] classes
-    const chartCards = container.querySelectorAll('.col-span-12.md\\:col-span-4.h-\\[450px\\]')
+    const chartCards = container.querySelectorAll(
+      '.col-span-12.md\\:col-span-4.h-\\[450px\\]'
+    )
     expect(chartCards).toHaveLength(3)
   })
 
   it('renders one large chart in second row', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // Large chart has col-span-12 h-[300px] classes
     const largeChart = container.querySelectorAll('.col-span-12.h-\\[300px\\]')
@@ -43,18 +51,22 @@ describe('DashboardSkeleton', () => {
   })
 
   it('has proper accessibility attributes', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
-    // All skeleton elements should be present
-    const skeletonElements = container.querySelectorAll('[class*="skeleton"]')
+    // All skeleton elements should be present (animate-pulse class is on all Skeletons)
+    const skeletonElements = container.querySelectorAll('.animate-pulse')
     expect(skeletonElements.length).toBeGreaterThan(0)
 
     // Verify aria-busy is not set (skeletons are visual indicators)
-    expect(container.querySelector('[aria-busy="true"]')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('[aria-busy="true"]')
+    ).not.toBeInTheDocument()
   })
 
   it('renders bar chart placeholders with correct count', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // The large chart has 10 bars
     const bars = container.querySelectorAll('.w-full.rounded-t-md')
@@ -62,10 +74,13 @@ describe('DashboardSkeleton', () => {
   })
 
   it('has donut chart placeholders', () => {
-    const { container } = render(<DashboardSkeleton />)
+    render(<DashboardSkeleton />)
+    const container = screen.getByTestId('dashboard-skeleton')
 
     // Three charts with circular placeholders (h-32 w-32 rounded-full)
-    const donutPlaceholders = container.querySelectorAll('.h-32.w-32.rounded-full')
+    const donutPlaceholders = container.querySelectorAll(
+      '.h-32.w-32.rounded-full'
+    )
     expect(donutPlaceholders).toHaveLength(3)
   })
 })

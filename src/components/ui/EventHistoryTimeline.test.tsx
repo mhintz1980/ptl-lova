@@ -19,6 +19,15 @@ describe('EventHistoryTimeline', () => {
     vi.clearAllMocks()
   })
 
+  // Helper function to handle text broken up by elements (e.g. "Paused in <span>Fabrication</span>")
+  const findByTextContent = (text: string) => {
+    const elements = screen.getAllByText((_, element) => {
+      const normalized = element?.textContent?.replace(/\s+/g, ' ').trim() || ''
+      return normalized.includes(text)
+    })
+    expect(elements.length).toBeGreaterThan(0)
+  }
+
   it('should render loading state initially', () => {
     ;(eventStore.getEvents as Mock).mockReturnValue(
       new Promise(() => {}) // Never resolves
@@ -36,7 +45,9 @@ describe('EventHistoryTimeline', () => {
     await waitFor(() => {
       expect(screen.getByText('No events yet')).toBeDefined()
       expect(
-        screen.getByText('Events will appear here as the pump moves through stages')
+        screen.getByText(
+          'Events will appear here as the pump moves through stages'
+        )
       ).toBeDefined()
     })
   })
@@ -113,7 +124,9 @@ describe('EventHistoryTimeline', () => {
   })
 
   it('should handle event fetch errors gracefully', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
     ;(eventStore.getEvents as Mock).mockRejectedValue(new Error('Fetch failed'))
 
     render(<EventHistoryTimeline pumpId={mockPumpId} />)
@@ -189,7 +202,7 @@ describe('EventHistoryTimeline', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Paused')).toBeDefined()
-      expect(screen.getByText('Paused in Fabrication')).toBeDefined()
+      findByTextContent('Paused in Fabrication')
       expect(screen.queryByText('(automatic)')).toBeNull()
     })
   })
@@ -231,8 +244,9 @@ describe('EventHistoryTimeline', () => {
     render(<EventHistoryTimeline pumpId={mockPumpId} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Resumed')).toBeDefined()
-      expect(screen.getByText('Resumed in Fabrication')).toBeDefined()
+      const resumedBadges = screen.getAllByText(/Resumed/)
+      expect(resumedBadges.length).toBeGreaterThan(0)
+      findByTextContent('Resumed in Fabrication')
       expect(screen.queryByText(/paused/i)).toBeNull()
     })
   })
@@ -252,10 +266,10 @@ describe('EventHistoryTimeline', () => {
 
     render(<EventHistoryTimeline pumpId={mockPumpId} />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Resumed')).toBeDefined()
-      expect(screen.getByText(/paused 1 day/i)).toBeDefined()
-    })
+    const resumedBadges = await screen.findAllByText(/Resumed/)
+    expect(resumedBadges.length).toBeGreaterThan(0)
+
+    findByTextContent('(paused 1 day)')
   })
 
   it('should render PumpResumed event with multiple paused days', async () => {
@@ -273,10 +287,10 @@ describe('EventHistoryTimeline', () => {
 
     render(<EventHistoryTimeline pumpId={mockPumpId} />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Resumed')).toBeDefined()
-      expect(screen.getByText(/paused 5 days/i)).toBeDefined()
-    })
+    const resumedBadges = await screen.findAllByText(/Resumed/)
+    expect(resumedBadges.length).toBeGreaterThan(0)
+
+    findByTextContent('(paused 5 days)')
   })
 
   it('should render multiple events with timeline connectors', async () => {
@@ -305,7 +319,9 @@ describe('EventHistoryTimeline', () => {
       expect(screen.getByText('Stage Move')).toBeDefined()
       expect(screen.getByText('Paused')).toBeDefined()
       // Check for timeline connector (the line between events)
-      const timelineLines = container.querySelectorAll('.absolute.left-\\[11px\\]')
+      const timelineLines = container.querySelectorAll(
+        '.absolute.left-\\[11px\\]'
+      )
       expect(timelineLines.length).toBeGreaterThan(0)
     })
   })
@@ -328,7 +344,9 @@ describe('EventHistoryTimeline', () => {
     await waitFor(() => {
       const timeElements = container.querySelectorAll('time')
       expect(timeElements.length).toBe(1)
-      expect(timeElements[0].getAttribute('datetime')).toBe('2024-01-15T14:30:00.000Z')
+      expect(timeElements[0].getAttribute('datetime')).toBe(
+        '2024-01-15T14:30:00.000Z'
+      )
     })
   })
 })
