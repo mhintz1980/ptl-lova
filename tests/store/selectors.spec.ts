@@ -9,9 +9,9 @@ import {
 vi.mock('../../src/adapters/local', () => ({
   LocalAdapter: {
     load: vi.fn().mockResolvedValue([]),
-    upsertMany: vi.fn(),
-    update: vi.fn(),
-    replaceAll: vi.fn(),
+    upsertMany: vi.fn().mockResolvedValue(undefined),
+    update: vi.fn().mockResolvedValue(undefined),
+    replaceAll: vi.fn().mockResolvedValue(undefined),
   },
 }))
 
