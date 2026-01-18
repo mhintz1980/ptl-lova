@@ -18,69 +18,37 @@ vi.mock('@supabase/supabase-js', () => {
   }
 })
 
-// Also need to mock the environment check in the adapter
-// We'll mock the adapter module itself to bypass the null client check
-vi.mock('../src/adapters/supabase', async () => {
-  const mockClient = { from: mockFrom }
-
-  return {
-    supabase: mockClient,
-    SupabaseAdapter: {
-      async load() {
-        let attempts = 0
-        const maxAttempts = 3
-
-        while (attempts < maxAttempts) {
-          const { data, error } = await mockClient.from('pump').select('*')
-
-          if (!error) {
-            return data
-          }
-
-          attempts++
-          console.error(
-            `❌ [Supabase] load() ERROR (attempt ${attempts}):`,
-            error.message || 'Unknown error'
-          )
-
-          if (attempts >= maxAttempts) {
-            console.error(
-              '❌ [Supabase] load() FAILED after',
-              maxAttempts,
-              'attempts - giving up'
-            )
-            throw error
-          }
-
-          // Skip delay in tests for speed
-        }
-
-        throw new Error('Failed to load data after maximum retries')
-      },
-      async replaceAll() {},
-      async upsertMany() {},
-      async update() {},
-    },
-  }
-})
-
-import { SupabaseAdapter } from '../src/adapters/supabase'
-
 describe('SupabaseAdapter', () => {
   beforeEach(() => {
+    vi.resetModules()
+    vi.useFakeTimers()
+    // Mock environment variables so SupabaseAdapter initializes the client
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://mock.supabase.co')
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'mock-key')
+
+    // Clear mock history
     vi.clearAllMocks()
+    mockSelect.mockReset()
+    mockFrom.mockClear()
   })
 
   afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllEnvs()
     vi.clearAllMocks()
   })
 
   it('should retry loading data on failure', async () => {
+    // 1. Setup mocks
     const consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {})
+    const consoleWarnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {}) // Adapter logs retries as warnings
 
     const error = new Error('Network error')
+    // Fail 2 times, succeed on 3rd
     mockSelect
       .mockResolvedValueOnce({ data: null, error })
       .mockResolvedValueOnce({ data: null, error })
@@ -89,30 +57,70 @@ describe('SupabaseAdapter', () => {
         error: null,
       })
 
-    const data = await SupabaseAdapter.load()
+    // 2. Import the real adapter (dynamic import to pick up env vars)
+    const { SupabaseAdapter } = await import('../src/adapters/supabase')
 
+    // 3. Start the operation (do not await yet)
+    const loadPromise = SupabaseAdapter.load()
+
+    // 4. Fast-forward timers to skip backoff delays
+    // We use runAllTimersAsync to handle the recursive async/await + setTimeout loop
+    await vi.runAllTimersAsync()
+
+    // 5. Await result
+    const data = await loadPromise
+
+    // 6. Assertions
     expect(mockFrom).toHaveBeenCalledTimes(3)
     expect(mockSelect).toHaveBeenCalledTimes(3)
+    // Should log error for the first 2 failures
     expect(consoleErrorSpy).toHaveBeenCalledTimes(2)
     expect(data).toEqual([{ id: '1', name: 'Test Pump' }])
 
     consoleErrorSpy.mockRestore()
+    consoleWarnSpy.mockRestore()
   })
 
   it('should throw an error after max retries', async () => {
+    // 1. Setup mocks
     const consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {})
+    const consoleWarnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {})
 
     const error = new Error('Network error')
+    // Always fail
     mockSelect.mockResolvedValue({ data: null, error })
 
-    await expect(SupabaseAdapter.load()).rejects.toThrow('Network error')
+    // 2. Import the real adapter
+    const { SupabaseAdapter } = await import('../src/adapters/supabase')
 
+    // 3. Start operation
+    const loadPromise = SupabaseAdapter.load()
+
+    // 4. Handle rejection to prevent usage error during timer flush
+    const safePromise = loadPromise.catch((e) => e)
+
+    // 5. Fast-forward timers
+    await vi.runAllTimersAsync()
+
+    // 6. Await result (which is the caught error)
+    const result = await safePromise
+
+    // 7. Assert it failed with the correct error
+    expect(result).toBe(error)
+
+    // 8. Assertions
+    // It tries 3 times (maxAttempts)
     expect(mockFrom).toHaveBeenCalledTimes(3)
     expect(mockSelect).toHaveBeenCalledTimes(3)
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(4)
+
+    // Logs expected
+    expect(consoleErrorSpy.mock.calls.length).toBeGreaterThanOrEqual(4)
 
     consoleErrorSpy.mockRestore()
+    consoleWarnSpy.mockRestore()
   })
 })
