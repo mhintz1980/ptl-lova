@@ -67,6 +67,12 @@
 - [x] **Component Fixes**: Resolved failures in `EventHistoryTimeline` (text assertions), `DashboardSkeleton` (selectors), and `MainCalendarGrid` (missing identifiers).
 - [x] **Result**: All ~317 unit tests passing.
 
+## Completed: Refactor & Cleanup ✅ (2026-01-18)
+
+- [x] **AuthContext**: Deduplicated `AuthContextType` and removed dead `localStorage` fallback code.
+- [x] **Hooks**: Converted `useChartDataSummary` to a proper React hook with `useMemo`.
+- [x] **Merges**: Merged `feature/fix-ci-linting` into `main` after resolving test conflicts.
+
 ## Completed: Branch Consolidation ✅ (2026-01-17)
 
 - [x] **Batch Merge**: Merged all outstanding feature branches (`dashboard-improvements`, `database-logging`, etc.) into `main`.
