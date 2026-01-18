@@ -151,10 +151,10 @@ export const useApp = create<AppState>()(
       collapsedCards: false,
       wipLimits: {
         QUEUE: null,
-        FABRICATION: 8,
+        FABRICATION: 5,
         STAGED_FOR_POWDER: null, // Buffer stage, no WIP limit
         POWDER_COAT: 6,
-        ASSEMBLY: 8,
+        ASSEMBLY: 5,
         SHIP: 5, // Constitution §2.1: Merged testing+shipping
         CLOSED: null,
       },

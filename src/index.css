@@ -24,6 +24,9 @@
 /* PumpTracker neon layered system */
 
 @layer base {
+  html {
+    font-size: 14px;
+  }
   :root {
     --background: 220 17% 6%;
     --foreground: 210 20% 94%;

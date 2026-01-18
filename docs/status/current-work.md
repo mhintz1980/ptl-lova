@@ -10,7 +10,6 @@
 **Key References**:
 
 - [`docs/DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) — UI standards, chart patterns, drill-down architecture
-- [`docs/concepts/Dashboard for PumpTracker App/README.md`](../concepts/Dashboard%20for%20PumpTracker%20App/README.md) — Drill-down chart implementation guide
 - [`GEMINI.md`](../../GEMINI.md) — Agent bootloader and documentation map
 - [`docs/process/support-operations.md`](../process/support-operations.md) — Password resets & support SOPs
 
