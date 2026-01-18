@@ -12,7 +12,7 @@ export function AddPoButton({ onClick }: AddPoButtonProps) {
       onClick={onClick}
       size="icon"
       variant="default"
-      className="header-button header-button--accent h-[45px] w-[45px] rounded-full"
+      className="header-button header-button--accent h-[40px] w-[40px] rounded-full"
       title="Add PO"
       aria-label="Add purchase order"
     >

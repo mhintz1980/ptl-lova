@@ -80,13 +80,13 @@ export function Header({
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="relative hidden items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm text-foreground/80 shadow-sm md:flex">
+          <div className="relative hidden h-[40px] w-[200px] items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 text-sm text-foreground/80 shadow-sm md:flex">
             <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2} />
             <Input
               value={filters.q || ''}
               onChange={(event) => setFilters({ q: event.target.value })}
               placeholder="Search"
-              className="h-11 w-44 border-none bg-transparent p-0 text-sm text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-full w-full border-none bg-transparent p-0 text-sm text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
