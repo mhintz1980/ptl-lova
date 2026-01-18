@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Unit tests for dashboard KPI calculators
  */
@@ -119,10 +120,7 @@ describe('kpiCalculators', () => {
   })
 
   describe('calculateThroughput', () => {
-    let realDate: DateConstructor
-
     beforeEach(() => {
-      realDate = global.Date
       const mockNow = new Date('2026-01-17T12:00:00Z')
       vi.useFakeTimers()
       vi.setSystemTime(mockNow)

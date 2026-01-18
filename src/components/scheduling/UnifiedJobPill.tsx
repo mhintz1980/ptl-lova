@@ -28,6 +28,8 @@ interface UnifiedJobPillProps {
 }
 
 // Priority badge configuration
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
 const PRIORITY_BADGES: Record<
   Pump['priority'],
   { label: string; bgClass: string } | null
@@ -47,7 +49,6 @@ export function UnifiedJobPill({
   onClick,
   rowIndex,
 }: UnifiedJobPillProps) {
-  const MS_PER_DAY = 24 * 60 * 60 * 1000
   const CELL_WIDTH = 50
 
   // Calculate the overall pill bounds

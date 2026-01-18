@@ -121,11 +121,12 @@ export function MainCalendarGrid({
         case 'po':
           groupId = pump.po
           break
-        case 'risk':
+        case 'risk': {
           const shipDate =
             timeline.length > 0 ? timeline[timeline.length - 1].end : null
           groupId = getRiskGroup(pump, shipDate)
           break
+        }
         default:
           groupId = pump.model
       }
@@ -156,10 +157,11 @@ export function MainCalendarGrid({
           case 'po':
             return a.pump.po.localeCompare(b.pump.po)
           case 'startDate':
-          default:
+          default: {
             const aStart = a.timeline[0]?.start.getTime() ?? 0
             const bStart = b.timeline[0]?.start.getTime() ?? 0
             return aStart - bStart
+          }
         }
       })
       result.push({ groupId, items: sorted })

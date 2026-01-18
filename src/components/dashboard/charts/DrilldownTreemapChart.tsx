@@ -51,7 +51,7 @@ export const DrilldownTreemapChart = memo(function DrilldownTreemapChart({
     const sortedData = [...data].sort((a, b) => b.value - a.value)
 
     const rectangles: TreemapRect[] = []
-    let currentX = 0
+    const currentX = 0
     let currentY = 0
     let rowHeight = 0
     let row: TreemapSegment[] = []
@@ -155,7 +155,10 @@ export const DrilldownTreemapChart = memo(function DrilldownTreemapChart({
         {/* Chart + Legend Side-by-Side */}
         <div className="flex gap-4 min-h-[300px]">
           {/* 3D Treemap Chart */}
-          <div className="flex-1 relative z-10" style={{ perspective: '1200px' }}>
+          <div
+            className="flex-1 relative z-10"
+            style={{ perspective: '1200px' }}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={breadcrumbs.join('-')}
@@ -245,7 +248,9 @@ export const DrilldownTreemapChart = memo(function DrilldownTreemapChart({
                             opacity: { delay: index * 0.03, duration: 0.4 },
                             scale: { duration: 0.2 },
                           }}
-                          onMouseEnter={() => setHoveredSegment(rect.segment.id)}
+                          onMouseEnter={() =>
+                            setHoveredSegment(rect.segment.id)
+                          }
                           onMouseLeave={() => setHoveredSegment(null)}
                           onClick={() => onSegmentClick?.(rect.segment)}
                           whileHover={

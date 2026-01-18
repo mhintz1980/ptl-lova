@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import { AuthProvider, useAuth } from '../hooks/useAuth' // Wait, useAuth exports useAuth, AuthProvider is in AuthContext
 import { AuthProvider as AuthProviderComponent } from './AuthContext'
 import { useAuth as useAuthHook } from '../hooks/useAuth'
 

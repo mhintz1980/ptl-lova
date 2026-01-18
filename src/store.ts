@@ -252,7 +252,7 @@ export const useApp = create<AppState>()(
           // Migration: Convert UNSCHEDULED/NOT STARTED to QUEUE
           let migrated = false
           const migratedRows = rows.map((p) => {
-            let next = { ...p }
+            const next = { ...p }
 
             // Migration 1: Convert UNSCHEDULED/NOT STARTED to QUEUE
             if (
@@ -726,6 +726,7 @@ export const useApp = create<AppState>()(
         const today = new Date()
 
         // Determine start date for autoscheduling
+
         let searchStartDate = today
         if (lockDate) {
           const lock = parseISO(lockDate)
@@ -940,8 +941,9 @@ export const useApp = create<AppState>()(
             capacityConfig: {
               ...state.capacityConfig,
               powderCoat: {
-                vendors: state.capacityConfig.powderCoat.vendors.map((vendor) =>
-                  vendor.id === vendorId ? { ...vendor, ...config } : vendor
+                vendors: state.capacityConfig.powderCoat.vendors.map(
+                  (vendor) =>
+                    vendor.id === vendorId ? { ...vendor, ...config } : vendor
                 ),
               },
             },

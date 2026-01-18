@@ -6,7 +6,8 @@ import { useMemo } from 'react'
 import type { Pump } from '../../types'
 import type { DashboardMode, KpiId, DashboardFilters } from './dashboardConfig'
 import { MODE_CONFIGS } from './dashboardConfig'
-import { KpiCard, KPI_LABELS } from './KpiCard'
+import { KPI_LABELS } from './dashboardConfig'
+import { KpiCard } from './KpiCard'
 import { calculateKpi } from './kpiCalculators'
 
 interface ModeKpisProps {
@@ -71,8 +72,8 @@ export function ModeKpis({
                   isNegative
                     ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 animate-glow-slow'
                     : isPositive
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                    : 'bg-card/80 border-border/60 hover:bg-card text-muted-foreground hover:text-foreground'
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                      : 'bg-card/80 border-border/60 hover:bg-card text-muted-foreground hover:text-foreground'
                 }
               `}
             >

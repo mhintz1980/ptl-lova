@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import {
@@ -51,7 +52,6 @@ export function TrendAreaChart({
         <AreaChart
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Recharts uses non-standard event types
           onClick={(e: any) => {
             const target = e.target as SVGElement
             const payload = target.getAttribute('data_payload')
@@ -117,7 +117,7 @@ export function TrendAreaChart({
               strokeWidth: 2,
               fill: color,
               stroke: '#fff',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Recharts activeDot uses non-standard callback signature
+
               onClick: ((_e: any, payload: any) =>
                 onPointClick?.(payload.payload)) as any,
               style: { cursor: onPointClick ? 'pointer' : 'default' },

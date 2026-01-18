@@ -22,12 +22,12 @@ interface ChartA11yWrapperProps {
 
 /**
  * Accessibility wrapper for chart components.
- * 
+ *
  * Provides:
  * - Keyboard navigation (Tab to focus, Arrow keys to navigate, Enter/Space to select)
  * - ARIA labels and live regions for screen readers
  * - Focus management with visual indicators
- * 
+ *
  * @example
  * <ChartA11yWrapper
  *   title="Sales Trend"
@@ -54,7 +54,7 @@ export function ChartA11yWrapper({
   const containerRef = useRef<HTMLDivElement>(null)
   const [internalIndex, setInternalIndex] = useState(focusedIndex)
   const [announcement, setAnnouncement] = useState('')
-  
+
   // Sync external focused index
   useEffect(() => {
     if (focusedIndex >= 0) {
@@ -62,59 +62,66 @@ export function ChartA11yWrapper({
     }
   }, [focusedIndex])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (itemCount === 0) return
-    
-    let newIndex = internalIndex
-    
-    switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        e.preventDefault()
-        newIndex = internalIndex < itemCount - 1 ? internalIndex + 1 : 0
-        break
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        e.preventDefault()
-        newIndex = internalIndex > 0 ? internalIndex - 1 : itemCount - 1
-        break
-      case 'Home':
-        e.preventDefault()
-        newIndex = 0
-        break
-      case 'End':
-        e.preventDefault()
-        newIndex = itemCount - 1
-        break
-      case 'Enter':
-      case ' ':
-        e.preventDefault()
-        if (internalIndex >= 0) {
-          onSelect?.(internalIndex)
-          setAnnouncement(`Selected item ${internalIndex + 1} of ${itemCount}`)
-        }
-        return
-      case 'Escape':
-        e.preventDefault()
-        containerRef.current?.blur()
-        return
-      default:
-        return
-    }
-    
-    if (newIndex !== internalIndex) {
-      setInternalIndex(newIndex)
-      onNavigate?.(newIndex)
-      setAnnouncement(`Item ${newIndex + 1} of ${itemCount}`)
-    }
-  }, [internalIndex, itemCount, onNavigate, onSelect])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (itemCount === 0) return
+
+      let newIndex = internalIndex
+
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault()
+          newIndex = internalIndex < itemCount - 1 ? internalIndex + 1 : 0
+          break
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault()
+          newIndex = internalIndex > 0 ? internalIndex - 1 : itemCount - 1
+          break
+        case 'Home':
+          e.preventDefault()
+          newIndex = 0
+          break
+        case 'End':
+          e.preventDefault()
+          newIndex = itemCount - 1
+          break
+        case 'Enter':
+        case ' ':
+          e.preventDefault()
+          if (internalIndex >= 0) {
+            onSelect?.(internalIndex)
+            setAnnouncement(
+              `Selected item ${internalIndex + 1} of ${itemCount}`
+            )
+          }
+          return
+        case 'Escape':
+          e.preventDefault()
+          containerRef.current?.blur()
+          return
+        default:
+          return
+      }
+
+      if (newIndex !== internalIndex) {
+        setInternalIndex(newIndex)
+        onNavigate?.(newIndex)
+        setAnnouncement(`Item ${newIndex + 1} of ${itemCount}`)
+      }
+    },
+    [internalIndex, itemCount, onNavigate, onSelect]
+  )
 
   const handleFocus = useCallback(() => {
     if (internalIndex < 0 && itemCount > 0) {
       setInternalIndex(0)
       onNavigate?.(0)
     }
-    setAnnouncement(`${title}. ${dataSummary || ''} Use arrow keys to navigate.`)
+    setAnnouncement(
+      `${title}. ${dataSummary || ''} Use arrow keys to navigate.`
+    )
   }, [internalIndex, itemCount, onNavigate, title, dataSummary])
 
   const handleBlur = useCallback(() => {
@@ -145,60 +152,21 @@ export function ChartA11yWrapper({
           {description}
         </span>
       )}
-      
+
       {/* Hidden data summary for screen readers */}
       {dataSummary && (
         <span id={summaryId} className="sr-only">
           {dataSummary}
         </span>
       )}
-      
+
       {/* Live region for announcements */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-      >
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </div>
-      
+
       {/* Chart content */}
       {children}
     </div>
   )
-}
-
-/**
- * Hook for generating data summary for screen readers.
- * 
- * @example
- * const summary = useChartDataSummary({
- *   points: [10, 20, 30, 40, 50],
- *   formatValue: (v) => `$${v}`,
- *   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May']
- * })
- * // Returns: "5 data points from Jan to May, ranging from $10 to $50"
- */
-export function useChartDataSummary({
-  points,
-  formatValue = (v: number) => v.toString(),
-  labels,
-}: {
-  points: number[]
-  formatValue?: (value: number) => string
-  labels?: string[]
-}): string {
-  if (points.length === 0) return 'No data available'
-  
-  const min = Math.min(...points)
-  const max = Math.max(...points)
-  const count = points.length
-  
-  const rangeText = `ranging from ${formatValue(min)} to ${formatValue(max)}`
-  
-  if (labels && labels.length >= 2) {
-    return `${count} data points from ${labels[0]} to ${labels[labels.length - 1]}, ${rangeText}`
-  }
-  
-  return `${count} data points, ${rangeText}`
 }

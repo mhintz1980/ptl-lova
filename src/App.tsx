@@ -43,12 +43,12 @@ import { UpdatePasswordPage } from './pages/UpdatePasswordPage'
 import { useAuth } from './hooks/useAuth'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+
   // DEV BYPASS: Skip auth in development mode for faster local testing
   if (import.meta.env.DEV) {
     return <>{children}</>
   }
-
-  const { user, loading } = useAuth()
 
   if (loading) {
     return (

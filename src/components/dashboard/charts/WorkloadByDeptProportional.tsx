@@ -4,7 +4,7 @@ import {
   DonutSegment,
   DetailRow,
 } from './DrilldownDonutChart'
-import { ChartProps } from '../dashboardConfig'
+import { ChartProps, DashboardFilters } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getCapacityByDept } from '../kpiCalculators'
 
@@ -81,7 +81,7 @@ export function WorkloadByDeptProportional({
 
   const handleSegmentClick = (segment: DonutSegment) => {
     if (onDrilldown) {
-      onDrilldown({ department: segment.id as any })
+      onDrilldown({ department: segment.id as DashboardFilters['department'] })
     }
   }
 

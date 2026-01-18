@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import type { KpiId } from './dashboardConfig'
+import { KPI_LABELS } from './dashboardConfig'
 
 interface KpiCardProps {
   id: KpiId
@@ -43,18 +44,6 @@ const KPI_ICONS: Record<KpiId, React.ElementType> = {
   avgLeadTime: Clock,
   throughput: Package,
   onTimeRate: CheckCircle,
-}
-
-const KPI_LABELS: Record<KpiId, string> = {
-  activeWip: 'Active WIP',
-  lateOrders: 'Late Orders',
-  capacityUtil: 'Capacity',
-  totalValue: 'Total Value',
-  avgOrderValue: 'Avg Order',
-  topCustomer: 'Top Customer',
-  avgLeadTime: 'Lead Time',
-  throughput: 'Throughput',
-  onTimeRate: 'On-Time Rate',
 }
 
 export function KpiCard({
@@ -212,5 +201,3 @@ export function KpiCard({
     </motion.div>
   )
 }
-
-export { KPI_LABELS }
