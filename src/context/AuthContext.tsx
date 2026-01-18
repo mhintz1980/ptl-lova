@@ -21,19 +21,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((error) => {
         console.error('Error fetching session:', error)
-        // Fallback to localStorage session if available
-        try {
-          const storedSession = localStorage.getItem('supabase.auth.token')
-          if (storedSession) {
-            const { access_token } = JSON.parse(storedSession)
-            if (access_token) {
-              // Session exists in storage, will be validated by listener
-              console.log('Using localStorage session as fallback')
-            }
-          }
-        } catch (fallbackError) {
-          console.error('Error accessing localStorage:', fallbackError)
-        }
       })
       .finally(() => {
         setLoading(false)

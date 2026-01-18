@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 /**
  * Hook for generating data summary for screen readers.
  *
@@ -18,17 +20,19 @@ export function useChartDataSummary({
   formatValue?: (value: number) => string
   labels?: string[]
 }): string {
-  if (points.length === 0) return 'No data available'
+  return useMemo(() => {
+    if (points.length === 0) return 'No data available'
 
-  const min = Math.min(...points)
-  const max = Math.max(...points)
-  const count = points.length
+    const min = Math.min(...points)
+    const max = Math.max(...points)
+    const count = points.length
 
-  const rangeText = `ranging from ${formatValue(min)} to ${formatValue(max)}`
+    const rangeText = `ranging from ${formatValue(min)} to ${formatValue(max)}`
 
-  if (labels && labels.length >= 2) {
-    return `${count} data points from ${labels[0]} to ${labels[labels.length - 1]}, ${rangeText}`
-  }
+    if (labels && labels.length >= 2) {
+      return `${count} data points from ${labels[0]} to ${labels[labels.length - 1]}, ${rangeText}`
+    }
 
-  return `${count} data points, ${rangeText}`
+    return `${count} data points, ${rangeText}`
+  }, [points, formatValue, labels])
 }
