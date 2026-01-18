@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.vite', 'docs/concepts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -14,7 +14,6 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
-      'prettier',
     ],
     languageOptions: {
       ecmaVersion: 2020,
