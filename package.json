@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.545.0",
-    "motion": "^12.23.26",
+    "motion": "^12.26.2",
     "nanoid": "^5.1.6",
     "papaparse": "^5.5.3",
     "playwright": "^1.56.1",
