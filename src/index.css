@@ -4,12 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    font-size: 14px; /* Default is 16px. We are shrinking EVERYTHING by 12.5% */
-  }
-}
-
 /* Slow glow animation for health indicators - 4s cycle */
 @keyframes glow-slow {
   0%,
