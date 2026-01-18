@@ -91,6 +91,7 @@ export function PumpCard({
       {...listeners}
       className={cn(
         'group relative overflow-hidden rounded-xl border bg-card/90 p-3 shadow-layer-md transition-all duration-200',
+        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
         isGhost
           ? 'border-dashed border-yellow-500 bg-yellow-50/50'
           : 'border-border',

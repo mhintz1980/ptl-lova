@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../../store'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { PoLine, Priority } from '../../types'
+import { PoLine } from '../../types'
 import {
   X,
   Plus,
@@ -16,6 +16,8 @@ import {
 import { toast } from 'sonner'
 import { getModelPrice, getModelBom, getCatalogData } from '../../lib/seed'
 import { cn } from '../../lib/utils'
+import { formatCurrency } from '../../lib/format'
+import { PrioritySelect } from '../ui/PrioritySelect'
 
 interface AddPoModalProps {
   isOpen: boolean
@@ -75,14 +77,6 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, isSaving, onClose, activeLineIndex])
-
-  const priorityOptions: Priority[] = [
-    'Low',
-    'Normal',
-    'High',
-    'Rush',
-    'Urgent',
-  ]
 
   const availableModels = useMemo(() => {
     const catalog = getCatalogData()
@@ -231,15 +225,6 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
       { totalPumps: 0, totalValue: 0 }
     )
   }, [lines])
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
 
   // Reset form when modal closes (for consistency with Cancel/X button behavior)
   // This ensures form resets whether closed via Escape, Cancel button, or X button
@@ -600,23 +585,14 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                     />
                   </td>
                   <td className="py-2 px-4">
-                    <select
+                    <PrioritySelect
                       value={line.priority ?? 'Normal'}
-                      onChange={(e) =>
-                        handleLineChange(
-                          index,
-                          'priority',
-                          e.target.value as Priority
-                        )
+                      onChange={(priority) =>
+                        handleLineChange(index, 'priority', priority)
                       }
-                      className="w-full h-8 rounded border border-transparent hover:border-border bg-transparent focus:bg-muted/30 px-2 text-xs font-medium focus:outline-none cursor-pointer"
-                    >
-                      {priorityOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                      size="sm"
+                      className="w-full"
+                    />
                   </td>
                   <td className="py-2 px-4">
                     <Input

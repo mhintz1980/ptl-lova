@@ -15,6 +15,7 @@ import {
 import { ChartProps, DashboardFilters } from './dashboardConfig'
 import { useApp } from '../../store'
 import { applyDashboardFilters } from './utils'
+import { formatCurrency } from '../../lib/format'
 
 interface CapacityChartProps {
   pumps: Pump[]
@@ -74,15 +75,6 @@ const getStageColor = (stage: Stage) => {
     CLOSED: 'hsl(var(--muted))',
   }
   return colors[stage]
-}
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
 }
 
 const CustomTooltip = ({ active, payload }: CapacityTooltipProps) => {

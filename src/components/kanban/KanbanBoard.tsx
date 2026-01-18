@@ -5,6 +5,7 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -44,14 +45,18 @@ function KanbanBoardComponent({
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
+    useSensor(KeyboardSensor)
   )
 
   const pumpsByStage = useMemo(() => {
-    return STAGES.reduce((acc, stage) => {
-      acc[stage] = pumps.filter((pump) => pump.stage === stage)
-      return acc
-    }, {} as Record<Stage, Pump[]>)
+    return STAGES.reduce(
+      (acc, stage) => {
+        acc[stage] = pumps.filter((pump) => pump.stage === stage)
+        return acc
+      },
+      {} as Record<Stage, Pump[]>
+    )
   }, [pumps])
 
   const handleDragStart = (event: DragStartEvent) => {

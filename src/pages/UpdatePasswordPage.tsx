@@ -100,8 +100,8 @@ export function UpdatePasswordPage() {
                 }
               />
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update Password'}
+            <Button className="w-full" type="submit" loading={isLoading}>
+              Update Password
             </Button>
           </form>
         </CardContent>

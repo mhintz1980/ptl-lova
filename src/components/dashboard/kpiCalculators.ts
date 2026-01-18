@@ -4,6 +4,7 @@
 
 import type { Pump } from '../../types'
 import type { KpiId } from './dashboardConfig'
+import { formatCompactCurrency } from '../../lib/format'
 
 export interface KpiValue {
   value: number
@@ -88,7 +89,7 @@ function calculateTotalValue(pumps: Pump[]): KpiValue {
   const total = nonClosed.reduce((sum, p) => sum + (p.value || 0), 0)
   return {
     value: total,
-    formatted: formatCurrency(total),
+    formatted: formatCompactCurrency(total),
     subtitle: `across ${nonClosed.length} orders`,
   }
 }
@@ -102,7 +103,7 @@ function calculateAvgOrderValue(pumps: Pump[]): KpiValue {
       : 0
   return {
     value: avg,
-    formatted: formatCurrency(avg),
+    formatted: formatCompactCurrency(avg),
     subtitle: 'per pump',
   }
 }
@@ -184,17 +185,6 @@ function calculateOnTimeRate(pumps: Pump[]): KpiValue {
     subtitle: `${onTime.length} of ${closed.length} on time`,
     health: rate >= 95 ? 'positive' : rate >= 90 ? 'neutral' : 'negative',
   }
-}
-
-// Helper to format currency
-function formatCurrency(value: number): string {
-  if (value >= 1_000_000) {
-    return `$${(value / 1_000_000).toFixed(1)}M`
-  }
-  if (value >= 1_000) {
-    return `$${(value / 1_000).toFixed(0)}K`
-  }
-  return `$${value.toFixed(0)}`
 }
 
 // ---- Chart Data Helpers ----

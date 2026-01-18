@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
-import { formatCurrency } from '../../../lib/utils'
+import { formatCompactCurrency } from '../../../lib/format'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
 import { SparklineAreaChart, SparklineDataPoint } from './SparklineAreaChart'
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
@@ -149,7 +149,7 @@ export function TotalValueTrendChart({
                 data={chartData}
                 color="#06b6d4"
                 height={400}
-                valueFormatter={(val) => formatCurrency(val)}
+                valueFormatter={(val) => formatCompactCurrency(val)}
                 onPointClick={(point) => setSelectedWeek(point.label)}
                 showXAxis={true}
                 showYAxis={false}
@@ -169,7 +169,7 @@ export function TotalValueTrendChart({
                 title=""
                 breadcrumbs={[selectedWeek]}
                 onBreadcrumbClick={() => setSelectedWeek(null)}
-                valueFormatter={(v) => formatCurrency(v)}
+                valueFormatter={(v) => formatCompactCurrency(v)}
                 className="h-full flex flex-col overflow-y-auto"
               />
             </motion.div>

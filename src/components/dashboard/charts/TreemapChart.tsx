@@ -154,7 +154,12 @@ const AnimatedTreemapContent = (props: TreemapContentProps) => {
   )
 }
 
-const CustomTooltip = (props: any) => {
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{ payload: { name: string; value: number; count: number } }>
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
   const { active, payload: tooltipPayload } = props
   if (active && tooltipPayload && tooltipPayload.length) {
     const data = tooltipPayload[0].payload as {
@@ -186,6 +191,7 @@ const CustomTooltip = (props: any) => {
 export const TreemapChart: React.FC<ChartProps> = ({
   filters,
   onDrilldown,
+  chartHeight,
 }) => {
   const { pumps } = useApp()
   const [viewMode, setViewMode] = useState<ViewMode>('stage')
@@ -337,7 +343,10 @@ export const TreemapChart: React.FC<ChartProps> = ({
             transition={{ duration: 0.3 }}
             className="w-full h-full"
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer
+              width="100%"
+              height={chartHeight ? chartHeight - 60 : 350}
+            >
               <Treemap
                 data={data}
                 dataKey="value"

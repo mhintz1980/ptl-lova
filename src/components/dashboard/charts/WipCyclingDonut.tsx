@@ -8,7 +8,7 @@ import {
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { getPumpsByCustomer, getWorkloadByStage } from '../kpiCalculators'
-import { Stage } from '../../../types'
+import { Pump, Stage } from '../../../types'
 
 // Neon color palette matching the design system
 const STAGE_COLORS: Record<string, string> = {
@@ -41,7 +41,7 @@ const TABS: DonutTab[] = [
 ]
 
 // Helper to group pumps by key
-function groupPumps(pumps: any[], keyFn: (p: any) => string) {
+function groupPumps(pumps: Pump[], keyFn: (p: Pump) => string) {
   const map = new Map<string, number>()
   pumps.forEach((p) => {
     const k = keyFn(p)
@@ -144,8 +144,8 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
         activePerspective === 'stage'
           ? p.model
           : activePerspective === 'value'
-          ? `$${p.value.toLocaleString()}`
-          : p.stage.replace(/_/g, ' '),
+            ? `$${p.value.toLocaleString()}`
+            : p.stage.replace(/_/g, ' '),
       sublabel: activePerspective === 'customer' ? p.model : p.customer,
     }))
   }, [selectedSegment, filteredPumps, activePerspective])

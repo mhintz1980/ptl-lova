@@ -87,9 +87,8 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'WIP Treemap',
     description: 'Pumps sized by value, colored by stage',
     component: TreemapChart,
-    defaultSize: 'full',
+    defaultSize: 'large',
     height: 450,
-    containerClass: 'min-h-[450px]',
   },
   pumpTable: {
     id: 'pumpTable',

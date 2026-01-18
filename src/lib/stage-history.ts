@@ -23,10 +23,10 @@ export function getPumpStageMoveEvents(pumpId: string): PumpStageMoved[] {
       .filter(
         (e) => e.aggregateId === pumpId && e.eventType === 'PumpStageMoved'
       )
-      .map((e: any) => ({
+      .map((e) => ({
         ...e,
         occurredAt: new Date(e.occurredAt),
-      }))
+      })) as unknown as PumpStageMoved[]
   } catch (error) {
     console.error('Failed to parse stage events from localStorage:', error)
     return []
