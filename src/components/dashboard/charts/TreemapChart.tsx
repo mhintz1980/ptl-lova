@@ -191,6 +191,7 @@ const CustomTooltip = (props: CustomTooltipProps) => {
 export const TreemapChart: React.FC<ChartProps> = ({
   filters,
   onDrilldown,
+  chartHeight,
 }) => {
   const { pumps } = useApp()
   const [viewMode, setViewMode] = useState<ViewMode>('stage')
@@ -342,7 +343,10 @@ export const TreemapChart: React.FC<ChartProps> = ({
             transition={{ duration: 0.3 }}
             className="w-full h-full"
           >
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer
+              width="100%"
+              height={chartHeight ? chartHeight - 60 : 350}
+            >
               <Treemap
                 data={data}
                 dataKey="value"
