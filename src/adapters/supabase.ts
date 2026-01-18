@@ -88,9 +88,9 @@ export const SupabaseAdapter: DataAdapter = {
       await new Promise((res) => setTimeout(res, delay))
     }
 
-    // This part should not be reachable, but as a fallback:
-    console.warn('⚠️ [Supabase] load() - Reached fallback return (unexpected)')
-    return []
+    // This part should not be reachable, throw to ensure we never silently fail
+    console.error('❌ [Supabase] load() - Exhausted retries without success')
+    throw new Error('Failed to load data after maximum retries')
   },
   async replaceAll(rows: Pump[]) {
     console.log(
