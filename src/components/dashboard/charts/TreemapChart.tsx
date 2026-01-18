@@ -50,7 +50,8 @@ interface TreemapContentProps {
 }
 
 const AnimatedTreemapContent = (props: TreemapContentProps) => {
-  const { x, y, width, height, index, name, value, colors, onClick } = props
+  const { x, y, width, height, index, name, value, colors, onClick, count } =
+    props
 
   if (!width || !height) return null
 
@@ -100,9 +101,7 @@ const AnimatedTreemapContent = (props: TreemapContentProps) => {
           transformBox: 'fill-box',
           transformOrigin: 'center',
         }}
-        onClick={() =>
-          onClick({ name, value, count: (props as any).count ?? 1 })
-        }
+        onClick={() => onClick({ name, value, count: count ?? 1 })}
       />
       {canShowText && (
         <text
@@ -248,7 +247,7 @@ export const TreemapChart: React.FC<ChartProps> = ({
       } else {
         key = p.model
       }
-      const val = (p as any).value || 0
+      const val = p.value || 0
 
       if (!groups[key]) groups[key] = { value: 0, count: 0 }
       groups[key].value += val

@@ -23,6 +23,18 @@ export type KpiId =
   | 'throughput'
   | 'onTimeRate'
 
+export const KPI_LABELS: Record<KpiId, string> = {
+  activeWip: 'Active WIP',
+  lateOrders: 'Late Orders',
+  capacityUtil: 'Capacity',
+  totalValue: 'Total Value',
+  avgOrderValue: 'Avg Order',
+  topCustomer: 'Top Customer',
+  avgLeadTime: 'Lead Time',
+  throughput: 'Throughput',
+  onTimeRate: 'On-Time Rate',
+}
+
 // ... (ChartId type remains same)
 export type ChartId =
   | 'wipByStage'

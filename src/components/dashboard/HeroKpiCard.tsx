@@ -43,21 +43,24 @@ export function HeroKpiCard({
   color = '#8884d8',
 }: HeroKpiCardProps) {
   // In a real app, we'd use 'filters' to fetch real historical data
-  const data = useMemo(() => generateSparklineData(20, trend as any), [trend])
+  const data = useMemo(
+    () =>
+      generateSparklineData(
+        20,
+        trend === 'neutral' ? 'flat' : (trend as 'up' | 'down' | 'flat')
+      ),
+    [trend]
+  )
 
   const TrendIcon =
-    trend === 'up'
-      ? ArrowUpRight
-      : trend === 'down'
-      ? ArrowDownRight
-      : Minus
+    trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus
 
   const trendColor =
     trend === 'up'
       ? 'text-emerald-400'
       : trend === 'down'
-      ? 'text-rose-400'
-      : 'text-muted-foreground'
+        ? 'text-rose-400'
+        : 'text-muted-foreground'
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -70,7 +73,9 @@ export function HeroKpiCard({
             <h3 className="text-4xl font-bold tracking-tight text-foreground">
               {value}
             </h3>
-            <span className={`flex items-center text-sm font-medium ${trendColor}`}>
+            <span
+              className={`flex items-center text-sm font-medium ${trendColor}`}
+            >
               <TrendIcon className="h-4 w-4 mr-0.5" />
               {change}
             </span>
@@ -82,7 +87,13 @@ export function HeroKpiCard({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
-              <linearGradient id={`gradient-${title}`} x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id={`gradient-${title}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop offset="5%" stopColor={color} stopOpacity={0.5} />
                 <stop offset="95%" stopColor={color} stopOpacity={0} />
               </linearGradient>

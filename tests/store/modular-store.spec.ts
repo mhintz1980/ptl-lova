@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useApp } from '../../src/store'
 import type { Pump, Stage, Milestone, MicroTask } from '../../src/types'

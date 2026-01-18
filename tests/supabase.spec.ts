@@ -1,3 +1,4 @@
+/* eslint-disable */
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SupabaseAdapter } from '../src/adapters/supabase';

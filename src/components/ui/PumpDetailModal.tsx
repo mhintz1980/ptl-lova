@@ -203,7 +203,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
       setIsAdvancedOpen(false)
       setIsEventHistoryOpen(false)
     }
-  }, [currentPump?.id]) // Only reset when opening a different pump
+  }, [currentPump?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Focus management for accessibility
   const modalRef = useRef<HTMLDivElement>(null)
@@ -224,7 +224,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
         previousFocusRef.current?.focus()
       }
     }
-  }, [currentPump?.id])
+  }, [currentPump?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!currentPump || !formData) return null
 
