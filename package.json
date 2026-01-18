@@ -39,7 +39,7 @@
     "motion": "^12.23.26",
     "nanoid": "^5.1.6",
     "papaparse": "^5.5.3",
-    "playwright": "^1.56.1",
+    "playwright": "^1.57.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",
