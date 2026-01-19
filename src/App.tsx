@@ -161,7 +161,7 @@ function MainApp() {
         onOpenAddPo={() => setIsAddPoModalOpen(true)}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
       >
-        <div className="w-full px-[14px] pt-6 pb-[12px]">
+        <div className="w-full p-[12px]">
           {loading ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
               Loading...
