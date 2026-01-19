@@ -22,7 +22,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Cycling view of Work In Progress',
     component: WipCyclingDonut,
     defaultSize: 'mini',
-    height: 375,
+    height: 320,
     drillDownSequence: ['pumpsByCustomer', 'pumpTable'],
   },
   lateOrders: {
@@ -31,30 +31,30 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Historical late orders',
     component: LateOrdersChartWrapper,
     defaultSize: 'third',
-    height: 450,
+    height: 320,
   },
   capacityByDept: {
     id: 'capacityByDept',
     title: 'Department Capacity',
     description: 'Workload vs. Capacity per Department',
     component: WorkloadByDeptProportional,
-    defaultSize: 'third',
-    height: 275,
+    defaultSize: 'quarter',
+    height: 320,
   },
   onTimeRisk: {
     id: 'onTimeRisk',
     title: 'On-Time Risk',
     description: 'Orders at risk of being late',
     component: OnTimeRiskChart,
-    defaultSize: 'third',
-    height: 450,
+    defaultSize: 'quarter',
+    height: 320,
   },
   leadTimeTrend: {
     id: 'leadTimeTrend',
     title: 'Lead Time Trend',
     component: LeadTimeTrendChart,
     defaultSize: 'half',
-    height: 450,
+    height: 320,
   },
 
   // ---- ANALYSIS CHARTS ----
@@ -64,7 +64,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Cumulative value of active orders',
     component: TotalValueTrendChart,
     defaultSize: 'half',
-    height: 450,
+    height: 320,
   },
   throughputTrend: {
     id: 'throughputTrend',
@@ -72,15 +72,15 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Completed pumps over time',
     component: ThroughputTrendChart,
     defaultSize: 'half',
-    height: 450,
+    height: 320,
   },
   cycleTimeBreakdown: {
     id: 'cycleTimeBreakdown',
     title: 'Cycle Time Breakdown',
     description: 'Average days spent in each stage',
     component: CycleTimeBreakdownChart,
-    defaultSize: 'third',
-    height: 450,
+    defaultSize: 'quarter',
+    height: 320,
   },
   treemap: {
     id: 'treemap',
@@ -88,22 +88,22 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Pumps sized by value, colored by stage',
     component: TreemapChart,
     defaultSize: 'large',
-    height: 450,
+    height: 320,
   },
   pumpTable: {
     id: 'pumpTable',
     title: 'Pump Details',
     component: PumpTableChart,
     defaultSize: 'full',
-    height: 450,
-    containerClass: 'min-h-[450px]',
+    height: 320,
+    containerClass: 'min-h-[320px]',
   },
   lateOrdersList: {
     id: 'lateOrdersList',
     title: 'Late Order Details',
     component: LateOrdersList,
-    defaultSize: 'third',
-    height: 450,
+    defaultSize: 'quarter',
+    height: 320,
   },
 
   // ---- DRILLDOWN PANELS ----
@@ -112,7 +112,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'Pumps by Customer',
     component: DrilldownChartsPanelWrapper,
     defaultSize: 'full',
-    height: 450,
+    height: 320,
   },
   // Re-using same component for simplicity or distinct ones if they existed:
   pumpsByModel: {
@@ -120,6 +120,6 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'Pumps by Model',
     component: DrilldownChartsPanelWrapper,
     defaultSize: 'full',
-    height: 450,
+    height: 320,
   },
 }

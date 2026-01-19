@@ -52,7 +52,11 @@ function groupPumps(pumps: Pump[], keyFn: (p: Pump) => string) {
     .sort((a, b) => b.value - a.value)
 }
 
-export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
+export function WipCyclingDonut({
+  filters,
+  onDrilldown,
+  chartHeight,
+}: ChartProps) {
   const { pumps } = useApp()
   const [activePerspective, setActivePerspective] =
     useState<Perspective>('stage')
@@ -175,8 +179,14 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
     // Value perspective doesn't drill down further
   }
 
+  // Use chartHeight if provided, otherwise fallback to 450 (which matches the registry default backup)
+  const height = chartHeight || 450
+
   return (
-    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+    <div
+      className="w-full flex flex-col relative overflow-hidden"
+      style={{ height: `${height}px` }}
+    >
       <DrilldownDonutChart
         data={donutData}
         title=""
@@ -193,7 +203,8 @@ export function WipCyclingDonut({ filters, onDrilldown }: ChartProps) {
             : `${v} units`
         }
         className="h-full"
-        height={420}
+        // Pass the height explicitly to the chart so it can calculate SVG geometry
+        height={height}
       />
     </div>
   )

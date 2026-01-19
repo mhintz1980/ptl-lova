@@ -93,7 +93,7 @@ export function ThroughputTrendChart({
 
   return (
     <Card className="h-full border-none shadow-none bg-transparent flex flex-col overflow-hidden">
-      <CardContent className="h-full w-full px-0 pb-0 relative overflow-hidden">
+      <CardContent className="h-full w-full min-h-[280px] px-0 pb-0 relative overflow-hidden">
         <AnimatePresence mode="wait">
           {!selectedWeek ? (
             <motion.div

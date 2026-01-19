@@ -326,10 +326,10 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                     />
                   </div>
                 </div>
-                <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-3">
+                <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-3">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
-                    <p className="text-xs text-yellow-200/80">
+                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800 dark:text-amber-200">
                       These fields are auto-populated based on the selected
                       Model but can be overridden here.
                     </p>
@@ -380,7 +380,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         <DetailOverlay />
 
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-5">
+        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
           <div className="md:flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -416,7 +416,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <div className="mt-[7px] grid gap-4 grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 PO Number *
@@ -478,28 +478,28 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
           <table className="w-full text-left text-sm border-separate border-spacing-0">
             <thead className="sticky top-0 z-10 bg-card shadow-sm">
               <tr>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-12 text-center">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground w-12 text-center">
                   #
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground min-w-[180px]">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground min-w-[180px]">
                   Model
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-24">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground w-24">
                   Qty
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground">
                   Color
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-32">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground w-32">
                   Value ($)
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-32">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground w-32">
                   Priority
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-40">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground w-40">
                   Due Date
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground text-right w-[140px]">
+                <th className="border-b border-border py-1 px-4 font-medium text-muted-foreground text-right w-[140px]">
                   Actions
                 </th>
               </tr>
@@ -673,7 +673,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         </div>
 
         {/* Footer Summary */}
-        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-4">
+        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-[5px]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8 text-sm">
               <div className="flex flex-col">

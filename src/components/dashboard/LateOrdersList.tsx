@@ -67,21 +67,21 @@ export function LateOrdersList({ onDrilldown }: ChartProps) {
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 transition: { duration: 0.15 },
               }}
-              className="p-3 rounded-lg border border-border/50 bg-secondary/10 cursor-pointer group flex items-start justify-between gap-3"
+              className="p-2 rounded-lg border border-border/50 bg-secondary/10 cursor-pointer group flex items-start justify-between gap-2"
               onClick={() =>
                 onDrilldown && onDrilldown({ customerId: pump.customer })
               }
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-sm text-foreground truncate">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="font-semibold text-xs text-foreground truncate">
                     {pump.po}
                   </span>
-                  <Badge variant="outline" className="text-[10px] h-4 px-1">
+                  <Badge variant="outline" className="text-[9px] h-3.5 px-1">
                     {pump.model}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                   <span className="font-medium text-cyan-400">
                     {pump.customer}
                   </span>

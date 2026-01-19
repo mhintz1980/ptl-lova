@@ -69,22 +69,24 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
   const currentTab = activeTab ?? internalActiveTab
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // SVG DISPLAY DIMENSIONS - Computed from container height
+  // SVG DISPLAY DIMENSIONS - Width controls donut size, height is cropped
   // ═══════════════════════════════════════════════════════════════════════════
   // Reserve space for tabs and detail panel
   const hasDetail = detailData && detailData.length > 0 && selectedSegmentId
-  const svgHeightRatio = hasDetail ? 0.45 : 0.7
+  // Fixed width to maintain exact donut size (was 242px at height=375, ratio=0.58)
+  const svgDisplayWidth = 242
+  // Reduced height ratio to give more room for legend (third row)
+  const svgHeightRatio = hasDetail ? 0.45 : 0.5
   const svgDisplayHeight = Math.round(height * svgHeightRatio)
-  const svgDisplayWidth = Math.round(svgDisplayHeight * 1.11)
 
   const total = data.reduce((sum, item) => sum + item.value, 0)
   // ═══════════════════════════════════════════════════════════════════════════
   // DONUT GEOMETRY SETTINGS (coordinates within the 400x400 viewBox)
   // ═══════════════════════════════════════════════════════════════════════════
   const centerX = 200
-  const centerY = 190
-  const outerRadius = 145
-  const innerRadius = 80
+  const centerY = 162
+  const outerRadius = 153
+  const innerRadius = 85
   const hoverScale = 1.08
 
   const createSegmentPath = (
@@ -237,7 +239,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
             <svg
               width={svgDisplayWidth}
               height={svgDisplayHeight}
-              viewBox="0 0 400 360"
+              viewBox="0 0 400 320"
               className="drop-shadow-lg"
               role="graphics-document"
               aria-roledescription="donut chart"
@@ -362,7 +364,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fill="white"
-                        className="text-sm pointer-events-none font-medium"
+                        className="text-[17px] pointer-events-none font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 + 0.3 }}
@@ -392,7 +394,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                 y={centerY - 10}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-sm text-muted-foreground"
+                className="text-[16px] text-muted-foreground"
                 fill="hsl(var(--muted-foreground))"
                 key={hoveredSegment ? 'hover-label' : 'total-label'}
                 initial={{ opacity: 0, y: 5 }}

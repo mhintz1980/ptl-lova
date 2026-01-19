@@ -395,7 +395,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
       onClick={onClose}
       role="presentation"
     >
@@ -406,8 +406,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
         aria-labelledby="pump-detail-title"
         tabIndex={-1}
         className={cn(
-          'relative border-border rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary',
-          'bg-background/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_20px_rgba(34,211,238,0.1)]',
+          'relative w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none',
           currentPump.isPaused && 'grayscale-[50%]'
         )}
         onClick={(e) => e.stopPropagation()}
@@ -432,25 +431,28 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
             </div>
           </div>
         )}
-        {/* Main Modal Surface */}
-        <div className="p-8">
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between relative z-10 border-b border-white/5 pb-4">
+
+        {/* Header - matches AddPoModal structure */}
+        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
+          <div className="md:flex items-start justify-between">
             <div>
               <h2
                 id="pump-detail-title"
-                className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight"
+                className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2"
               >
                 Pump Details
-                <span className="text-blue-400 font-mono text-lg ml-2">
+                <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
                   {currentPump.serial !== null
                     ? `#${currentPump.serial}`
                     : 'No S/N'}
                 </span>
               </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {currentPump.model} • {currentPump.customer}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Pause/Resume button - small, sharp corners, left of Edit */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              {/* Pause/Resume button */}
               {currentPump.stage !== 'QUEUE' &&
                 currentPump.stage !== 'CLOSED' &&
                 (currentPump.isPaused ? (
@@ -476,34 +478,26 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               {isEditing ? (
                 <>
                   <Button
+                    type="button"
                     variant="outline"
-                    size="sm"
+                    className="rounded-full border-border/50 bg-white/5 hover:bg-white/10 backdrop-blur-sm"
                     onClick={handleCancel}
-                    className="font-semibold border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    className="gap-2 font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md hover:shadow-blue-500/25"
-                  >
-                    <Save className="h-4 w-4" />
-                    Save
+                  <Button onClick={handleSave}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
                   </Button>
                 </>
               ) : (
-                <Button
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                  className="gap-2 font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md hover:shadow-lg hover:shadow-blue-500/25 transition-all"
-                >
-                  <Edit2 className="h-4 w-4" />
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit2 className="mr-2 h-4 w-4" />
                   Edit
                 </Button>
               )}
 
-              {/* Exit button - visible in both modes */}
+              {/* Close button */}
               <button
                 onClick={onClose}
                 className="h-8 w-8 rounded-full flex items-center justify-center border border-border/50 bg-muted/30 text-muted-foreground transition-all hover:bg-red-500/90 hover:text-white hover:border-red-500 hover:shadow-[0_0_12px_rgba(239,68,68,0.5)]"
@@ -516,7 +510,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
           {/* Paused info banner - only show when paused */}
           {currentPump.isPaused && currentPump.pausedAt && (
-            <div className="mb-4 px-3 py-2 bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg text-center text-sm text-orange-700 dark:text-orange-400 relative z-10">
+            <div className="mt-3 px-3 py-2 bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg text-center text-sm text-orange-700 dark:text-orange-400">
               Paused since{' '}
               {format(
                 parseISO(currentPump.pausedAt),
@@ -531,8 +525,11 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                 )}
             </div>
           )}
+        </div>
 
-          <div className="space-y-10 relative z-10">
+        {/* Scrollable Content Area - matches AddPoModal structure */}
+        <div className="flex-1 overflow-auto relative bg-muted/5 px-6 py-4">
+          <div className="space-y-8 relative z-10">
             {/* TOP TIMELINE MOVED FROM BOTTOM */}
             <div className="relative pt-6 px-1">
               <TimelineProgress
@@ -558,8 +555,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   Order Information
                 </h3>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     PO Number
                   </label>
                   <div className="text-right w-1/2">
@@ -577,8 +574,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Customer
                   </label>
                   <div className="text-right w-1/2">
@@ -606,8 +603,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Model
                   </label>
                   <div className="text-right w-1/2">
@@ -635,8 +632,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Color
                   </label>
                   <div className="text-right w-1/2 flex justify-end items-center gap-3">
@@ -668,7 +665,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               </div>
 
               {/* Column Divider */}
-              <div className="hidden md:block w-[1px] h-full bg-white/10 self-stretch mx-auto" />
+              <div className="hidden md:block w-[1px] h-full bg-border/50 self-stretch mx-auto" />
 
               {/* Group 2: Status & Identity (Frequently Edited) */}
               <div className="space-y-3 flex flex-col h-full">
@@ -676,8 +673,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   Production Status
                 </h3>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Serial #
                   </label>
                   <div className="text-right w-1/2">
@@ -707,8 +704,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                 </div>
 
                 {/* Un-stacked Stage & Priority */}
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Stage
                   </label>
                   <div className="text-right">
@@ -758,8 +755,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Est. Start
                   </label>
                   <div className="text-right w-1/2">
@@ -785,8 +782,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-muted/30 border border-border/50 rounded-md hover:bg-muted/40 transition-all flex-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Est. Ship
                   </label>
                   <div className="text-right w-1/2">
@@ -815,10 +812,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
             </div>
 
             {/* Event History Section */}
-            <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden shadow-inner backdrop-blur-sm">
+            <div className="rounded-md border border-border/50 bg-muted/30 overflow-hidden">
               <button
                 onClick={() => setIsEventHistoryOpen(!isEventHistoryOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center justify-between p-3 hover:bg-muted/40 transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
                   {isEventHistoryOpen ? (
@@ -826,24 +823,24 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   ) : (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Event History
                   </span>
                 </div>
               </button>
 
               {isEventHistoryOpen && (
-                <div className="p-6 pt-0 border-t border-white/5 animate-in slide-in-from-top-2 duration-300">
+                <div className="p-4 pt-0 border-t border-border/50">
                   <EventHistoryTimeline pumpId={currentPump.id} />
                 </div>
               )}
             </div>
 
             {/* Model Defaults Section */}
-            <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden shadow-inner backdrop-blur-sm">
+            <div className="rounded-md border border-border/50 bg-muted/30 overflow-hidden">
               <button
                 onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center justify-between p-3 hover:bg-muted/40 transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
                   {isAdvancedOpen ? (
@@ -851,7 +848,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   ) : (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Model Defaults
                   </span>
                 </div>
@@ -864,9 +861,9 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               </button>
 
               {isAdvancedOpen && (
-                <div className="p-6 pt-0 space-y-4 border-t border-white/5 animate-in slide-in-from-top-2 duration-300">
+                <div className="p-4 pt-0 space-y-4 border-t border-border/50">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mt-6">
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Value ($)
                       </label>
@@ -887,7 +884,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Promise Date
                       </label>
@@ -935,7 +932,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Engine
                       </label>
@@ -955,7 +952,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Gearbox
                       </label>
@@ -1043,14 +1040,17 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-white/5 text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">
-              <span>System ID: {currentPump.id.split('-')[0]}</span>
-              <span>
-                Last Updated:{' '}
-                {format(new Date(currentPump.last_update), 'MMM d, h:mm a')}
-              </span>
-            </div>
+        {/* Footer - matches AddPoModal structure */}
+        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-[5px]">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>System ID: {currentPump.id.split('-')[0]}</span>
+            <span>
+              Last Updated:{' '}
+              {format(new Date(currentPump.last_update), 'MMM d, h:mm a')}
+            </span>
           </div>
         </div>
       </div>
