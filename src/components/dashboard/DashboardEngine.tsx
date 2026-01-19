@@ -314,7 +314,7 @@ export const DashboardEngine = memo(function DashboardEngine({
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 grid-cols-12 grid-flow-dense auto-rows-min ${
+        className={`grid gap-2 grid-cols-12 grid-flow-dense auto-rows-min ${
           isDrillMode ? 'grid-cols-1' : ''
         }`}
       >
