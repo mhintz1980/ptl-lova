@@ -364,7 +364,10 @@ export const DashboardEngine = memo(function DashboardEngine({
                   useExplicitHeight ? { height: `${chartHeight}px` } : undefined
                 }
               >
-                <div className="mb-0 flex items-start justify-end flex-shrink-0">
+                <div className="mb-1 flex items-center justify-between px-3 pt-2">
+                  <h3 className="text-sm font-semibold text-foreground/80 tracking-tight">
+                    {cfg.title}
+                  </h3>
                   {!isDrillMode && (
                     <button
                       onClick={() => toggleFavorite(chartId)}

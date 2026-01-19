@@ -141,28 +141,34 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
     }
   })
 
-  const handleSegmentInteraction = useCallback((segment: DonutSegment) => {
-    // If onSegmentSelect is provided, use it (new behavior for inline detail)
-    if (onSegmentSelect) {
-      onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
-    }
-    // If onSegmentClick is provided, call it (legacy drill-down behavior)
-    if (onSegmentClick) {
-      onSegmentClick(segment)
-    }
-  }, [onSegmentSelect, onSegmentClick, selectedSegmentId])
+  const handleSegmentInteraction = useCallback(
+    (segment: DonutSegment) => {
+      // If onSegmentSelect is provided, use it (new behavior for inline detail)
+      if (onSegmentSelect) {
+        onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
+      }
+      // If onSegmentClick is provided, call it (legacy drill-down behavior)
+      if (onSegmentClick) {
+        onSegmentClick(segment)
+      }
+    },
+    [onSegmentSelect, onSegmentClick, selectedSegmentId]
+  )
 
-  const handleTabChangeMemo = useCallback((tabId: string) => {
-    if (onTabChange) {
-      onTabChange(tabId)
-    } else {
-      setInternalActiveTab(tabId)
-    }
-    // Clear selection when tab changes
-    if (onSegmentSelect) {
-      onSegmentSelect(null)
-    }
-  }, [onTabChange, onSegmentSelect])
+  const handleTabChangeMemo = useCallback(
+    (tabId: string) => {
+      if (onTabChange) {
+        onTabChange(tabId)
+      } else {
+        setInternalActiveTab(tabId)
+      }
+      // Clear selection when tab changes
+      if (onSegmentSelect) {
+        onSegmentSelect(null)
+      }
+    },
+    [onTabChange, onSegmentSelect]
+  )
 
   return (
     <Card
@@ -175,7 +181,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
       <style>{`.layer-l1 { isolation: isolate; }`}</style>
 
       <CardHeader className="p-0 !relative z-0">
-        <CardTitle className="text-sm">{title}</CardTitle>
+        {title && <CardTitle className="text-sm">{title}</CardTitle>}
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap mt-0">
             <Button

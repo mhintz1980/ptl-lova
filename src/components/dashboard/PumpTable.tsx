@@ -204,11 +204,6 @@ export const PumpTable = memo(function PumpTable({
 
   return (
     <Card className="layer-l1">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold text-muted-foreground">
-          Purchase Order Breakdown
-        </CardTitle>
-      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
