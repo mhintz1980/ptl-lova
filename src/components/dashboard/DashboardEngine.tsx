@@ -175,7 +175,7 @@ export const DashboardEngine = memo(function DashboardEngine({
   const isDrillMode = drillStack.length > 0
 
   return (
-    <div className="flex flex-col gap-6 p-0 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
+    <div className="flex flex-col gap-2 p-0 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
       {/* Header / Controls - Condensed Layout */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* Left: KPIs or Breadcrumbs */}
