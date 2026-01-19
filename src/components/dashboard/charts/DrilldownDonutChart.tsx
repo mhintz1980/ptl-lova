@@ -73,7 +73,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
   // ═══════════════════════════════════════════════════════════════════════════
   // Reserve space for tabs and detail panel
   const hasDetail = detailData && detailData.length > 0 && selectedSegmentId
-  const svgHeightRatio = hasDetail ? 0.45 : 0.6
+  const svgHeightRatio = hasDetail ? 0.45 : 0.7
   const svgDisplayHeight = Math.round(height * svgHeightRatio)
   const svgDisplayWidth = Math.round(svgDisplayHeight * 1.11)
 
@@ -82,9 +82,9 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
   // DONUT GEOMETRY SETTINGS (coordinates within the 400x400 viewBox)
   // ═══════════════════════════════════════════════════════════════════════════
   const centerX = 200
-  const centerY = 170
-  const outerRadius = 160
-  const innerRadius = 85
+  const centerY = 190
+  const outerRadius = 145
+  const innerRadius = 80
   const hoverScale = 1.08
 
   const createSegmentPath = (

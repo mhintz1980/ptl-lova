@@ -21,8 +21,8 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     title: 'WIP Overview',
     description: 'Cycling view of Work In Progress',
     component: WipCyclingDonut,
-    defaultSize: 'third',
-    height: 315,
+    defaultSize: 'mini',
+    height: 375,
     drillDownSequence: ['pumpsByCustomer', 'pumpTable'],
   },
   lateOrders: {
@@ -39,7 +39,7 @@ export const CHART_REGISTRY: Record<string, ChartConfig> = {
     description: 'Workload vs. Capacity per Department',
     component: WorkloadByDeptProportional,
     defaultSize: 'third',
-    height: 315,
+    height: 275,
   },
   onTimeRisk: {
     id: 'onTimeRisk',
