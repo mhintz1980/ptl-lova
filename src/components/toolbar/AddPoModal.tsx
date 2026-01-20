@@ -490,7 +490,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 <th className="border-b border-border py-1 px-[3px] font-medium text-muted-foreground w-[110px] text-center">
                   Color
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[110px] text-center">
                   Value ($)
                 </th>
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
@@ -579,7 +579,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                           Math.max(0, parseFloat(e.target.value) || 0)
                         )
                       }
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent font-mono text-center px-[5px]"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent font-mono text-center p-0"
                       min={0}
                       step={0.01}
                     />
