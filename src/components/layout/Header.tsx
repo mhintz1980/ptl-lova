@@ -44,7 +44,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 text-foreground backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-4 px-8">
+      <div className="relative flex h-[60px] items-center justify-between px-[14px]">
         <div className="flex min-w-[180px] items-center gap-3">
           <div className="rounded-2xl border border-border/70 bg-card/80 p-2 shadow-layer-sm">
             <Package className="h-5 w-5 text-primary" strokeWidth={2.5} />
@@ -59,44 +59,41 @@ export function Header({
           </div>
         </div>
 
-        <div className="ml-auto flex flex-1 items-center justify-end gap-3">
-          <nav className="flex items-center gap-2">
-            {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-              <Button
-                key={id}
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'header-button h-10 w-10 rounded-full border border-border/60 bg-card/70 text-foreground/70',
-                  currentView === id &&
-                    'border-primary/40 bg-primary/15 text-foreground'
-                )}
-                onClick={() => onChangeView(id)}
-                title={label}
-                aria-label={`Go to ${label}`}
-              >
-                <Icon className="h-5 w-5" strokeWidth={2.5} />
-              </Button>
-            ))}
-          </nav>
+        <nav className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+            <Button
+              key={id}
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'header-button h-[45px] w-[45px] rounded-full border border-border/60 bg-card/70 text-foreground/70',
+                currentView === id &&
+                  'border-primary/40 bg-primary/15 text-foreground'
+              )}
+              onClick={() => onChangeView(id)}
+              title={label}
+              aria-label={`Go to ${label}`}
+            >
+              <Icon className="h-5 w-5" strokeWidth={2.5} />
+            </Button>
+          ))}
+        </nav>
 
-          <div className="relative hidden items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm text-foreground/80 shadow-sm md:flex">
-            <Search
-              className="h-4 w-4 text-muted-foreground"
-              strokeWidth={2}
-            />
+        <div className="flex items-center gap-3">
+          <div className="relative hidden h-[40px] w-[225px] items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 text-sm text-foreground/80 shadow-sm md:flex">
+            <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2} />
             <Input
               value={filters.q || ''}
               onChange={(event) => setFilters({ q: event.target.value })}
               placeholder="Search"
-              className="h-11 w-44 border-none bg-transparent p-0 text-sm text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-full w-full border-none bg-transparent p-0 text-sm text-foreground placeholder:text-muted-foreground/80 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
           <Button
             variant="ghost"
             size="icon"
-            className="header-button relative h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button relative h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={() => setFiltersOpen((open) => !open)}
           >
             <Filter className="h-5 w-5" strokeWidth={2.5} />
@@ -115,7 +112,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="header-button h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={toggle}
             title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
             aria-label="Toggle theme"
@@ -130,7 +127,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="header-button h-10 w-10 rounded-full border border-border/60 bg-card/80 text-foreground"
+            className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground"
             onClick={onOpenSettings}
             title="Settings"
             aria-label="Open settings"

@@ -123,7 +123,7 @@ export const DrilldownTreemapChart = memo(function DrilldownTreemapChart({
     <Card className="layer-l1 overflow-hidden !bg-card !relative">
       <style>{`.layer-l1 { isolation: isolate; }`}</style>
       <CardHeader className="pb-2 !relative z-20">
-        <CardTitle className="text-lg">{title}</CardTitle>
+        {title && <CardTitle className="text-lg">{title}</CardTitle>}
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-2">
             <Button

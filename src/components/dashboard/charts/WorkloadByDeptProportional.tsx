@@ -86,7 +86,7 @@ export function WorkloadByDeptProportional({
   }
 
   return (
-    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+    <div className="w-full h-[375px] flex flex-col relative overflow-hidden">
       <DrilldownDonutChart
         data={donutData}
         title=""
@@ -95,7 +95,7 @@ export function WorkloadByDeptProportional({
         selectedSegmentId={selectedSegment?.id}
         detailData={detailData}
         valueFormatter={(v) => `${v} pumps`}
-        height={420}
+        height={375}
       />
     </div>
   )

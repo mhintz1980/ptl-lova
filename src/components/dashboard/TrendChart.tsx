@@ -1,7 +1,7 @@
 // src/components/dashboard/TrendChart.tsx
 import React from 'react'
 import { Pump } from '../../types'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import { Card, CardContent } from '../ui/Card'
 import { round } from '../../lib/format'
 import { ChartProps, DashboardFilters } from './dashboardConfig'
 import { useApp } from '../../store'
@@ -43,17 +43,20 @@ export const TrendChart: React.FC<TrendChartProps> = ({
   const weeklyData = React.useMemo((): SparklineDataPoint[] => {
     const closed = pumps.filter((p) => p.stage === 'CLOSED' && p.forecastEnd)
 
-    const weeklyStats = closed.reduce((acc, pump) => {
-      const week = getWeekNumber(new Date(pump.last_update))
-      const buildTime = diffDays(pump)
+    const weeklyStats = closed.reduce(
+      (acc, pump) => {
+        const week = getWeekNumber(new Date(pump.last_update))
+        const buildTime = diffDays(pump)
 
-      if (!acc[week]) {
-        acc[week] = { total: 0, count: 0, week }
-      }
-      acc[week].total += buildTime
-      acc[week].count += 1
-      return acc
-    }, {} as Record<string, { total: number; count: number; week: string }>)
+        if (!acc[week]) {
+          acc[week] = { total: 0, count: 0, week }
+        }
+        acc[week].total += buildTime
+        acc[week].count += 1
+        return acc
+      },
+      {} as Record<string, { total: number; count: number; week: string }>
+    )
 
     // Convert to sparkline format and sort by week
     return Object.values(weeklyStats)
@@ -99,9 +102,6 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 
   return (
     <Card className="layer-l1">
-      <CardHeader>
-        <CardTitle className="text-lg">Build Time Trend</CardTitle>
-      </CardHeader>
       <CardContent>{Content}</CardContent>
     </Card>
   )

@@ -175,7 +175,7 @@ export const DashboardEngine = memo(function DashboardEngine({
   const isDrillMode = drillStack.length > 0
 
   return (
-    <div className="flex flex-col gap-6 p-2 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
+    <div className="flex flex-col gap-2 p-0 animate-in fade-in duration-500 min-h-[calc(100vh-80px)]">
       {/* Header / Controls - Condensed Layout */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* Left: KPIs or Breadcrumbs */}
@@ -314,7 +314,7 @@ export const DashboardEngine = memo(function DashboardEngine({
 
       {/* Charts grid */}
       <div
-        className={`grid gap-6 grid-cols-12 grid-flow-dense auto-rows-min ${
+        className={`grid gap-2 grid-cols-12 grid-flow-dense auto-rows-min ${
           isDrillMode ? 'grid-cols-1' : ''
         }`}
       >
@@ -357,14 +357,17 @@ export const DashboardEngine = memo(function DashboardEngine({
                 transition={{ duration: 0.2 }}
                 // [HIERARCHY-1] THE DASHBOARD CARD (OUTER WRAPPER)
                 // Controls width (col-span) and fixed height for consistent rows
-                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
+                className={`relative rounded-3xl border border-border/40 bg-card/50 backdrop-blur-xl p-[5px] shadow-sm hover:shadow-md transition-all duration-300 hover:border-border/80 group flex flex-col ${colSpan} ${
                   isDrillMode ? 'min-h-[calc(100vh-200px)]' : ''
                 } ${cfg.containerClass || ''}`}
                 style={
                   useExplicitHeight ? { height: `${chartHeight}px` } : undefined
                 }
               >
-                <div className="mb-0 flex items-start justify-end flex-shrink-0">
+                <div className="mb-0.5 flex items-center justify-between px-2 pt-0.5">
+                  <h3 className="text-sm font-semibold text-foreground/80 tracking-tight">
+                    {cfg.title}
+                  </h3>
                   {!isDrillMode && (
                     <button
                       onClick={() => toggleFavorite(chartId)}

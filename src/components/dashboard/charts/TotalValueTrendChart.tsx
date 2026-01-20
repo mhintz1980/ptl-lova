@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { formatCompactCurrency } from '../../../lib/format'
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
+import { Card, CardContent } from '../../ui/Card'
 import { SparklineAreaChart, SparklineDataPoint } from './SparklineAreaChart'
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
 
@@ -119,22 +119,7 @@ export function TotalValueTrendChart({
 
   return (
     <Card className="h-full border-none shadow-none bg-transparent flex flex-col overflow-hidden">
-      <CardHeader className="px-0 pt-0 pb-2 flex-shrink-0">
-        <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between">
-          <span>
-            {selectedWeek
-              ? `Value Breakdown: ${selectedWeek}`
-              : 'Projected Value by Week'}
-          </span>
-          {!selectedWeek && (
-            <span className="text-xs font-normal opacity-70">
-              Click to drill down
-            </span>
-          )}
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="h-[400px] w-full px-0 pb-0 relative overflow-hidden">
+      <CardContent className="h-full w-full px-0 pb-0 relative overflow-hidden">
         <AnimatePresence mode="wait">
           {!selectedWeek ? (
             <motion.div

@@ -69,21 +69,23 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
   const currentTab = activeTab ?? internalActiveTab
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // SVG DISPLAY DIMENSIONS - Computed from container height
+  // SVG DISPLAY DIMENSIONS - Width controls donut size, height is cropped
   // ═══════════════════════════════════════════════════════════════════════════
   // Reserve space for tabs and detail panel
   const hasDetail = detailData && detailData.length > 0 && selectedSegmentId
-  const svgHeightRatio = hasDetail ? 0.45 : 0.6
+  // Fixed width to maintain exact donut size (was 242px at height=375, ratio=0.58)
+  const svgDisplayWidth = 242
+  // Reduced height ratio to give more room for legend (third row)
+  const svgHeightRatio = hasDetail ? 0.45 : 0.5
   const svgDisplayHeight = Math.round(height * svgHeightRatio)
-  const svgDisplayWidth = Math.round(svgDisplayHeight * 1.11)
 
   const total = data.reduce((sum, item) => sum + item.value, 0)
   // ═══════════════════════════════════════════════════════════════════════════
   // DONUT GEOMETRY SETTINGS (coordinates within the 400x400 viewBox)
   // ═══════════════════════════════════════════════════════════════════════════
   const centerX = 200
-  const centerY = 170
-  const outerRadius = 160
+  const centerY = 162
+  const outerRadius = 153
   const innerRadius = 85
   const hoverScale = 1.08
 
@@ -141,28 +143,34 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
     }
   })
 
-  const handleSegmentInteraction = useCallback((segment: DonutSegment) => {
-    // If onSegmentSelect is provided, use it (new behavior for inline detail)
-    if (onSegmentSelect) {
-      onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
-    }
-    // If onSegmentClick is provided, call it (legacy drill-down behavior)
-    if (onSegmentClick) {
-      onSegmentClick(segment)
-    }
-  }, [onSegmentSelect, onSegmentClick, selectedSegmentId])
+  const handleSegmentInteraction = useCallback(
+    (segment: DonutSegment) => {
+      // If onSegmentSelect is provided, use it (new behavior for inline detail)
+      if (onSegmentSelect) {
+        onSegmentSelect(selectedSegmentId === segment.id ? null : segment)
+      }
+      // If onSegmentClick is provided, call it (legacy drill-down behavior)
+      if (onSegmentClick) {
+        onSegmentClick(segment)
+      }
+    },
+    [onSegmentSelect, onSegmentClick, selectedSegmentId]
+  )
 
-  const handleTabChangeMemo = useCallback((tabId: string) => {
-    if (onTabChange) {
-      onTabChange(tabId)
-    } else {
-      setInternalActiveTab(tabId)
-    }
-    // Clear selection when tab changes
-    if (onSegmentSelect) {
-      onSegmentSelect(null)
-    }
-  }, [onTabChange, onSegmentSelect])
+  const handleTabChangeMemo = useCallback(
+    (tabId: string) => {
+      if (onTabChange) {
+        onTabChange(tabId)
+      } else {
+        setInternalActiveTab(tabId)
+      }
+      // Clear selection when tab changes
+      if (onSegmentSelect) {
+        onSegmentSelect(null)
+      }
+    },
+    [onTabChange, onSegmentSelect]
+  )
 
   return (
     <Card
@@ -175,7 +183,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
       <style>{`.layer-l1 { isolation: isolate; }`}</style>
 
       <CardHeader className="p-0 !relative z-0">
-        <CardTitle className="text-sm">{title}</CardTitle>
+        {title && <CardTitle className="text-sm">{title}</CardTitle>}
         {breadcrumbs.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap mt-0">
             <Button
@@ -231,7 +239,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
             <svg
               width={svgDisplayWidth}
               height={svgDisplayHeight}
-              viewBox="0 0 400 360"
+              viewBox="0 0 400 320"
               className="drop-shadow-lg"
               role="graphics-document"
               aria-roledescription="donut chart"
@@ -273,7 +281,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                   fill={segment.color}
                   opacity="0.15"
                   transform="translate(0, 8) scale(1.02, 1.02)"
-                  style={{ transformOrigin: '200px 200px' }}
+                  style={{ transformOrigin: `${centerX}px ${centerY}px` }}
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
                   transition={{ delay: index * 0.05, duration: 0.6 }}
@@ -303,7 +311,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                       strokeWidth={isSelected ? 3 : 2}
                       filter="url(#donut-shadow)"
                       className={isClickable ? 'cursor-pointer' : ''}
-                      style={{ transformOrigin: '200px 200px' }}
+                      style={{ transformOrigin: `${centerX}px ${centerY}px` }}
                       role="graphics-symbol"
                       aria-label={`${segment.label}: ${valueFormatter(
                         segment.value
@@ -356,7 +364,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fill="white"
-                        className="text-sm pointer-events-none font-medium"
+                        className="text-[17px] pointer-events-none font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 + 0.3 }}
@@ -386,7 +394,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                 y={centerY - 10}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-sm text-muted-foreground"
+                className="text-[16px] text-muted-foreground"
                 fill="hsl(var(--muted-foreground))"
                 key={hoveredSegment ? 'hover-label' : 'total-label'}
                 initial={{ opacity: 0, y: 5 }}

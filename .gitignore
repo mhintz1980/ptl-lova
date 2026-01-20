@@ -51,3 +51,7 @@ master-agents/openai.chatgpt-0.5.52.vsix
 .claude_settings.json
 .security-key
 logs/security/
+
+# Agent Artifacts
+.codex/
+.opencode/

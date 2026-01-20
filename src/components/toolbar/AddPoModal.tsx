@@ -326,10 +326,10 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                     />
                   </div>
                 </div>
-                <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-3">
+                <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-3">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
-                    <p className="text-xs text-yellow-200/80">
+                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800 dark:text-amber-200">
                       These fields are auto-populated based on the selected
                       Model but can be overridden here.
                     </p>
@@ -380,7 +380,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         <DetailOverlay />
 
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-5">
+        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
           <div className="md:flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -416,7 +416,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <div className="mt-[7px] grid gap-[0.35rem] grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 PO Number *
@@ -478,28 +478,28 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
           <table className="w-full text-left text-sm border-separate border-spacing-0">
             <thead className="sticky top-0 z-10 bg-card shadow-sm">
               <tr>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-12 text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[30px] text-center">
                   #
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground min-w-[180px]">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
                   Model
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-24">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[55px] text-center">
                   Qty
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground">
+                <th className="border-b border-border py-1 px-[3px] font-medium text-muted-foreground w-[110px] text-center">
                   Color
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-32">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[110px] text-center">
                   Value ($)
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-32">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
                   Priority
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground w-40">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[110px] text-center">
                   Due Date
                 </th>
-                <th className="border-b border-border py-3 px-4 font-medium text-muted-foreground text-right w-[140px]">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground text-center w-[110px]">
                   Actions
                 </th>
               </tr>
@@ -510,17 +510,17 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                   key={index}
                   className="group/row hover:bg-muted/30 transition-colors bg-card"
                 >
-                  <td className="py-2 px-4 text-center text-muted-foreground text-xs">
+                  <td className="py-[5px] px-[5px] text-center text-muted-foreground text-xs">
                     {index + 1}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-[5px] px-[5px]">
                     {availableModels.length ? (
                       <select
                         value={line.model}
                         onChange={(e) =>
                           handleLineChange(index, 'model', e.target.value)
                         }
-                        className="w-full h-8 rounded border border-transparent hover:border-border bg-transparent focus:bg-muted/30 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer"
+                        className="w-full h-8 rounded border border-transparent hover:border-border bg-transparent focus:bg-muted/30 px-[5px] text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all cursor-pointer text-center"
                         required
                       >
                         <option value="" disabled>
@@ -538,11 +538,11 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                         onChange={(e) =>
                           handleLineChange(index, 'model', e.target.value)
                         }
-                        className="h-8 border-transparent hover:border-border focus:border-input bg-transparent"
+                        className="h-8 border-transparent hover:border-border focus:border-input bg-transparent px-[5px] text-center"
                       />
                     )}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-[5px] px-[5px]">
                     <Input
                       type="number"
                       value={line.quantity || ''} // Allow empty display for 0
@@ -554,21 +554,21 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                         )
                       }
                       onFocus={(e) => e.target.select()} // Auto-select for quick replacement
-                      className="h-8 w-20 border-transparent hover:border-border focus:border-input bg-transparent text-center font-mono"
+                      className="h-8 w-full border-transparent hover:border-border focus:border-input bg-transparent text-center font-mono p-0"
                       min={1}
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="p-[3px]">
                     <Input
                       value={line.color ?? ''}
                       onChange={(e) =>
                         handleLineChange(index, 'color', e.target.value)
                       }
                       placeholder="Std"
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent px-[3px] text-center"
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-[5px] px-[5px]">
                     <Input
                       type="number"
                       value={line.valueEach ?? 0}
@@ -579,33 +579,33 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                           Math.max(0, parseFloat(e.target.value) || 0)
                         )
                       }
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent font-mono text-right"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent font-mono text-center p-0"
                       min={0}
                       step={0.01}
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-[5px] px-[5px]">
                     <PrioritySelect
                       value={line.priority ?? 'Normal'}
                       onChange={(priority) =>
                         handleLineChange(index, 'priority', priority)
                       }
                       size="sm"
-                      className="w-full"
+                      className="flex w-full justify-center items-center gap-1"
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-[5px] px-[5px]">
                     <Input
                       type="date"
                       value={line.promiseDate ?? ''}
                       onChange={(e) =>
                         handleLineChange(index, 'promiseDate', e.target.value)
                       }
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent text-xs"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent text-xs p-0 text-center"
                     />
                   </td>
-                  <td className="py-2 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1 transition-opacity">
+                  <td className="py-[5px] px-[5px] text-center">
+                    <div className="flex items-center justify-center gap-1 transition-opacity">
                       <Button
                         type="button"
                         variant="ghost"
@@ -673,7 +673,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         </div>
 
         {/* Footer Summary */}
-        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-4">
+        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-[5px]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8 text-sm">
               <div className="flex flex-col">

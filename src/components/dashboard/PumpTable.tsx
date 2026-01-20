@@ -2,7 +2,7 @@
 import { Fragment, useMemo, useState, memo } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Pump, Priority, Stage } from '../../types'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import { Card, CardContent } from '../ui/Card'
 import {
   Table,
   TableBody,
@@ -204,11 +204,6 @@ export const PumpTable = memo(function PumpTable({
 
   return (
     <Card className="layer-l1">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold text-muted-foreground">
-          Purchase Order Breakdown
-        </CardTitle>
-      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>

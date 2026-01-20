@@ -171,7 +171,7 @@ export function OnTimeRiskChart(_props: ChartProps) {
   }
 
   return (
-    <div className="w-full h-[450px] flex flex-col relative overflow-hidden">
+    <div className="w-full h-[375px] flex flex-col relative overflow-hidden">
       <DrilldownDonutChart
         data={donutData}
         title=""
@@ -180,7 +180,7 @@ export function OnTimeRiskChart(_props: ChartProps) {
         selectedSegmentId={selectedSegment?.id}
         detailData={detailData}
         valueFormatter={(v) => `${v} orders`}
-        height={420}
+        height={375}
       />
     </div>
   )

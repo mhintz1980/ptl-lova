@@ -104,7 +104,7 @@ function KanbanBoardComponent({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-full min-h-full w-full gap-4 overflow-x-auto pb-8 pr-4 scrollbar-themed">
+      <div className="flex h-full min-h-full w-full gap-4 overflow-x-auto pb-2 pr-4 scrollbar-themed pt-[14px]">
         {STAGES.map((stage) => (
           <StageColumn
             key={stage}

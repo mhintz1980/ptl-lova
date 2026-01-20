@@ -11,7 +11,7 @@ import {
 } from './types'
 import { toast } from 'sonner'
 import { LocalAdapter } from './adapters/local'
-import { SandboxAdapter } from './adapters/sandbox'
+// SandboxAdapter is dynamically imported only in dev mode to avoid polluting production bundles
 import { SupabaseAdapter } from './adapters/supabase'
 import {
   getModelLeadTimes as getCatalogLeadTimes,
@@ -115,7 +115,7 @@ export interface AppState {
   rebuildTimelines: () => void
 
   // Sandbox Actions
-  enterSandbox: () => void
+  enterSandbox: () => Promise<void>
   commitSandbox: () => void
   exitSandbox: () => void
 
@@ -221,6 +221,7 @@ export const useApp = create<AppState>()(
           )
 
           const { seed } = await import('./lib/seed')
+          const { SandboxAdapter } = await import('./adapters/sandbox')
           const seedData = seed(40) // Generate 40 test pumps for good chart coverage
 
           console.log(
@@ -1003,9 +1004,10 @@ export const useApp = create<AppState>()(
       },
 
       // Sandbox Actions
-      enterSandbox: () => {
+      enterSandbox: async () => {
         const state = get()
         if (state.isSandbox) return
+        const { SandboxAdapter } = await import('./adapters/sandbox')
         set({
           isSandbox: true,
           originalSnapshot: [...state.pumps],

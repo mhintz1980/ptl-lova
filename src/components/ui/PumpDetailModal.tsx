@@ -6,7 +6,6 @@ import {
   projectPumpTimeline,
 } from '../../lib/projection-engine'
 import {
-  X,
   Edit2,
   Save,
   ChevronDown,
@@ -188,7 +187,6 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
   }, [pump, pumps])
 
   const [isEditing, setIsEditing] = useState(false)
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [isEventHistoryOpen, setIsEventHistoryOpen] = useState(false)
   const [formData, setFormData] = useState<Pump | null>(null)
 
@@ -200,7 +198,6 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     if (currentPump) {
       setFormData({ ...currentPump })
       setIsEditing(false)
-      setIsAdvancedOpen(false)
       setIsEventHistoryOpen(false)
     }
   }, [currentPump?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -395,7 +392,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
       onClick={onClose}
       role="presentation"
     >
@@ -406,8 +403,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
         aria-labelledby="pump-detail-title"
         tabIndex={-1}
         className={cn(
-          'relative border-border rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto m-4 animate-in zoom-in-95 duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary',
-          'bg-background/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_20px_rgba(34,211,238,0.1)]',
+          'relative w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none',
           currentPump.isPaused && 'grayscale-[50%]'
         )}
         onClick={(e) => e.stopPropagation()}
@@ -432,25 +428,28 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
             </div>
           </div>
         )}
-        {/* Main Modal Surface */}
-        <div className="p-8">
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between relative z-10 border-b border-white/5 pb-4">
+
+        {/* Header - matches AddPoModal structure */}
+        <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
+          <div className="md:flex items-start justify-between">
             <div>
               <h2
                 id="pump-detail-title"
-                className="text-2xl font-bold text-foreground flex items-center gap-3 tracking-tight"
+                className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2"
               >
                 Pump Details
-                <span className="text-blue-400 font-mono text-lg ml-2">
+                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-500 ring-1 ring-inset ring-blue-500/20">
                   {currentPump.serial !== null
                     ? `#${currentPump.serial}`
                     : 'No S/N'}
                 </span>
               </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {currentPump.model} • {currentPump.customer}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Pause/Resume button - small, sharp corners, left of Edit */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              {/* Pause/Resume button */}
               {currentPump.stage !== 'QUEUE' &&
                 currentPump.stage !== 'CLOSED' &&
                 (currentPump.isPaused ? (
@@ -476,47 +475,39 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               {isEditing ? (
                 <>
                   <Button
+                    type="button"
                     variant="outline"
-                    size="sm"
+                    className="rounded-full border-border/50 bg-white/5 hover:bg-white/10 backdrop-blur-sm"
                     onClick={handleCancel}
-                    className="font-semibold border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    className="gap-2 font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md hover:shadow-blue-500/25"
-                  >
-                    <Save className="h-4 w-4" />
-                    Save
+                  <Button onClick={handleSave}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
                   </Button>
                 </>
               ) : (
-                <Button
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                  className="gap-2 font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md hover:shadow-lg hover:shadow-blue-500/25 transition-all"
-                >
-                  <Edit2 className="h-4 w-4" />
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit2 className="mr-2 h-4 w-4" />
                   Edit
                 </Button>
               )}
 
-              {/* Exit button - visible in both modes */}
+              {/* Close button */}
               <button
                 onClick={onClose}
-                className="h-8 w-8 rounded-full flex items-center justify-center border border-border/50 bg-muted/30 text-muted-foreground transition-all hover:bg-red-500/90 hover:text-white hover:border-red-500 hover:shadow-[0_0_12px_rgba(239,68,68,0.5)]"
+                className="h-9 px-4 rounded-full flex items-center justify-center border border-border/50 bg-white/5 hover:bg-white/10 backdrop-blur-sm text-sm font-medium transition-all"
                 title="Close"
               >
-                <X className="h-4 w-4" />
+                Close
               </button>
             </div>
           </div>
 
           {/* Paused info banner - only show when paused */}
           {currentPump.isPaused && currentPump.pausedAt && (
-            <div className="mb-4 px-3 py-2 bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg text-center text-sm text-orange-700 dark:text-orange-400 relative z-10">
+            <div className="mt-3 px-3 py-2 bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg text-center text-sm text-orange-700 dark:text-orange-400">
               Paused since{' '}
               {format(
                 parseISO(currentPump.pausedAt),
@@ -531,8 +522,11 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                 )}
             </div>
           )}
+        </div>
 
-          <div className="space-y-10 relative z-10">
+        {/* Scrollable Content Area - matches AddPoModal structure */}
+        <div className="flex-1 overflow-auto relative bg-muted/5 px-6 py-4">
+          <div className="space-y-8 relative z-10">
             {/* TOP TIMELINE MOVED FROM BOTTOM */}
             <div className="relative pt-6 px-1">
               <TimelineProgress
@@ -550,38 +544,36 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               />
             </div>
 
-            {/* Groups Section */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2px_1fr] gap-x-12 gap-y-12 items-stretch relative">
-              {/* Group 1: Stable Order Info */}
-              <div className="space-y-3 flex flex-col h-full">
-                <h3 className="text-[13px] font-black text-blue-400/90 uppercase tracking-[0.3em] mb-4 pl-1 min-h-[20px]">
+            {/* 4-Panel Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* TOP LEFT: Order Information */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
                   Order Information
                 </h3>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    PO Number
-                  </label>
-                  <div className="text-right w-1/2">
+                <div className="space-y-1">
+                  {/* PO Number */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      PO Number
+                    </span>
                     {isEditing ? (
                       <Input
                         value={formData.po}
                         onChange={(e) => handleChange('po', e.target.value)}
-                        className="bg-background/40 h-8 text-right border-blue-500/20 focus:border-blue-500/50 text-sm"
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                       />
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
+                      <span className="font-mono text-sm font-bold text-foreground">
                         {formData.po}
-                      </p>
+                      </span>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Customer
-                  </label>
-                  <div className="text-right w-1/2">
+                  {/* Customer */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Customer
+                    </span>
                     {isEditing ? (
                       <>
                         <Input
@@ -590,7 +582,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                           onChange={(e) =>
                             handleChange('customer', e.target.value)
                           }
-                          className="bg-background/40 h-8 text-right border-blue-500/20 text-sm"
+                          className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                         />
                         <datalist id="customers-list">
                           {catalogData.customers.map((c) => (
@@ -599,18 +591,16 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         </datalist>
                       </>
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
+                      <span className="text-sm font-bold text-foreground truncate max-w-[140px]">
                         {formData.customer}
-                      </p>
+                      </span>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Model
-                  </label>
-                  <div className="text-right w-1/2">
+                  {/* Model */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Model
+                    </span>
                     {isEditing ? (
                       <>
                         <Input
@@ -619,7 +609,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                           onChange={(e) =>
                             handleChange('model', e.target.value)
                           }
-                          className="bg-background/40 h-8 text-right border-blue-500/20 text-sm"
+                          className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                         />
                         <datalist id="models-list">
                           {catalogData.models.map((m) => (
@@ -628,18 +618,16 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         </datalist>
                       </>
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
+                      <span className="text-sm font-bold text-foreground">
                         {formData.model}
-                      </p>
+                      </span>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Color
-                  </label>
-                  <div className="text-right w-1/2 flex justify-end items-center gap-3">
+                  {/* Color */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Color
+                    </span>
                     {isEditing ? (
                       <Input
                         list="colors-list"
@@ -647,40 +635,37 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         onChange={(e) =>
                           handleChange('powder_color', e.target.value)
                         }
-                        className="bg-background/40 h-8 text-right border-blue-500/20 text-sm"
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                       />
                     ) : (
-                      <>
+                      <div className="flex items-center gap-2">
                         <span
-                          className="h-2.5 w-8 rounded-full shadow-[0_0_12px_rgba(255,255,255,0.1)] transition-transform group-hover:scale-110"
+                          className="h-3 w-3 rounded-full border border-white/10"
                           style={{
                             backgroundColor:
-                              formData.powder_color || 'hsl(var(--border))',
+                              formData.powder_color || 'hsl(var(--muted))',
                           }}
                         />
-                        <p className="font-bold text-foreground tracking-tight text-base">
+                        <span className="text-sm font-bold text-foreground">
                           {formData.powder_color || 'N/A'}
-                        </p>
-                      </>
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Column Divider */}
-              <div className="hidden md:block w-[1px] h-full bg-white/10 self-stretch mx-auto" />
-
-              {/* Group 2: Status & Identity (Frequently Edited) */}
-              <div className="space-y-3 flex flex-col h-full">
-                <h3 className="text-[13px] font-black text-emerald-400/90 uppercase tracking-[0.3em] mb-4 pl-1 min-h-[20px]">
+              {/* TOP RIGHT: Production Status */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
                   Production Status
                 </h3>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Serial #
-                  </label>
-                  <div className="text-right w-1/2">
+                <div className="space-y-1">
+                  {/* Serial # */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Serial #
+                    </span>
                     {isEditing ? (
                       <Input
                         type="number"
@@ -691,105 +676,90 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                             e.target.value ? parseInt(e.target.value, 10) : null
                           )
                         }
-                        placeholder="Assign before powder coat"
-                        className="bg-background/40 h-8 text-right border-emerald-500/20 focus:border-emerald-500/50 text-sm"
+                        placeholder="Pending"
+                        className="bg-muted/30 border-border/50 h-7 w-24 text-right text-sm font-mono"
                       />
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
+                      <span className="font-mono text-sm font-bold text-foreground">
                         {formData.serial !== null ? (
                           `#${formData.serial}`
                         ) : (
-                          <span className="text-amber-500">Unassigned</span>
+                          <span className="text-amber-500 font-sans text-xs">
+                            Unassigned
+                          </span>
                         )}
-                      </p>
+                      </span>
                     )}
                   </div>
-                </div>
-
-                {/* Un-stacked Stage & Priority */}
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Stage
-                  </label>
-                  <div className="text-right">
+                  {/* Priority */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Priority
+                    </span>
                     {isEditing ? (
-                      <div className="flex items-center gap-2">
-                        <select
-                          className="h-8 rounded-md border border-white/10 bg-background/40 px-2 text-xs shadow-sm transition-colors text-foreground text-right"
-                          value={formData.stage}
-                          onChange={(e) =>
-                            handleChange('stage', e.target.value as Stage)
-                          }
-                        >
-                          {STAGES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                        <PrioritySelect
-                          value={formData.priority}
-                          onChange={(priority) =>
-                            handleChange('priority', priority)
-                          }
-                          size="sm"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <div className="text-base font-bold text-foreground tracking-tight">
-                          {formData.stage}
-                        </div>
-                        <span
-                          className={cn(
-                            'rounded px-2.2 py-0.5 text-[10px] font-black uppercase tracking-[0.15em] bg-current-color/10 border border-current-color/20',
-                            formData.priority === 'Urgent' ||
-                              formData.priority === 'Rush'
-                              ? 'text-rose-500 bg-rose-500/10 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]'
-                              : formData.priority === 'High'
-                                ? 'text-orange-500 bg-orange-500/10 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.15)]'
-                                : 'text-muted-foreground/60 bg-muted/20 border-white/5'
-                          )}
-                        >
-                          {formData.priority}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Est. Start
-                  </label>
-                  <div className="text-right w-1/2">
-                    {isEditing ? (
-                      <Input
-                        type="date"
-                        value={formatDateForInput(formData.forecastStart)}
-                        onChange={(e) =>
-                          handleDateChange('forecastStart', e.target.value)
+                      <PrioritySelect
+                        value={formData.priority}
+                        onChange={(priority) =>
+                          handleChange('priority', priority)
                         }
-                        className="bg-background/40 h-8 text-right border-emerald-500/20 text-sm"
+                        size="sm"
+                        className="w-28"
                       />
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
-                        {formData.forecastStart
-                          ? format(
-                              parseISO(formData.forecastStart),
-                              'MMM d, yyyy'
-                            )
-                          : '-'}
-                      </p>
+                      <span
+                        className={cn(
+                          'rounded px-2 py-0.5 text-xs font-medium border',
+                          formData.priority === 'Urgent' ||
+                            formData.priority === 'Rush'
+                            ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                            : formData.priority === 'High'
+                              ? 'text-orange-500 bg-orange-500/10 border-orange-500/20'
+                              : 'text-muted-foreground bg-muted/20 border-border/50'
+                        )}
+                      >
+                        {formData.priority}
+                      </span>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/5 rounded-xl group hover:bg-white/[0.08] transition-all flex-1">
-                  <label className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-widest">
-                    Est. Ship
-                  </label>
-                  <div className="text-right w-1/2">
+                  {/* Stage */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Stage
+                    </span>
+                    {isEditing ? (
+                      <select
+                        className="h-7 w-32 rounded-md border border-border/50 bg-muted/30 px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        value={formData.stage}
+                        onChange={(e) =>
+                          handleChange('stage', e.target.value as Stage)
+                        }
+                      >
+                        {STAGES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                          formData.stage === 'CLOSED'
+                            ? 'bg-green-400/10 text-green-400 ring-green-400/20'
+                            : formData.stage === 'SHIP'
+                              ? 'bg-emerald-400/10 text-emerald-400 ring-emerald-400/20'
+                              : 'bg-blue-400/10 text-blue-400 ring-blue-400/20'
+                        )}
+                      >
+                        {formData.stage}
+                      </span>
+                    )}
+                  </div>
+                  {/* Est. Ship */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Est. Ship
+                    </span>
                     {isEditing ? (
                       <Input
                         type="date"
@@ -797,28 +767,207 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         onChange={(e) =>
                           handleDateChange('forecastEnd', e.target.value)
                         }
-                        className="bg-background/40 h-8 text-right border-emerald-500/20 text-sm"
+                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
                       />
                     ) : (
-                      <p className="font-bold text-foreground tracking-tight text-base">
+                      <span className="text-sm font-mono font-bold text-foreground">
                         {formData.forecastEnd
-                          ? format(
-                              parseISO(formData.forecastEnd),
-                              'MMM d, yyyy'
-                            )
+                          ? format(parseISO(formData.forecastEnd), 'MMM d')
                           : '-'}
-                      </p>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* BOTTOM LEFT: Model Defaults */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
+                  <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em]">
+                    Model Defaults
+                  </h3>
+                  {isEditing && (
+                    <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
+                      <AlertTriangle className="h-3 w-3" />
+                      Caution
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {/* Value ($) */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Value ($)
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        value={formData.value}
+                        onChange={(e) =>
+                          handleChange('value', parseFloat(e.target.value))
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-24 text-right text-sm font-mono"
+                      />
+                    ) : (
+                      <span className="font-mono text-sm font-bold text-foreground">
+                        ${formData.value?.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {/* Promise Date */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Promise Date
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        type="date"
+                        value={formatDateForInput(formData.promiseDate)}
+                        onChange={(e) =>
+                          handleDateChange('promiseDate', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-foreground">
+                        {formData.promiseDate
+                          ? format(
+                              parseISO(formData.promiseDate),
+                              'MMM d, yyyy'
+                            )
+                          : '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Description */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Description
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.description || ''}
+                        onChange={(e) =>
+                          handleExtraChange('description', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-40 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground truncate max-w-[160px]">
+                        {safeFormData.description || '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Engine */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Engine
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.engine_model || ''}
+                        onChange={(e) =>
+                          handleExtraChange('engine_model', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground">
+                        {safeFormData.engine_model || '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Gearbox */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Gearbox
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.gearbox_model || ''}
+                        onChange={(e) =>
+                          handleExtraChange('gearbox_model', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground">
+                        {safeFormData.gearbox_model || '-'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTTOM RIGHT: Department Work Content */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
+                  Department Work Content
+                </h3>
+                <div className="space-y-1">
+                  {stageRows.map((row) => (
+                    <div
+                      key={row.key}
+                      className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-b-0 hover:bg-white/5 transition-colors rounded px-1"
+                    >
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {row.label}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        {row.kind === 'buffer' ? (
+                          <span className="font-mono text-sm font-bold text-foreground">
+                            {row.plannedDays ?? '-'}
+                            <span className="text-[10px] text-muted-foreground ml-0.5">
+                              D
+                            </span>
+                          </span>
+                        ) : isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              step="0.1"
+                              className="h-6 w-14 text-right bg-muted/30 border-border/50 text-xs font-mono"
+                              value={row.days}
+                              onChange={(e) =>
+                                handleExtraChange(
+                                  row.key,
+                                  parseFloat(e.target.value)
+                                )
+                              }
+                            />
+                            <span className="text-[10px] text-muted-foreground">
+                              D
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-mono text-sm font-bold text-foreground">
+                            {row.days ?? '-'}
+                            <span className="text-[10px] text-muted-foreground ml-0.5">
+                              D
+                            </span>
+                          </span>
+                        )}
+                        <span className="w-16 text-[10px] font-mono text-muted-foreground/70 text-right">
+                          {row.kind === 'work' && row.stage
+                            ? `${calculateManHours(row.days, row.stage)}H`
+                            : row.kind === 'vendor'
+                              ? 'WORK DAYS'
+                              : row.actualDays !== undefined
+                                ? `Act: ${row.actualDays}D`
+                                : 'Act: -'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Event History Section */}
-            <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden shadow-inner backdrop-blur-sm">
+            {/* Event History Section - Collapsible */}
+            <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
               <button
                 onClick={() => setIsEventHistoryOpen(!isEventHistoryOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-muted/40 transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
                   {isEventHistoryOpen ? (
@@ -826,231 +975,29 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                   ) : (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Event History
                   </span>
                 </div>
               </button>
 
               {isEventHistoryOpen && (
-                <div className="p-6 pt-0 border-t border-white/5 animate-in slide-in-from-top-2 duration-300">
+                <div className="px-4 pb-4 border-t border-border/50">
                   <EventHistoryTimeline pumpId={currentPump.id} />
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            {/* Model Defaults Section */}
-            <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden shadow-inner backdrop-blur-sm">
-              <button
-                onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
-              >
-                <div className="flex items-center gap-2">
-                  {isAdvancedOpen ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-[0.2em] ml-1">
-                    Model Defaults
-                  </span>
-                </div>
-                {isEditing && (
-                  <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
-                    <AlertTriangle className="h-3 w-3" />
-                    Edit with Caution
-                  </div>
-                )}
-              </button>
-
-              {isAdvancedOpen && (
-                <div className="p-6 pt-0 space-y-4 border-t border-white/5 animate-in slide-in-from-top-2 duration-300">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mt-6">
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Value ($)
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            type="number"
-                            value={formData.value}
-                            onChange={(e) =>
-                              handleChange('value', parseFloat(e.target.value))
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-bold text-foreground">
-                            ${formData.value?.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Promise Date
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            type="date"
-                            value={formatDateForInput(formData.promiseDate)}
-                            onChange={(e) =>
-                              handleDateChange('promiseDate', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-bold text-foreground">
-                            {formData.promiseDate
-                              ? format(
-                                  parseISO(formData.promiseDate),
-                                  'MMM d, yyyy'
-                                )
-                              : '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between py-2 border-b border-white/5 col-span-full">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Description
-                      </label>
-                      <div className="text-right w-2/3">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.description || ''}
-                            onChange={(e) =>
-                              handleExtraChange('description', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground truncate">
-                            {safeFormData.description || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Engine
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.engine_model || ''}
-                            onChange={(e) =>
-                              handleExtraChange('engine_model', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground">
-                            {safeFormData.engine_model || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/5">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Gearbox
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.gearbox_model || ''}
-                            onChange={(e) =>
-                              handleExtraChange('gearbox_model', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground">
-                            {safeFormData.gearbox_model || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-8">
-                    <h4 className="text-[10px] font-black text-blue-400/60 uppercase tracking-[0.2em] mb-4">
-                      Department Work Content
-                    </h4>
-                    <div className="space-y-1">
-                      {stageRows.map((row) => (
-                        <div
-                          key={row.key}
-                          className="flex items-center justify-between py-2 border-b border-white/5 group hover:bg-white/5 transition-colors px-2 rounded"
-                        >
-                          <div className="text-xs font-medium text-muted-foreground uppercase">
-                            {row.label}
-                          </div>
-                          <div className="flex items-center gap-6">
-                            <div className="text-right">
-                              {row.kind === 'buffer' ? (
-                                <span className="font-bold text-foreground text-sm">
-                                  {row.plannedDays ?? '-'}
-                                  <span className="text-[10px] ml-0.5 text-muted-foreground">
-                                    D
-                                  </span>
-                                </span>
-                              ) : isEditing ? (
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    type="number"
-                                    step="0.1"
-                                    className="h-7 w-16 text-right bg-background/40 text-xs"
-                                    value={row.days}
-                                    onChange={(e) =>
-                                      handleExtraChange(
-                                        row.key,
-                                        parseFloat(e.target.value)
-                                      )
-                                    }
-                                  />
-                                  <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                                    d
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="font-bold text-foreground text-sm">
-                                  {row.days ?? '-'}
-                                  <span className="text-[10px] ml-0.5 text-muted-foreground">
-                                    D
-                                  </span>
-                                </span>
-                              )}
-                            </div>
-                            <div className="w-24 text-[10px] font-mono text-muted-foreground/60 text-right">
-                              {row.kind === 'work' && row.stage
-                                ? `${calculateManHours(row.days, row.stage)}H`
-                                : row.kind === 'vendor'
-                                  ? 'WORK DAYS'
-                                  : row.actualDays !== undefined
-                                    ? `Actual: ${row.actualDays}D`
-                                    : 'Actual: -'}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-white/5 text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">
-              <span>System ID: {currentPump.id.split('-')[0]}</span>
-              <span>
-                Last Updated:{' '}
-                {format(new Date(currentPump.last_update), 'MMM d, h:mm a')}
-              </span>
-            </div>
+        {/* Footer - matches AddPoModal structure */}
+        <div className="flex-shrink-0 border-t border-border bg-muted/40 px-6 py-[5px]">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>System ID: {currentPump.id.split('-')[0]}</span>
+            <span>
+              Last Updated:{' '}
+              {format(new Date(currentPump.last_update), 'MMM d, h:mm a')}
+            </span>
           </div>
         </div>
       </div>

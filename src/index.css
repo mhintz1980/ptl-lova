@@ -603,7 +603,6 @@
   .content-stage {
     position: relative;
     z-index: 1;
-    @apply px-6 pb-10;
   }
 
   .layer-glass {
