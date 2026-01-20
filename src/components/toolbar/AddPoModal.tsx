@@ -601,7 +601,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                       onChange={(e) =>
                         handleLineChange(index, 'promiseDate', e.target.value)
                       }
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent text-xs px-[5px] text-center"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent text-xs p-0 text-center"
                     />
                   </td>
                   <td className="py-[5px] px-[5px] text-center">
