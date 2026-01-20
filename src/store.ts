@@ -301,7 +301,7 @@ export const useApp = create<AppState>()(
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: crypto.randomUUID(), // Use valid UUID format for Supabase
-            serial: null, // Null for unassigned (DB expects integer)
+            serial: null, // Null for unassigned (DB expects text or null)
             po,
             customer,
             model: line.model,
@@ -310,8 +310,9 @@ export const useApp = create<AppState>()(
             powder_color: line.color,
             last_update: new Date().toISOString(),
             value: line.valueEach || 0,
-            promiseDate: line.promiseDate || promiseDate,
-            dateReceived: dateReceived,
+            // Convert empty strings to undefined to avoid PostgreSQL timestamp errors
+            promiseDate: line.promiseDate || promiseDate || undefined,
+            dateReceived: dateReceived || undefined,
           }))
         )
 
