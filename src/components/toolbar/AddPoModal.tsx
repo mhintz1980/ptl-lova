@@ -554,7 +554,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                         )
                       }
                       onFocus={(e) => e.target.select()} // Auto-select for quick replacement
-                      className="h-8 w-full border-transparent hover:border-border focus:border-input bg-transparent text-center font-mono px-[5px]"
+                      className="h-8 w-full border-transparent hover:border-border focus:border-input bg-transparent text-center font-mono p-0"
                       min={1}
                     />
                   </td>
