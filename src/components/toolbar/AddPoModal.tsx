@@ -478,7 +478,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
           <table className="w-full text-left text-sm border-separate border-spacing-0">
             <thead className="sticky top-0 z-10 bg-card shadow-sm">
               <tr>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-12 text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[30px] text-center">
                   #
                 </th>
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground min-w-[180px] text-center">
@@ -487,7 +487,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[50px] text-center">
                   Qty
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground text-center">
+                <th className="border-b border-border py-1 px-[3px] font-medium text-muted-foreground w-[110px] text-center">
                   Color
                 </th>
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-32 text-center">
@@ -496,10 +496,10 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-32 text-center">
                   Priority
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-40 text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[110px] text-center">
                   Due Date
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground text-center w-[140px]">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground text-center w-[110px]">
                   Actions
                 </th>
               </tr>
@@ -558,14 +558,14 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                       min={1}
                     />
                   </td>
-                  <td className="py-[5px] px-[5px]">
+                  <td className="p-[3px]">
                     <Input
                       value={line.color ?? ''}
                       onChange={(e) =>
                         handleLineChange(index, 'color', e.target.value)
                       }
                       placeholder="Std"
-                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent px-[5px] text-center"
+                      className="h-8 border-transparent hover:border-border focus:border-input bg-transparent px-[3px] text-center"
                     />
                   </td>
                   <td className="py-[5px] px-[5px]">
@@ -591,7 +591,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                         handleLineChange(index, 'priority', priority)
                       }
                       size="sm"
-                      className="w-full px-[5px] text-center"
+                      className="flex w-full justify-center items-center gap-1"
                     />
                   </td>
                   <td className="py-[5px] px-[5px]">
