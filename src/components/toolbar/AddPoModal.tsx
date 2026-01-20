@@ -481,7 +481,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[30px] text-center">
                   #
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground min-w-[180px] text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
                   Model
                 </th>
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[55px] text-center">
@@ -490,10 +490,10 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 <th className="border-b border-border py-1 px-[3px] font-medium text-muted-foreground w-[110px] text-center">
                   Color
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-32 text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
                   Value ($)
                 </th>
-                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-32 text-center">
+                <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[145px] text-center">
                   Priority
                 </th>
                 <th className="border-b border-border py-1 px-[5px] font-medium text-muted-foreground w-[110px] text-center">
