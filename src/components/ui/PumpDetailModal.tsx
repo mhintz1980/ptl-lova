@@ -6,7 +6,6 @@ import {
   projectPumpTimeline,
 } from '../../lib/projection-engine'
 import {
-  X,
   Edit2,
   Save,
   ChevronDown,
@@ -188,7 +187,6 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
   }, [pump, pumps])
 
   const [isEditing, setIsEditing] = useState(false)
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [isEventHistoryOpen, setIsEventHistoryOpen] = useState(false)
   const [formData, setFormData] = useState<Pump | null>(null)
 
@@ -200,7 +198,6 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     if (currentPump) {
       setFormData({ ...currentPump })
       setIsEditing(false)
-      setIsAdvancedOpen(false)
       setIsEventHistoryOpen(false)
     }
   }, [currentPump?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -547,38 +544,36 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               />
             </div>
 
-            {/* Groups Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-              {/* Column 1: Order Information */}
-              <div className="space-y-6">
-                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] border-b border-border/50 pb-2">
+            {/* 4-Panel Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* TOP LEFT: Order Information */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
                   Order Information
                 </h3>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
                   {/* PO Number */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
                       PO Number
-                    </label>
+                    </span>
                     {isEditing ? (
                       <Input
                         value={formData.po}
                         onChange={(e) => handleChange('po', e.target.value)}
-                        className="bg-muted/30 border-border/50 h-9"
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                       />
                     ) : (
-                      <p className="font-mono text-sm font-bold text-foreground pt-1">
+                      <span className="font-mono text-sm font-bold text-foreground">
                         {formData.po}
-                      </p>
+                      </span>
                     )}
                   </div>
-
                   {/* Customer */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Customer
-                    </label>
+                    </span>
                     {isEditing ? (
                       <>
                         <Input
@@ -587,7 +582,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                           onChange={(e) =>
                             handleChange('customer', e.target.value)
                           }
-                          className="bg-muted/30 border-border/50 h-9"
+                          className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                         />
                         <datalist id="customers-list">
                           {catalogData.customers.map((c) => (
@@ -596,17 +591,16 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         </datalist>
                       </>
                     ) : (
-                      <p className="text-sm font-bold text-foreground pt-1 truncate">
+                      <span className="text-sm font-bold text-foreground truncate max-w-[140px]">
                         {formData.customer}
-                      </p>
+                      </span>
                     )}
                   </div>
-
                   {/* Model */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Model
-                    </label>
+                    </span>
                     {isEditing ? (
                       <>
                         <Input
@@ -615,7 +609,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                           onChange={(e) =>
                             handleChange('model', e.target.value)
                           }
-                          className="bg-muted/30 border-border/50 h-9"
+                          className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                         />
                         <datalist id="models-list">
                           {catalogData.models.map((m) => (
@@ -624,17 +618,16 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         </datalist>
                       </>
                     ) : (
-                      <p className="text-sm font-bold text-foreground pt-1 truncate">
+                      <span className="text-sm font-bold text-foreground">
                         {formData.model}
-                      </p>
+                      </span>
                     )}
                   </div>
-
                   {/* Color */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Color
-                    </label>
+                    </span>
                     {isEditing ? (
                       <Input
                         list="colors-list"
@@ -642,10 +635,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         onChange={(e) =>
                           handleChange('powder_color', e.target.value)
                         }
-                        className="bg-muted/30 border-border/50 h-9"
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
                       />
                     ) : (
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex items-center gap-2">
                         <span
                           className="h-3 w-3 rounded-full border border-white/10"
                           style={{
@@ -653,27 +646,26 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                               formData.powder_color || 'hsl(var(--muted))',
                           }}
                         />
-                        <p className="text-sm font-bold text-foreground truncate">
+                        <span className="text-sm font-bold text-foreground">
                           {formData.powder_color || 'N/A'}
-                        </p>
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Column 2: Status & Identity */}
-              <div className="space-y-6">
-                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] border-b border-border/50 pb-2">
+              {/* TOP RIGHT: Production Status */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
                   Production Status
                 </h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Serial Number */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="space-y-1">
+                  {/* Serial # */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Serial #
-                    </label>
+                    </span>
                     {isEditing ? (
                       <Input
                         type="number"
@@ -685,10 +677,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                           )
                         }
                         placeholder="Pending"
-                        className="bg-muted/30 border-border/50 h-9 font-mono"
+                        className="bg-muted/30 border-border/50 h-7 w-24 text-right text-sm font-mono"
                       />
                     ) : (
-                      <p className="font-mono text-sm font-bold text-foreground pt-1">
+                      <span className="font-mono text-sm font-bold text-foreground">
                         {formData.serial !== null ? (
                           `#${formData.serial}`
                         ) : (
@@ -696,18 +688,47 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                             Unassigned
                           </span>
                         )}
-                      </p>
+                      </span>
                     )}
                   </div>
-
-                  {/* Stage & Priority - merged in display, separate in edit */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {/* Priority */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Priority
+                    </span>
+                    {isEditing ? (
+                      <PrioritySelect
+                        value={formData.priority}
+                        onChange={(priority) =>
+                          handleChange('priority', priority)
+                        }
+                        size="sm"
+                        className="w-28"
+                      />
+                    ) : (
+                      <span
+                        className={cn(
+                          'rounded px-2 py-0.5 text-xs font-medium border',
+                          formData.priority === 'Urgent' ||
+                            formData.priority === 'Rush'
+                            ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                            : formData.priority === 'High'
+                              ? 'text-orange-500 bg-orange-500/10 border-orange-500/20'
+                              : 'text-muted-foreground bg-muted/20 border-border/50'
+                        )}
+                      >
+                        {formData.priority}
+                      </span>
+                    )}
+                  </div>
+                  {/* Stage */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Stage
-                    </label>
+                    </span>
                     {isEditing ? (
                       <select
-                        className="w-full h-9 rounded-md border border-border/50 bg-muted/30 px-2 text-sm shadow-sm transition-colors text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="h-7 w-32 rounded-md border border-border/50 bg-muted/30 px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                         value={formData.stage}
                         onChange={(e) =>
                           handleChange('stage', e.target.value as Stage)
@@ -720,61 +741,25 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         ))}
                       </select>
                     ) : (
-                      <div className="pt-0.5">
-                        <span
-                          className={cn(
-                            'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset',
-                            formData.stage === 'CLOSED'
-                              ? 'bg-green-400/10 text-green-400 ring-green-400/20'
-                              : formData.stage === 'SHIP'
-                                ? 'bg-emerald-400/10 text-emerald-400 ring-emerald-400/20'
-                                : 'bg-blue-400/10 text-blue-400 ring-blue-400/20'
-                          )}
-                        >
-                          {formData.stage}
-                        </span>
-                      </div>
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                          formData.stage === 'CLOSED'
+                            ? 'bg-green-400/10 text-green-400 ring-green-400/20'
+                            : formData.stage === 'SHIP'
+                              ? 'bg-emerald-400/10 text-emerald-400 ring-emerald-400/20'
+                              : 'bg-blue-400/10 text-blue-400 ring-blue-400/20'
+                        )}
+                      >
+                        {formData.stage}
+                      </span>
                     )}
                   </div>
-
-                  {/* Est Start */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Priority
-                    </label>
-                    {isEditing ? (
-                      <PrioritySelect
-                        value={formData.priority}
-                        onChange={(priority) =>
-                          handleChange('priority', priority)
-                        }
-                        size="sm"
-                        className="w-full"
-                      />
-                    ) : (
-                      <div className="pt-0.5">
-                        <span
-                          className={cn(
-                            'rounded px-2 py-1 text-xs font-medium border',
-                            formData.priority === 'Urgent' ||
-                              formData.priority === 'Rush'
-                              ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
-                              : formData.priority === 'High'
-                                ? 'text-orange-500 bg-orange-500/10 border-orange-500/20'
-                                : 'text-muted-foreground bg-muted/20 border-border/50'
-                          )}
-                        >
-                          {formData.priority}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Est Ship */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {/* Est. Ship */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Est. Ship
-                    </label>
+                    </span>
                     {isEditing ? (
                       <Input
                         type="date"
@@ -782,25 +767,207 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                         onChange={(e) =>
                           handleDateChange('forecastEnd', e.target.value)
                         }
-                        className="bg-muted/30 border-border/50 h-9 text-xs"
+                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-mono font-bold text-foreground pt-1">
+                      <span className="text-sm font-mono font-bold text-foreground">
                         {formData.forecastEnd
                           ? format(parseISO(formData.forecastEnd), 'MMM d')
                           : '-'}
-                      </p>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* BOTTOM LEFT: Model Defaults */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
+                  <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em]">
+                    Model Defaults
+                  </h3>
+                  {isEditing && (
+                    <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
+                      <AlertTriangle className="h-3 w-3" />
+                      Caution
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {/* Value ($) */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Value ($)
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        value={formData.value}
+                        onChange={(e) =>
+                          handleChange('value', parseFloat(e.target.value))
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-24 text-right text-sm font-mono"
+                      />
+                    ) : (
+                      <span className="font-mono text-sm font-bold text-foreground">
+                        ${formData.value?.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {/* Promise Date */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Promise Date
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        type="date"
+                        value={formatDateForInput(formData.promiseDate)}
+                        onChange={(e) =>
+                          handleDateChange('promiseDate', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-foreground">
+                        {formData.promiseDate
+                          ? format(
+                              parseISO(formData.promiseDate),
+                              'MMM d, yyyy'
+                            )
+                          : '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Description */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Description
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.description || ''}
+                        onChange={(e) =>
+                          handleExtraChange('description', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-40 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground truncate max-w-[160px]">
+                        {safeFormData.description || '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Engine */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Engine
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.engine_model || ''}
+                        onChange={(e) =>
+                          handleExtraChange('engine_model', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground">
+                        {safeFormData.engine_model || '-'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Gearbox */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Gearbox
+                    </span>
+                    {isEditing ? (
+                      <Input
+                        value={safeFormData.gearbox_model || ''}
+                        onChange={(e) =>
+                          handleExtraChange('gearbox_model', e.target.value)
+                        }
+                        className="bg-muted/30 border-border/50 h-7 w-32 text-right text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-foreground">
+                        {safeFormData.gearbox_model || '-'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTTOM RIGHT: Department Work Content */}
+              <div className="rounded-md border border-border/50 bg-muted/20 p-4">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.15em] border-b border-border/50 pb-2 mb-3">
+                  Department Work Content
+                </h3>
+                <div className="space-y-1">
+                  {stageRows.map((row) => (
+                    <div
+                      key={row.key}
+                      className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-b-0 hover:bg-white/5 transition-colors rounded px-1"
+                    >
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {row.label}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        {row.kind === 'buffer' ? (
+                          <span className="font-mono text-sm font-bold text-foreground">
+                            {row.plannedDays ?? '-'}
+                            <span className="text-[10px] text-muted-foreground ml-0.5">
+                              D
+                            </span>
+                          </span>
+                        ) : isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              step="0.1"
+                              className="h-6 w-14 text-right bg-muted/30 border-border/50 text-xs font-mono"
+                              value={row.days}
+                              onChange={(e) =>
+                                handleExtraChange(
+                                  row.key,
+                                  parseFloat(e.target.value)
+                                )
+                              }
+                            />
+                            <span className="text-[10px] text-muted-foreground">
+                              D
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-mono text-sm font-bold text-foreground">
+                            {row.days ?? '-'}
+                            <span className="text-[10px] text-muted-foreground ml-0.5">
+                              D
+                            </span>
+                          </span>
+                        )}
+                        <span className="w-16 text-[10px] font-mono text-muted-foreground/70 text-right">
+                          {row.kind === 'work' && row.stage
+                            ? `${calculateManHours(row.days, row.stage)}H`
+                            : row.kind === 'vendor'
+                              ? 'WORK DAYS'
+                              : row.actualDays !== undefined
+                                ? `Act: ${row.actualDays}D`
+                                : 'Act: -'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Event History Section */}
-            <div className="rounded-md border border-border/50 bg-muted/30 overflow-hidden">
+            {/* Event History Section - Collapsible */}
+            <div className="rounded-md border border-border/50 bg-muted/20 overflow-hidden">
               <button
                 onClick={() => setIsEventHistoryOpen(!isEventHistoryOpen)}
-                className="w-full flex items-center justify-between p-3 hover:bg-muted/40 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-muted/40 transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
                   {isEventHistoryOpen ? (
@@ -815,213 +982,8 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
               </button>
 
               {isEventHistoryOpen && (
-                <div className="p-4 pt-0 border-t border-border/50">
+                <div className="px-4 pb-4 border-t border-border/50">
                   <EventHistoryTimeline pumpId={currentPump.id} />
-                </div>
-              )}
-            </div>
-
-            {/* Model Defaults Section */}
-            <div className="rounded-md border border-border/50 bg-muted/30 overflow-hidden">
-              <button
-                onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                className="w-full flex items-center justify-between p-3 hover:bg-muted/40 transition-colors text-left"
-              >
-                <div className="flex items-center gap-2">
-                  {isAdvancedOpen ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Model Defaults
-                  </span>
-                </div>
-                {isEditing && (
-                  <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
-                    <AlertTriangle className="h-3 w-3" />
-                    Edit with Caution
-                  </div>
-                )}
-              </button>
-
-              {isAdvancedOpen && (
-                <div className="p-4 pt-0 space-y-4 border-t border-border/50">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mt-6">
-                    <div className="flex items-center justify-between py-2 border-b border-border/50">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Value ($)
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            type="number"
-                            value={formData.value}
-                            onChange={(e) =>
-                              handleChange('value', parseFloat(e.target.value))
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-bold text-foreground">
-                            ${formData.value?.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-border/50">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Promise Date
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            type="date"
-                            value={formatDateForInput(formData.promiseDate)}
-                            onChange={(e) =>
-                              handleDateChange('promiseDate', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-bold text-foreground">
-                            {formData.promiseDate
-                              ? format(
-                                  parseISO(formData.promiseDate),
-                                  'MMM d, yyyy'
-                                )
-                              : '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between py-2 border-b border-white/5 col-span-full">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Description
-                      </label>
-                      <div className="text-right w-2/3">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.description || ''}
-                            onChange={(e) =>
-                              handleExtraChange('description', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground truncate">
-                            {safeFormData.description || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between py-2 border-b border-border/50">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Engine
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.engine_model || ''}
-                            onChange={(e) =>
-                              handleExtraChange('engine_model', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground">
-                            {safeFormData.engine_model || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-border/50">
-                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Gearbox
-                      </label>
-                      <div className="text-right">
-                        {isEditing ? (
-                          <Input
-                            value={safeFormData.gearbox_model || ''}
-                            onChange={(e) =>
-                              handleExtraChange('gearbox_model', e.target.value)
-                            }
-                            className="bg-background/40 h-8 text-right"
-                          />
-                        ) : (
-                          <p className="font-semibold text-foreground">
-                            {safeFormData.gearbox_model || '-'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-8">
-                    <h4 className="text-[10px] font-black text-blue-400/60 uppercase tracking-[0.2em] mb-4">
-                      Department Work Content
-                    </h4>
-                    <div className="space-y-1">
-                      {stageRows.map((row) => (
-                        <div
-                          key={row.key}
-                          className="flex items-center justify-between py-2 border-b border-white/5 group hover:bg-white/5 transition-colors px-2 rounded"
-                        >
-                          <div className="text-xs font-medium text-muted-foreground uppercase">
-                            {row.label}
-                          </div>
-                          <div className="flex items-center gap-6">
-                            <div className="text-right">
-                              {row.kind === 'buffer' ? (
-                                <span className="font-bold text-foreground text-sm">
-                                  {row.plannedDays ?? '-'}
-                                  <span className="text-[10px] ml-0.5 text-muted-foreground">
-                                    D
-                                  </span>
-                                </span>
-                              ) : isEditing ? (
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    type="number"
-                                    step="0.1"
-                                    className="h-7 w-16 text-right bg-background/40 text-xs"
-                                    value={row.days}
-                                    onChange={(e) =>
-                                      handleExtraChange(
-                                        row.key,
-                                        parseFloat(e.target.value)
-                                      )
-                                    }
-                                  />
-                                  <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                                    d
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="font-bold text-foreground text-sm">
-                                  {row.days ?? '-'}
-                                  <span className="text-[10px] ml-0.5 text-muted-foreground">
-                                    D
-                                  </span>
-                                </span>
-                              )}
-                            </div>
-                            <div className="w-24 text-[10px] font-mono text-muted-foreground/60 text-right">
-                              {row.kind === 'work' && row.stage
-                                ? `${calculateManHours(row.days, row.stage)}H`
-                                : row.kind === 'vendor'
-                                  ? 'WORK DAYS'
-                                  : row.actualDays !== undefined
-                                    ? `Actual: ${row.actualDays}D`
-                                    : 'Actual: -'}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
