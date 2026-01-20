@@ -1,7 +1,7 @@
 // src/components/dashboard/TrendChart.tsx
 import React from 'react'
 import { Pump } from '../../types'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import { Card, CardContent } from '../ui/Card'
 import { round } from '../../lib/format'
 import { ChartProps, DashboardFilters } from './dashboardConfig'
 import { useApp } from '../../store'

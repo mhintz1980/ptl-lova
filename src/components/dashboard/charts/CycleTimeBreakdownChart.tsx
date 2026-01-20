@@ -20,7 +20,7 @@ const STAGE_COLORS: Record<string, string> = {
 
 const BOTTLENECK_COLOR = '#ef4444' // Red for bottleneck
 
-export function CycleTimeBreakdownChart(_props: ChartProps) {
+export function CycleTimeBreakdownChart({ chartHeight = 375 }: ChartProps) {
   const { pumps } = useApp()
   const [selectedSegment, setSelectedSegment] = useState<DonutSegment | null>(
     null
@@ -83,7 +83,10 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
   }
 
   return (
-    <div className="w-full h-[375px] flex flex-col relative overflow-hidden">
+    <div
+      className="w-full flex flex-col relative overflow-hidden"
+      style={{ height: chartHeight }}
+    >
       <DrilldownDonutChart
         data={donutData}
         title=""
@@ -91,7 +94,7 @@ export function CycleTimeBreakdownChart(_props: ChartProps) {
         selectedSegmentId={selectedSegment?.id}
         detailData={detailData}
         valueFormatter={(v) => `${v.toFixed(1)} days`}
-        height={375}
+        height={chartHeight}
       />
     </div>
   )

@@ -281,7 +281,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                   fill={segment.color}
                   opacity="0.15"
                   transform="translate(0, 8) scale(1.02, 1.02)"
-                  style={{ transformOrigin: '200px 200px' }}
+                  style={{ transformOrigin: `${centerX}px ${centerY}px` }}
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
                   transition={{ delay: index * 0.05, duration: 0.6 }}
@@ -311,7 +311,7 @@ export const DrilldownDonutChart = memo(function DrilldownDonutChart({
                       strokeWidth={isSelected ? 3 : 2}
                       filter="url(#donut-shadow)"
                       className={isClickable ? 'cursor-pointer' : ''}
-                      style={{ transformOrigin: '200px 200px' }}
+                      style={{ transformOrigin: `${centerX}px ${centerY}px` }}
                       role="graphics-symbol"
                       aria-label={`${segment.label}: ${valueFormatter(
                         segment.value

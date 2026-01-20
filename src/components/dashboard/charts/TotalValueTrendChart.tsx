@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ChartProps } from '../dashboardConfig'
 import { useApp } from '../../../store'
 import { formatCompactCurrency } from '../../../lib/format'
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card'
+import { Card, CardContent } from '../../ui/Card'
 import { SparklineAreaChart, SparklineDataPoint } from './SparklineAreaChart'
 import { DrilldownChart3D, DrilldownSegment } from './DrilldownChart3D'
 
