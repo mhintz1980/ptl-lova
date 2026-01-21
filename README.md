@@ -20,6 +20,7 @@ All project documents live under [`docs/`](docs/README.md):
 | ------------------------------------------------------------ | ----------------------------------- |
 | [`docs/architecture.md`](docs/architecture.md)               | UI surfaces, data flow, DDD layers  |
 | [`docs/development.md`](docs/development.md)                 | Setup, workflow, coding conventions |
+| [`docs/error-format.md`](docs/error-format.md)               | Error reporting shape + troubleshooting |
 | [`docs/testing.md`](docs/testing.md)                         | Vitest + Playwright instructions    |
 | [`docs/deployment.md`](docs/deployment.md)                   | Hosting and deployment guidance     |
 | [`docs/status/current-work.md`](docs/status/current-work.md) | Active work and next steps          |

@@ -36,6 +36,7 @@ import { pumpResumed } from './domain/production/events/PumpResumed'
 import { lockDateChanged } from './domain/production/events/LockDateChanged'
 import { priorityChanged } from './domain/production/events/PriorityChanged'
 import { WORK_STAGES } from './lib/stage-constants'
+import { logErrorReport } from './lib/error-reporting'
 
 // --- Store Definition ---
 
@@ -286,7 +287,15 @@ export const useApp = create<AppState>()(
           // Performance: Build timeline cache after loading pumps
           get().rebuildTimelines()
         } catch (error) {
-          console.error('Failed to load pumps:', error)
+          logErrorReport(error, {
+            where: 'store.load',
+            what: 'Failed to load pumps into state',
+            request: {
+              route: 'AppInit',
+              operation: 'load pumps',
+              inputSummary: `adapter=${get().isSandbox ? 'SandboxAdapter' : 'SupabaseAdapter'}`,
+            },
+          })
           set({ loading: false })
           toast.error('Failed to load data. Please refresh the page.', {
             duration: 5000,
@@ -301,7 +310,7 @@ export const useApp = create<AppState>()(
         const expanded: Pump[] = lines.flatMap((line) =>
           Array.from({ length: line.quantity || 1 }).map(() => ({
             id: crypto.randomUUID(), // Use valid UUID format for Supabase
-            serial: null, // Null for unassigned (DB expects integer)
+            serial: null, // Null for unassigned (DB expects text or null)
             po,
             customer,
             model: line.model,
@@ -310,8 +319,9 @@ export const useApp = create<AppState>()(
             powder_color: line.color,
             last_update: new Date().toISOString(),
             value: line.valueEach || 0,
-            promiseDate: line.promiseDate || promiseDate,
-            dateReceived: dateReceived,
+            // Convert empty strings to undefined to avoid PostgreSQL timestamp errors
+            promiseDate: line.promiseDate || promiseDate || undefined,
+            dateReceived: dateReceived || undefined,
           }))
         )
 
@@ -325,7 +335,15 @@ export const useApp = create<AppState>()(
           // Await the save - errors propagate to caller for handling
           await get().adapter.upsertMany(expanded)
         } catch (error) {
-          console.error('Failed to add pumps:', error)
+          logErrorReport(error, {
+            where: 'store.addPO',
+            what: 'Failed to add pumps from purchase order',
+            request: {
+              route: 'AddPoModal',
+              operation: 'upsert pumps',
+              inputSummary: `poPrefix=${po.trim().slice(0, 6)} lines=${lines.length} pumps=${expanded.length}`,
+            },
+          })
           // Rollback: Remove added pumps from state
           set({ pumps: currentPumps })
           get().rebuildTimelines()
@@ -434,7 +452,15 @@ export const useApp = create<AppState>()(
         get()
           .adapter.update(id, patch)
           .catch((err) => {
-            console.error('Failed to persist stage move:', err)
+            logErrorReport(err, {
+              where: 'store.moveStage',
+              what: 'Failed to persist stage move',
+              request: {
+                route: 'Kanban',
+                operation: 'update pump stage',
+                inputSummary: `id=${id.slice(0, 8)} from=${fromStage} to=${to}`,
+              },
+            })
             toast.error(
               'Failed to save stage move. Data may be desynchronized.'
             )
@@ -472,7 +498,15 @@ export const useApp = create<AppState>()(
         get()
           .adapter.update(id, { ...patch, last_update: now })
           .catch((err) => {
-            console.error('Failed to update pump:', err)
+            logErrorReport(err, {
+              where: 'store.updatePump',
+              what: 'Failed to update pump details',
+              request: {
+                route: 'PumpDetail',
+                operation: 'update pump',
+                inputSummary: `id=${id.slice(0, 8)} patchKeys=${Object.keys(patch).length}`,
+              },
+            })
             toast.error('Failed to save changes. Please check your connection.')
           })
       },

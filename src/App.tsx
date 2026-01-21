@@ -25,6 +25,7 @@ import { sortPumps } from './lib/sort'
 import { PrintLayout } from './components/print/PrintLayout'
 import { MondayBrief } from './components/print/MondayBrief'
 import { CapacityForecast } from './components/print/CapacityForecast'
+import { KanbanPrintView } from './components/print/KanbanPrintView'
 // Debug import for development
 import './debug-seed'
 
@@ -242,6 +243,7 @@ function App() {
           >
             <Route path="brief" element={<MondayBrief />} />
             <Route path="forecast" element={<CapacityForecast />} />
+            <Route path="kanban" element={<KanbanPrintView />} />
           </Route>
 
           {/* Kiosk Views - Protected? Maybe not, kiosk might be shared. But for now let's protect everything to be safe. */}

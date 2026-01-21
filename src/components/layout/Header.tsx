@@ -1,4 +1,12 @@
-import { Filter, Moon, Package, Search, Settings, Sun } from 'lucide-react'
+import {
+  Filter,
+  Moon,
+  Package,
+  Printer,
+  Search,
+  Settings,
+  Sun,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
@@ -136,6 +144,19 @@ export function Header({
           </Button>
 
           <AddPoButton onClick={onOpenAddPo} />
+
+          {currentView === 'kanban' && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground ml-2"
+              onClick={() => window.open('/print/kanban', '_blank')}
+              title="Print View"
+              aria-label="Print Kanban Board"
+            >
+              <Printer className="h-5 w-5" strokeWidth={2.5} />
+            </Button>
+          )}
         </div>
       </div>
 
