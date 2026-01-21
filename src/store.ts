@@ -837,7 +837,8 @@ export const useApp = create<AppState>()(
         set({ pumps: rows })
         // Performance: Rebuild timelines when dataset is replaced
         get().rebuildTimelines()
-        get().adapter.replaceAll(rows)
+        // Use safe syncAll instead of dangerous replaceAll (which deletes all data first)
+        get().adapter.syncAll(rows)
       },
 
       toggleStageCollapse: (stage) =>
@@ -1073,8 +1074,8 @@ export const useApp = create<AppState>()(
             ? SupabaseAdapter
             : LocalAdapter
 
-        // Persist current state to real adapter
-        realAdapter.replaceAll(state.pumps)
+        // Persist current state to real adapter using safe sync (no deletions)
+        realAdapter.syncAll(state.pumps)
 
         set({
           isSandbox: false,

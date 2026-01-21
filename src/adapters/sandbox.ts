@@ -39,6 +39,14 @@ export const SandboxAdapter: DataAdapter = {
     )
     // No-op
   },
+  syncAll: async (rows?: Pump[]) => {
+    console.warn(
+      '⚠️ [Sandbox] syncAll() called with',
+      rows?.length ?? 0,
+      'rows - DATA NOT SAVED (no-op)'
+    )
+    // No-op
+  },
   upsertMany: async (rows?: Pump[]) => {
     console.warn(
       '⚠️ [Sandbox] upsertMany() called with',

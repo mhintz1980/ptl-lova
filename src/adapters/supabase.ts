@@ -102,9 +102,44 @@ export const SupabaseAdapter: DataAdapter = {
     console.error('❌ [Supabase] load() - Exhausted retries without success')
     throw new Error('Failed to load data after maximum retries')
   },
+  /**
+   * @deprecated DANGEROUS: This function deletes ALL data before inserting.
+   * Use syncAll() instead which uses safe UPSERT-only approach.
+   * This function is now disabled to prevent accidental data wipe.
+   */
   async replaceAll(rows: Pump[]) {
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🚨 DANGER: This function previously caused production data loss!
+    // It deleted ALL rows before inserting new ones.
+    // Now disabled - use syncAll() for safe upsert operations.
+    // ═══════════════════════════════════════════════════════════════════════════
+    const error = new Error(
+      'replaceAll() is DISABLED to prevent data loss. Use syncAll() or upsertMany() instead. ' +
+        'This function previously deleted all production data. See: fix/prevent-data-wipe branch.'
+    )
+    logErrorReport(error, {
+      where: 'SupabaseAdapter.replaceAll',
+      what: 'Attempted to use dangerous replaceAll() which is now disabled',
+      request: {
+        route: 'DataSync',
+        operation: 'BLOCKED: replaceAll attempted',
+        inputSummary: `rows=${rows.length} - OPERATION BLOCKED FOR SAFETY`,
+      },
+    })
+    console.error(
+      '🚨 [Supabase] replaceAll() is DISABLED to prevent data loss!'
+    )
+    console.error('🚨 Use syncAll() or upsertMany() instead.')
+    throw error
+  },
+
+  /**
+   * Safe replacement for replaceAll(). Uses UPSERT-only approach.
+   * Does NOT delete any existing data - only inserts or updates provided rows.
+   */
+  async syncAll(rows: Pump[]) {
     console.log(
-      '🔵 [Supabase] replaceAll() called with',
+      '🔵 [Supabase] syncAll() called with',
       rows.length,
       'rows at:',
       new Date().toISOString()
@@ -112,63 +147,41 @@ export const SupabaseAdapter: DataAdapter = {
 
     if (!supabase) {
       console.warn(
-        '⚠️ [Supabase] replaceAll() - No client available, operation skipped'
+        '⚠️ [Supabase] syncAll() - No client available, operation skipped'
       )
       return
     }
 
-    // Delete all existing rows and then insert new ones
-    // Note: This is a destructive operation for a full dataset replacement
+    if (rows.length === 0) {
+      console.log('🔵 [Supabase] syncAll() - No rows provided, nothing to sync')
+      return
+    }
+
+    // Safe UPSERT-only approach: inserts new rows, updates existing ones
+    // Does NOT delete any data - much safer than replaceAll
     console.log(
-      '🔵 [Supabase] replaceAll() - Step 1: Deleting all existing rows...'
+      '🔵 [Supabase] syncAll() - Upserting',
+      rows.length,
+      'rows (safe mode - no deletions)...'
     )
-    const { error: deleteError } = await supabase
-      .from('pump')
-      .delete()
-      .neq('id', '0') // delete all
-    if (deleteError) {
-      logErrorReport(deleteError, {
-        where: 'SupabaseAdapter.replaceAll',
-        what: 'Failed to delete existing pump rows',
+    const { error: upsertError } = await supabase.from('pump').upsert(rows)
+    if (upsertError) {
+      logErrorReport(upsertError, {
+        where: 'SupabaseAdapter.syncAll',
+        what: 'Failed to upsert pump rows during sync',
         request: {
           route: 'DataSync',
-          operation: 'delete pump rows',
+          operation: 'upsert pump rows',
           inputSummary: `rows=${rows.length}`,
         },
       })
-      throw deleteError
+      throw upsertError
     }
-    console.log('✅ [Supabase] replaceAll() - Delete complete')
-
-    if (rows.length) {
-      console.log(
-        '🔵 [Supabase] replaceAll() - Step 2: Upserting',
-        rows.length,
-        'new rows...'
-      )
-      const { error: upsertError } = await supabase.from('pump').upsert(rows)
-      if (upsertError) {
-        logErrorReport(upsertError, {
-          where: 'SupabaseAdapter.replaceAll',
-          what: 'Failed to upsert replacement pump rows',
-          request: {
-            route: 'DataSync',
-            operation: 'upsert pump rows',
-            inputSummary: `rows=${rows.length}`,
-          },
-        })
-        throw upsertError
-      }
-      console.log(
-        '✅ [Supabase] replaceAll() SUCCESS - Replaced',
-        rows.length,
-        'rows'
-      )
-    } else {
-      console.log(
-        '🔵 [Supabase] replaceAll() - No rows to insert (table cleared)'
-      )
-    }
+    console.log(
+      '✅ [Supabase] syncAll() SUCCESS - Synced',
+      rows.length,
+      'rows (no deletions)'
+    )
   },
   async upsertMany(rows: Pump[]) {
     console.log(
@@ -192,16 +205,16 @@ export const SupabaseAdapter: DataAdapter = {
       )
       const { error } = await supabase.from('pump').upsert(rows)
       if (error) {
-      logErrorReport(error, {
-        where: 'SupabaseAdapter.upsertMany',
-        what: 'Failed to upsert pump rows',
-        request: {
-          route: 'AddPoModal',
-          operation: 'upsert pump rows',
-          inputSummary: `rows=${rows.length}`,
-        },
-      })
-      throw error
+        logErrorReport(error, {
+          where: 'SupabaseAdapter.upsertMany',
+          what: 'Failed to upsert pump rows',
+          request: {
+            route: 'AddPoModal',
+            operation: 'upsert pump rows',
+            inputSummary: `rows=${rows.length}`,
+          },
+        })
+        throw error
       }
       console.log(
         '✅ [Supabase] upsertMany() SUCCESS - Upserted',
