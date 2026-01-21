@@ -98,6 +98,22 @@ This directory contains comprehensive end-to-end tests for the PumpTracker sched
    - Large dataset performance
    - Concurrent operations
 
+### Dashboard Pump Detail Tests (`dashboard-pump-detail.spec.ts`)
+
+1. **Dashboard Drilldown Flow**
+   - Tests drilling down from dashboard charts to pump list
+   - Verifies chart legend click navigation
+   - Opens pump detail modal from the pump list
+   - Uses stable `data-testid` selectors for reliable tests
+
+### Kanban Scheduling Flow Tests (`kanban-scheduling-flow.spec.ts`)
+
+1. **Kanban to Scheduling Integration**
+   - Creates a pump via Zustand store seeding
+   - Drags pump card across Kanban stages (QUEUE → FABRICATION → ASSEMBLY)
+   - Navigates to Scheduling view
+   - Verifies pump appears on calendar with correct stage
+
 ## Setup and Configuration
 
 ### Prerequisites
@@ -147,7 +163,7 @@ where your dev server is running. It defaults to `http://localhost:5173`.
 
 ```bash
 # Point Playwright at a custom dev server URL
-PLAYWRIGHT_TEST_BASE_URL=http://localhost:5173 pnpm test:e2e
+PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 pnpm test:e2e
 ```
 
 ### Running Specific Tests
@@ -183,6 +199,7 @@ tests/e2e/
 #### SchedulingPageHelper (`helpers/test-utils.ts`)
 
 Utility class providing methods for:
+
 - Navigation between views
 - Component interaction
 - Data extraction
@@ -192,6 +209,7 @@ Utility class providing methods for:
 #### Test Fixtures (`fixtures/test-fixtures.ts`)
 
 Custom Playwright fixtures providing:
+
 - Configured test environment
 - Helper class instances
 - Test configuration constants
@@ -200,6 +218,7 @@ Custom Playwright fixtures providing:
 #### Test Data
 
 Predefined test data for:
+
 - Pump models
 - Priority levels
 - Customer names
@@ -279,6 +298,7 @@ npm run test:e2e:report
 ```
 
 Reports include:
+
 - Test results and screenshots
 - Video recordings of test runs
 - Trace files for detailed debugging

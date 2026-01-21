@@ -1,32 +1,26 @@
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Sector,
-} from "recharts";
-import type { PieProps } from "recharts";
-import type { PieSectorDataItem } from "recharts/types/polar/Pie";
+import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import { ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts'
+import type { PieProps } from 'recharts'
+import type { PieSectorDataItem } from 'recharts/types/polar/Pie'
 
-type DataPoint = Record<string, string | number>;
+type DataPoint = Record<string, string | number>
 
 interface HoverAnimatedPieChartProps<T extends DataPoint> {
-  data: T[];
-  dataKey: keyof T;
-  nameKey: keyof T;
-  colors: string[];
-  title: string;
-  subtitle?: string;
-  headless?: boolean;
-  onDrilldown?: (key: string, value: string | number) => void;
-  valueFormatter?: (value: number, item?: T) => string;
-  height?: number;
+  data: T[]
+  dataKey: keyof T
+  nameKey: keyof T
+  colors: string[]
+  title: string
+  subtitle?: string
+  headless?: boolean
+  onDrilldown?: (key: string, value: string | number) => void
+  valueFormatter?: (value: number, item?: T) => string
+  height?: number
 }
 
-const RADIAN = Math.PI / 180;
-const defaultValueFormatter = (value: number) => `${value}`;
+const RADIAN = Math.PI / 180
+const defaultValueFormatter = (value: number) => `${value}`
 
 export function HoverAnimatedPieChart<T extends DataPoint>({
   data,
@@ -40,39 +34,39 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
   headless = false,
   onDrilldown,
 }: HoverAnimatedPieChartProps<T>) {
-  const [activeSlice, setActiveSlice] = React.useState(0);
-  const [chartSize, setChartSize] = React.useState({ width: 0, height: 0 });
-  const [isHovered, setIsHovered] = React.useState(false);
-  const chartBoundsRef = React.useRef<HTMLDivElement | null>(null);
+  const [activeSlice, setActiveSlice] = React.useState(0)
+  const [chartSize, setChartSize] = React.useState({ width: 0, height: 0 })
+  const [isHovered, setIsHovered] = React.useState(false)
+  const chartBoundsRef = React.useRef<HTMLDivElement | null>(null)
 
   React.useLayoutEffect(() => {
-    if (!chartBoundsRef.current || typeof ResizeObserver === "undefined") {
-      return;
+    if (!chartBoundsRef.current || typeof ResizeObserver === 'undefined') {
+      return
     }
 
     const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
+      const entry = entries[0]
       setChartSize({
         width: entry.contentRect.width,
         height: entry.contentRect.height,
-      });
-    });
+      })
+    })
 
-    observer.observe(chartBoundsRef.current);
-    return () => observer.disconnect();
-  }, []);
+    observer.observe(chartBoundsRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   const total = React.useMemo(
     () =>
       data.reduce((sum, item) => {
-        const value = item[dataKey];
-        if (typeof value === "number") {
-          return sum + value;
+        const value = item[dataKey]
+        if (typeof value === 'number') {
+          return sum + value
         }
-        return sum;
+        return sum
       }, 0),
     [data, dataKey]
-  );
+  )
 
   const renderActiveShape = (props: PieSectorDataItem & { fill?: string }) => {
     const {
@@ -87,16 +81,16 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
       payload,
       percent,
       value,
-    } = props;
+    } = props
 
     const maxRadius =
-      Math.min(chartSize.width, chartSize.height) / 2 - 12 || outerRadius || 0;
-    const labelRadius = Math.min((outerRadius ?? 0) + 16, maxRadius);
-    const sin = Math.sin(-RADIAN * (midAngle ?? 0));
-    const cos = Math.cos(-RADIAN * (midAngle ?? 0));
-    const labelX = (cx ?? 0) + labelRadius * cos;
-    const labelY = (cy ?? 0) + labelRadius * sin;
-    const textAnchor = cos >= 0 ? "start" : "end";
+      Math.min(chartSize.width, chartSize.height) / 2 - 12 || outerRadius || 0
+    const labelRadius = Math.min((outerRadius ?? 0) + 16, maxRadius)
+    const sin = Math.sin(-RADIAN * (midAngle ?? 0))
+    const cos = Math.cos(-RADIAN * (midAngle ?? 0))
+    const labelX = (cx ?? 0) + labelRadius * cos
+    const labelY = (cy ?? 0) + labelRadius * sin
+    const textAnchor = cos >= 0 ? 'start' : 'end'
 
     return (
       <g>
@@ -137,19 +131,31 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
           textAnchor={textAnchor}
           className="chart-callout__value-text"
         >
-          {valueFormatter(value as number, payload as T)} ·{" "}
+          {valueFormatter(value as number, payload as T)} ·{' '}
           {((percent ?? 0) * 100).toFixed(0)}%
         </text>
       </g>
-    );
-  };
+    )
+  }
+
+  const titleSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 
   const Content = (
-    <div className="h-full w-full flex flex-col">
+    <div
+      className="h-full w-full flex flex-col"
+      data-testid={`chart-pie-chart-${titleSlug}`}
+    >
       <div
         style={{ height: headless ? '100%' : height }}
         ref={chartBoundsRef}
-        className={isHovered ? "chart-canvas chart-canvas--hovered flex-1" : "chart-canvas flex-1"}
+        className={
+          isHovered
+            ? 'chart-canvas chart-canvas--hovered flex-1'
+            : 'chart-canvas flex-1'
+        }
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -179,26 +185,27 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
                 data,
                 dataKey: dataKey as string,
                 nameKey: nameKey as string,
-                cx: "50%",
-                cy: "50%",
-                innerRadius: "56%",
-                outerRadius: "72%",
+                cx: '50%',
+                cy: '50%',
+                innerRadius: '56%',
+                outerRadius: '72%',
                 paddingAngle: 5,
                 cornerRadius: 999,
                 activeIndex: activeSlice,
                 activeShape: renderActiveShape,
-                onMouseEnter: (_: unknown, index: number) => setActiveSlice(index),
+                onMouseEnter: (_: unknown, index: number) =>
+                  setActiveSlice(index),
                 onClick: (data: PieSectorDataItem) => {
-                  const payload = data.payload as T;
+                  const payload = data.payload as T
                   if (onDrilldown && payload && payload[nameKey]) {
-                    onDrilldown(String(nameKey), payload[nameKey]);
+                    onDrilldown(String(nameKey), payload[nameKey])
                   }
-                }
+                },
               } satisfies PieProps & {
-                activeIndex: number;
-                activeShape: typeof renderActiveShape;
-                onMouseEnter: (_: unknown, index: number) => void;
-                onClick: (data: PieSectorDataItem) => void;
+                activeIndex: number
+                activeShape: typeof renderActiveShape
+                onMouseEnter: (_: unknown, index: number) => void
+                onClick: (data: PieSectorDataItem) => void
               })}
             >
               {data.map((item, index) => (
@@ -213,24 +220,34 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
         </ResponsiveContainer>
       </div>
 
-      <div className="chart-legend-row mt-4" aria-label="Chart legend">
+      <div
+        className="chart-legend-row mt-4"
+        aria-label="Chart legend"
+        data-testid={`chart-legend-row-${titleSlug}`}
+      >
         {data.map((item, index) => {
           const value =
-            typeof item[dataKey] === "number" ? (item[dataKey] as number) : 0;
-          const percentage = total ? Math.round((value / total) * 100) : 0;
-          const label = String(item[nameKey]);
+            typeof item[dataKey] === 'number' ? (item[dataKey] as number) : 0
+          const percentage = total ? Math.round((value / total) * 100) : 0
+          const label = String(item[nameKey])
+          const labelSlug = label
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
 
           return (
             <button
               type="button"
               key={`${item[nameKey]}-legend`}
-              className={`chart-legend-row__item ${index === activeSlice ? "chart-legend-row__item--active" : ""
-                }`}
+              data-testid={`chart-legend-item-${labelSlug}`}
+              className={`chart-legend-row__item ${
+                index === activeSlice ? 'chart-legend-row__item--active' : ''
+              }`}
               onMouseEnter={() => setActiveSlice(index)}
               onFocus={() => setActiveSlice(index)}
               onClick={() => {
                 if (onDrilldown) {
-                  onDrilldown(String(nameKey), item[nameKey]);
+                  onDrilldown(String(nameKey), item[nameKey])
                 }
               }}
               title={`${label} – ${valueFormatter(value, item)} (${percentage}%)`}
@@ -244,14 +261,14 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
                 {valueFormatter(value, item)} · {percentage}%
               </span>
             </button>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 
   if (headless) {
-    return Content;
+    return Content
   }
 
   return (
@@ -270,5 +287,5 @@ export function HoverAnimatedPieChart<T extends DataPoint>({
         {Content}
       </CardContent>
     </Card>
-  );
+  )
 }
