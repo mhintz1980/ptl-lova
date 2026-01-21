@@ -78,7 +78,10 @@ export interface Filters {
 
 export type DataAdapter = {
   load: () => Promise<Pump[]>
+  /** @deprecated Use syncAll() instead - replaceAll deletes ALL data before inserting! */
   replaceAll: (rows: Pump[]) => Promise<void>
+  /** Safe sync that uses UPSERT-only - does NOT delete any data */
+  syncAll: (rows: Pump[]) => Promise<void>
   upsertMany: (rows: Pump[]) => Promise<void>
   update: (id: string, patch: Partial<Pump>) => Promise<void>
 }
