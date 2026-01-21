@@ -1,6 +1,7 @@
 // src/adapters/supabase.ts
 import { createClient } from '@supabase/supabase-js'
 import { Pump, DataAdapter } from '../types'
+import { logErrorReport } from '../lib/error-reporting'
 
 // NOTE: This client is configured to use environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 // which must be set in a .env file for this adapter to work.
@@ -66,10 +67,15 @@ export const SupabaseAdapter: DataAdapter = {
 
       attempts++
       // Log error without exposing sensitive data
-      console.error(
-        `❌ [Supabase] load() ERROR (attempt ${attempts}):`,
-        error.message || 'Unknown error'
-      )
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.load',
+        what: 'Failed to load pumps from Supabase',
+        request: {
+          route: 'StoreInit',
+          operation: 'select pump rows',
+          inputSummary: `attempt=${attempts} maxAttempts=${maxAttempts}`,
+        },
+      })
 
       const delayIndex = Math.min(attempts - 1, backoffIntervals.length - 1)
       const delay = backoffIntervals[delayIndex]
@@ -77,11 +83,15 @@ export const SupabaseAdapter: DataAdapter = {
       console.warn(`⚠️ [Supabase] Retrying in ${delay}ms...`)
 
       if (attempts >= maxAttempts) {
-        console.error(
-          '❌ [Supabase] load() FAILED after',
-          maxAttempts,
-          'attempts - giving up'
-        )
+        logErrorReport(error, {
+          where: 'SupabaseAdapter.load',
+          what: 'Supabase load exhausted retries',
+          request: {
+            route: 'StoreInit',
+            operation: 'select pump rows',
+            inputSummary: `attempts=${attempts}`,
+          },
+        })
         throw error
       }
 
@@ -117,7 +127,15 @@ export const SupabaseAdapter: DataAdapter = {
       .delete()
       .neq('id', '0') // delete all
     if (deleteError) {
-      console.error('❌ [Supabase] replaceAll() DELETE ERROR:', deleteError)
+      logErrorReport(deleteError, {
+        where: 'SupabaseAdapter.replaceAll',
+        what: 'Failed to delete existing pump rows',
+        request: {
+          route: 'DataSync',
+          operation: 'delete pump rows',
+          inputSummary: `rows=${rows.length}`,
+        },
+      })
       throw deleteError
     }
     console.log('✅ [Supabase] replaceAll() - Delete complete')
@@ -130,7 +148,15 @@ export const SupabaseAdapter: DataAdapter = {
       )
       const { error: upsertError } = await supabase.from('pump').upsert(rows)
       if (upsertError) {
-        console.error('❌ [Supabase] replaceAll() UPSERT ERROR:', upsertError)
+        logErrorReport(upsertError, {
+          where: 'SupabaseAdapter.replaceAll',
+          what: 'Failed to upsert replacement pump rows',
+          request: {
+            route: 'DataSync',
+            operation: 'upsert pump rows',
+            inputSummary: `rows=${rows.length}`,
+          },
+        })
         throw upsertError
       }
       console.log(
@@ -166,8 +192,16 @@ export const SupabaseAdapter: DataAdapter = {
       )
       const { error } = await supabase.from('pump').upsert(rows)
       if (error) {
-        console.error('❌ [Supabase] upsertMany() ERROR:', error)
-        throw error
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.upsertMany',
+        what: 'Failed to upsert pump rows',
+        request: {
+          route: 'AddPoModal',
+          operation: 'upsert pump rows',
+          inputSummary: `rows=${rows.length}`,
+        },
+      })
+      throw error
       }
       console.log(
         '✅ [Supabase] upsertMany() SUCCESS - Upserted',
@@ -198,11 +232,15 @@ export const SupabaseAdapter: DataAdapter = {
 
     const { error } = await supabase.from('pump').update(patch).eq('id', id)
     if (error) {
-      console.error(
-        '❌ [Supabase] update() ERROR for id',
-        id?.substring(0, 8) + '...:',
-        error
-      )
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.update',
+        what: 'Failed to update pump row',
+        request: {
+          route: 'PumpDetail',
+          operation: 'update pump row',
+          inputSummary: `id=${id?.substring(0, 8) ?? 'unknown'} patchKeys=${Object.keys(patch).length}`,
+        },
+      })
       throw error
     }
     console.log(

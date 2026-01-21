@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { getModelPrice, getModelBom, getCatalogData } from '../../lib/seed'
 import { cn } from '../../lib/utils'
 import { formatCurrency } from '../../lib/format'
+import { logErrorReport } from '../../lib/error-reporting'
 import { PrioritySelect } from '../ui/PrioritySelect'
 
 interface AddPoModalProps {
@@ -180,7 +181,15 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
       resetForm()
       onClose()
     } catch (error) {
-      console.error('Failed to save PO:', error)
+      logErrorReport(error, {
+        where: 'AddPoModal.handleSubmit',
+        what: 'Failed to save purchase order',
+        request: {
+          route: 'AddPoModal',
+          operation: 'submit purchase order',
+          inputSummary: `poPrefix=${po.trim().slice(0, 6)} lines=${validLines.length}`,
+        },
+      })
       toast.error(
         'Failed to save to cloud. Please check your connection and try again.'
       )
