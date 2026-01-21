@@ -341,6 +341,7 @@ export function UnifiedJobPill({
       }}
       onClick={handleClick}
       data-testid="calendar-event"
+      data-pump-id={pump.id}
       data-stage={pump.stage}
     >
       <Tooltip

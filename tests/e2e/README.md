@@ -109,45 +109,58 @@ This directory contains comprehensive end-to-end tests for the PumpTracker sched
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Install Playwright browsers
-npm run test:e2e:install
+pnpm test:e2e:install
 ```
 
 ### Running Tests
 
 ```bash
+# Start the Vite dev server (default http://localhost:5173)
+pnpm dev
+
 # Run all tests in headless mode
-npm run test:e2e
+pnpm test:e2e
 
 # Run tests with visible browser
-npm run test:e2e:headed
+pnpm test:e2e:headed
 
 # Run tests with Playwright Test UI
-npm run test:e2e:ui
+pnpm test:e2e:ui
 
 # Run tests in debug mode
-npm run test:e2e:debug
+pnpm test:e2e:debug
 
 # Generate new tests with codegen
-npm run test:e2e:codegen
+pnpm test:e2e:codegen
 
 # View test reports
-npm run test:e2e:report
+pnpm test:e2e:report
+```
+
+### Base URL Configuration
+
+Playwright uses the `PLAYWRIGHT_TEST_BASE_URL` environment variable to know
+where your dev server is running. It defaults to `http://localhost:5173`.
+
+```bash
+# Point Playwright at a custom dev server URL
+PLAYWRIGHT_TEST_BASE_URL=http://localhost:5173 pnpm test:e2e
 ```
 
 ### Running Specific Tests
 
 ```bash
 # Run specific test file
-npx playwright test tests/e2e/scheduling.spec.ts
+pnpm playwright test tests/e2e/scheduling.spec.ts
 
 # Run tests with specific pattern
-npx playwright test --grep "drag and drop"
+pnpm playwright test --grep "drag and drop"
 
 # Run tests in specific browser
-npx playwright test --project=chromium
+pnpm playwright test --project=chromium
 ```
 
 ## Test Architecture
