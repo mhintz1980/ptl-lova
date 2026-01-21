@@ -11,6 +11,7 @@ import {
 } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { logErrorReport } from '../lib/error-reporting'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -26,13 +27,29 @@ export function LoginPage() {
     try {
       const { error } = await signIn(email, password)
       if (error) {
-        toast.error('Login failed: ' + error.message)
+        logErrorReport(error, {
+          where: 'LoginPage.handleSubmit',
+          what: 'Login failed for user credentials',
+          request: {
+            route: 'Login',
+            operation: 'sign in',
+            inputSummary: `emailDomain=${email.split('@')[1] ?? 'unknown'}`,
+          },
+        })
+        toast.error('Login failed. Please check your credentials and try again.')
       } else {
         toast.success('Welcome back!')
         navigate('/')
       }
     } catch (err) {
-      console.error(err)
+      logErrorReport(err, {
+        where: 'LoginPage.handleSubmit',
+        what: 'Unexpected login error',
+        request: {
+          route: 'Login',
+          operation: 'sign in',
+        },
+      })
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)

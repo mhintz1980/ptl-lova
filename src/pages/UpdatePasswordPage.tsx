@@ -11,6 +11,7 @@ import {
 } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { logErrorReport } from '../lib/error-reporting'
 
 export function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
@@ -42,13 +43,29 @@ export function UpdatePasswordPage() {
       const { error } = await supabase.auth.updateUser({ password })
 
       if (error) {
-        toast.error('Failed to update password: ' + error.message)
+        logErrorReport(error, {
+          where: 'UpdatePasswordPage.handleSubmit',
+          what: 'Failed to update password',
+          request: {
+            route: 'UpdatePassword',
+            operation: 'update user password',
+            inputSummary: `passwordLength=${password.length}`,
+          },
+        })
+        toast.error('Failed to update password. Please try again.')
       } else {
         toast.success('Password updated successfully!')
         navigate('/login')
       }
     } catch (err) {
-      console.error(err)
+      logErrorReport(err, {
+        where: 'UpdatePasswordPage.handleSubmit',
+        what: 'Unexpected update password error',
+        request: {
+          route: 'UpdatePassword',
+          operation: 'update user password',
+        },
+      })
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)

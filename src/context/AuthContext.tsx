@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '../adapters/supabase'
 import { AuthContext } from './AuthContext.shared'
+import { logErrorReport } from '../lib/error-reporting'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -20,7 +21,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null)
       })
       .catch((error) => {
-        console.error('Error fetching session:', error)
+        logErrorReport(error, {
+          where: 'AuthProvider.getSession',
+          what: 'Failed to fetch auth session',
+          request: {
+            route: 'AppInit',
+            operation: 'get session',
+          },
+        })
       })
       .finally(() => {
         setLoading(false)
@@ -33,14 +41,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           setUser(session?.user ?? null)
         } catch (error) {
-          console.error('Error in auth state change handler:', error)
+          logErrorReport(error, {
+            where: 'AuthProvider.onAuthStateChange',
+            what: 'Failed to apply auth state update',
+            request: {
+              route: 'AuthListener',
+              operation: 'update auth state',
+            },
+          })
         } finally {
           setLoading(false)
         }
       })
       subscription = data.subscription
     } catch (error) {
-      console.error('Error setting up auth state listener:', error)
+      logErrorReport(error, {
+        where: 'AuthProvider.onAuthStateChange',
+        what: 'Failed to register auth state listener',
+        request: {
+          route: 'AppInit',
+          operation: 'register auth listener',
+        },
+      })
       setLoading(false)
     }
 
