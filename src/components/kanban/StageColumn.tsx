@@ -122,6 +122,8 @@ export function StageColumn({
           <div
             ref={setNodeRef}
             className="flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-3 py-4 scrollbar-themed"
+            data-testid={`kanban-column-${stage}`}
+            data-stage={stage}
           >
             {sortedPumps.map((pump) =>
               activeId === pump.id ? null : (
