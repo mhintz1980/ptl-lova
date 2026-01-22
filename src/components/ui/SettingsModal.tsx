@@ -32,7 +32,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
       <div
         className="relative w-full max-w-2xl flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}

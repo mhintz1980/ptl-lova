@@ -617,7 +617,7 @@ describe('Modular Store Integration Tests', () => {
       expect(originalSnapshot).toBeNull()
     })
 
-    it('should support entering sandbox mode', () => {
+    it('should support entering sandbox mode', async () => {
       const testPump: Pump = {
         id: 'sandbox-test',
         serial: 555,
@@ -633,7 +633,7 @@ describe('Modular Store Integration Tests', () => {
 
       useApp.setState({ pumps: [testPump] })
 
-      useApp.getState().enterSandbox()
+      await useApp.getState().enterSandbox()
 
       const state = useApp.getState()
       expect(state.isSandbox).toBe(true)
@@ -641,7 +641,7 @@ describe('Modular Store Integration Tests', () => {
       expect(state.originalSnapshot?.[0]?.id).toBe('sandbox-test')
     })
 
-    it('should support exiting sandbox mode', () => {
+    it('should support exiting sandbox mode', async () => {
       const testPump: Pump = {
         id: 'sandbox-exit',
         serial: 666,
@@ -657,7 +657,7 @@ describe('Modular Store Integration Tests', () => {
 
       useApp.setState({ pumps: [testPump] })
 
-      useApp.getState().enterSandbox()
+      await useApp.getState().enterSandbox()
 
       // Modify pump in sandbox
       useApp.setState({
@@ -725,7 +725,9 @@ describe('Modular Store Integration Tests', () => {
 
       const state = useApp.getState()
       // Check employee count was reset to DEFAULT_CAPACITY_CONFIG value
-      expect(state.capacityConfig.assembly.employeeCount).toBeGreaterThanOrEqual(2)
+      expect(
+        state.capacityConfig.assembly.employeeCount
+      ).toBeGreaterThanOrEqual(2)
     })
   })
 })

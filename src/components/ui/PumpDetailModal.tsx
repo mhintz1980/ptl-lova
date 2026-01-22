@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import { Button } from './Button'
 import { Input } from './Input'
-import { format, parseISO, isValid } from 'date-fns'
+import { DateInput } from './DateInput'
+import { format, parseISO } from 'date-fns'
 import { useApp } from '../../store'
 import { cn } from '../../lib/utils'
 import { getCatalogData } from '../../lib/seed'
@@ -341,58 +342,14 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
     },
   ] as const
 
-  // Update handler for these specific "extra" fields
-  // Update handler for these specific "extra" fields
+  // Update handler for extended pump fields (not in base Pump type)
   const handleExtraChange = (field: string, value: string | number) => {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : null))
   }
 
-  const formatDateForInput = (isoString?: string) => {
-    if (!isoString) return ''
-    try {
-      return format(parseISO(isoString), 'yyyy-MM-dd')
-    } catch {
-      return ''
-    }
-  }
-
-  // Helper for Date Input Change
-  // To fix the "0000" year issue, we should allow the input to drive the state directly if possible,
-  // but since we store ISO strings, we need to parse.
-  // The issue usually happens if we re-format invalid partial dates.
-  // We will only update the state if the date is valid or empty.
-  const handleDateChange = (field: keyof Pump, value: string) => {
-    if (!value) {
-      handleChange(field, undefined)
-      return
-    }
-    // Check if it's a full date (YYYY-MM-DD)
-    if (value.length === 10) {
-      const date = new Date(value)
-      if (isValid(date)) {
-        handleChange(field, date.toISOString())
-      }
-    }
-    // If partial, we might not want to update the ISO string yet to avoid "0000" jumping?
-    // Actually, the input value is controlled by `formatDateForInput(formData.field)`.
-    // If we don't update formData, the input will revert to the old value on re-render, preventing typing.
-    // So we MUST update formData.
-    // But if we update formData with an invalid date, `formatDateForInput` returns "".
-    // This clears the input.
-    // Solution: We need local state for the date input value while editing, OR we accept that we only update the store on valid dates.
-    // But for a controlled input, we need to reflect what the user types.
-    // Since `formData` stores the actual Pump data (ISO strings), we can't store "2025-0" in it.
-    // We should probably use an uncontrolled input (defaultValue) for the date fields in Edit mode,
-    // OR maintain a separate local state for the string value of the date inputs.
-    // Let's try `defaultValue` approach for simplicity in this refactor, or just be careful.
-    // Actually, `Input` is controlled.
-    // Let's just update the ISO string. `new Date("0002-01-01").toISOString()` is valid.
-    // The browser handles the typing buffer.
-  }
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
       onClick={onClose}
       role="presentation"
     >
@@ -761,13 +718,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                       Est. Ship
                     </span>
                     {isEditing ? (
-                      <Input
-                        type="date"
-                        value={formatDateForInput(formData.forecastEnd)}
-                        onChange={(e) =>
-                          handleDateChange('forecastEnd', e.target.value)
-                        }
-                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
+                      <DateInput
+                        value={formData.forecastEnd}
+                        onChange={(val) => handleChange('forecastEnd', val)}
+                        className="w-36"
                       />
                     ) : (
                       <span className="text-sm font-mono font-bold text-foreground">
@@ -820,13 +774,10 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
                       Promise Date
                     </span>
                     {isEditing ? (
-                      <Input
-                        type="date"
-                        value={formatDateForInput(formData.promiseDate)}
-                        onChange={(e) =>
-                          handleDateChange('promiseDate', e.target.value)
-                        }
-                        className="bg-muted/30 border-border/50 h-7 w-28 text-xs"
+                      <DateInput
+                        value={formData.promiseDate}
+                        onChange={(val) => handleChange('promiseDate', val)}
+                        className="w-36"
                       />
                     ) : (
                       <span className="text-sm font-bold text-foreground">

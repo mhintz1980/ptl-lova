@@ -248,137 +248,14 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
 
   if (!isOpen) return null
 
-  // --- Sub-components (could be extracted) ---
-
-  const DetailOverlay = () => {
-    if (activeLineIndex === null) return null
-    const line = lines[activeLineIndex]
-
-    return (
-      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-lg ring-1 ring-white/10">
-          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-3">
-            <h3 className="text-sm font-semibold">
-              Line {activeLineIndex + 1} Details
-            </h3>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 rounded-full"
-              onClick={() => setActiveLineIndex(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex border-b border-border bg-muted/20">
-            <button
-              onClick={() => setActiveTab('details')}
-              className={cn(
-                'flex-1 px-4 py-2 text-xs font-medium transition-colors hover:text-primary',
-                activeTab === 'details'
-                  ? 'border-b-2 border-primary text-primary bg-primary/5'
-                  : 'text-muted-foreground'
-              )}
-            >
-              Specifications
-            </button>
-            <button
-              onClick={() => setActiveTab('notes')}
-              className={cn(
-                'flex-1 px-4 py-2 text-xs font-medium transition-colors hover:text-primary',
-                activeTab === 'notes'
-                  ? 'border-b-2 border-primary text-primary bg-primary/5'
-                  : 'text-muted-foreground'
-              )}
-            >
-              Notes
-            </button>
-          </div>
-
-          <div className="p-4 space-y-4">
-            {activeTab === 'details' ? (
-              <div className="space-y-4 animate-in slide-in-from-left-2 duration-200">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Engine
-                    </label>
-                    <Input
-                      value={line.engine ?? ''}
-                      onChange={(e) =>
-                        handleLineChange(
-                          activeLineIndex,
-                          'engine',
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g. Honda GX390"
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Gearbox
-                    </label>
-                    <Input
-                      value={line.gearbox ?? ''}
-                      onChange={(e) =>
-                        handleLineChange(
-                          activeLineIndex,
-                          'gearbox',
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g. PA 2:1"
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                </div>
-                <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-3">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-amber-800 dark:text-amber-200">
-                      These fields are auto-populated based on the selected
-                      Model but can be overridden here.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2 animate-in slide-in-from-right-2 duration-200">
-                <textarea
-                  value={line.notes ?? ''}
-                  onChange={(e) =>
-                    handleLineChange(activeLineIndex, 'notes', e.target.value)
-                  }
-                  placeholder="Add any special instructions or notes for this line item..."
-                  className="w-full min-h-[120px] rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-contain"
-                  autoFocus
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="border-t border-border bg-muted/20 p-3 flex justify-end">
-            <Button
-              size="sm"
-              onClick={() => setActiveLineIndex(null)}
-              className="px-6"
-            >
-              Done
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // --- Main Render ---
+
+  // Get the active line for the detail overlay (if any)
+  const activeLine = activeLineIndex !== null ? lines[activeLineIndex] : null
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
       onClick={handleCancel}
     >
       <div
@@ -386,7 +263,129 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
         className="w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <DetailOverlay />
+        {/* Detail Overlay - rendered inline to preserve focus across re-renders */}
+        {activeLineIndex !== null && activeLine && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-lg ring-1 ring-white/10">
+              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-3">
+                <h3 className="text-sm font-semibold">
+                  Line {activeLineIndex + 1} Details
+                </h3>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => setActiveLineIndex(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex border-b border-border bg-muted/20">
+                <button
+                  onClick={() => setActiveTab('details')}
+                  className={cn(
+                    'flex-1 px-4 py-2 text-xs font-medium transition-colors hover:text-primary',
+                    activeTab === 'details'
+                      ? 'border-b-2 border-primary text-primary bg-primary/5'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  Specifications
+                </button>
+                <button
+                  onClick={() => setActiveTab('notes')}
+                  className={cn(
+                    'flex-1 px-4 py-2 text-xs font-medium transition-colors hover:text-primary',
+                    activeTab === 'notes'
+                      ? 'border-b-2 border-primary text-primary bg-primary/5'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  Notes
+                </button>
+              </div>
+
+              <div className="p-4 space-y-4">
+                {activeTab === 'details' ? (
+                  <div className="space-y-4 animate-in slide-in-from-left-2 duration-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Engine
+                        </label>
+                        <Input
+                          value={activeLine.engine ?? ''}
+                          onChange={(e) =>
+                            handleLineChange(
+                              activeLineIndex,
+                              'engine',
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. Honda GX390"
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Gearbox
+                        </label>
+                        <Input
+                          value={activeLine.gearbox ?? ''}
+                          onChange={(e) =>
+                            handleLineChange(
+                              activeLineIndex,
+                              'gearbox',
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. PA 2:1"
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-amber-800 dark:text-amber-200">
+                          These fields are auto-populated based on the selected
+                          Model but can be overridden here.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 animate-in slide-in-from-right-2 duration-200">
+                    <textarea
+                      value={activeLine.notes ?? ''}
+                      onChange={(e) =>
+                        handleLineChange(
+                          activeLineIndex,
+                          'notes',
+                          e.target.value
+                        )
+                      }
+                      placeholder="Add any special instructions or notes for this line item..."
+                      className="w-full min-h-[120px] rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-contain"
+                      autoFocus
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-border bg-muted/20 p-3 flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={() => setActiveLineIndex(null)}
+                  className="px-6"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
@@ -580,7 +579,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                   <td className="py-[5px] px-[5px]">
                     <Input
                       type="number"
-                      value={line.valueEach ?? 0}
+                      value={line.valueEach || ''} // Allow empty display for 0
                       onChange={(e) =>
                         handleLineChange(
                           index,
@@ -588,6 +587,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                           Math.max(0, parseFloat(e.target.value) || 0)
                         )
                       }
+                      onFocus={(e) => e.target.select()} // Auto-select for quick replacement
                       className="h-8 border-transparent hover:border-border focus:border-input bg-transparent font-mono text-center p-0"
                       min={0}
                       step={0.01}
