@@ -114,6 +114,12 @@ async function main() {
   const targetDir = process.argv[2] || 'src' // Default to src
   const absoluteTarget = path.resolve(targetDir)
 
+  // Check if target exists
+  if (!fs.existsSync(absoluteTarget)) {
+    console.error(`${COLORS.red}Error: Path not found: ${targetDir}${COLORS.reset}`)
+    process.exit(1)
+  }
+
   console.log(
     `${COLORS.cyan}Scanning ${targetDir} for slop...${COLORS.reset}\n`
   )
