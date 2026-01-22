@@ -110,13 +110,43 @@ async function walk(dir, fileList = []) {
   return fileList
 }
 
+function showHelp() {
+  console.log(`
+Deslop - Scan codebase for AI slop (debug statements, secrets, etc.)
+
+Usage: node scripts/deslop.js [options] [path]
+
+Arguments:
+  path           Directory or file to scan (default: src)
+
+Options:
+  -h, --help     Show this help message and exit
+
+Examples:
+  node scripts/deslop.js              # Scan src/ directory
+  node scripts/deslop.js src/         # Scan src/ directory
+  node scripts/deslop.js file.ts      # Scan single file
+`)
+}
+
 async function main() {
-  const targetDir = process.argv[2] || 'src' // Default to src
+  const args = process.argv.slice(2)
+
+  // Handle --help/-h
+  if (args.includes('--help') || args.includes('-h')) {
+    showHelp()
+    process.exit(0)
+  }
+
+  // Get target path (first non-flag argument or default to 'src')
+  const targetDir = args.find((arg) => !arg.startsWith('-')) || 'src'
   const absoluteTarget = path.resolve(targetDir)
 
   // Check if target exists
   if (!fs.existsSync(absoluteTarget)) {
-    console.error(`${COLORS.red}Error: Path not found: ${targetDir}${COLORS.reset}`)
+    console.error(
+      `${COLORS.red}Error: Path not found: ${targetDir}${COLORS.reset}`
+    )
     process.exit(1)
   }
 

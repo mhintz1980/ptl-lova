@@ -28,7 +28,7 @@ Simulate three different reviewers looking at the code:
 
 - **Silent Failures**: Are there empty `catch` blocks? Swallowed errors?
 - **Input Validation**: Is user input checked before use?
-- **secrets**: Are there any hardcoded keys or tokens? (Run `deslop` check)
+- **Secrets**: Are there any hardcoded keys or tokens? (Run `deslop` check)
 - **Side Effects**: Does this change affect global state unexpectedly?
 
 ### 🧪 Reviewer 3: The Test Engineer (Coverage)

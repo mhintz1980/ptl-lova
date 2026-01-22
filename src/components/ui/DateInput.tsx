@@ -98,8 +98,7 @@ export function DateInput({
           // Style the native calendar picker icon
           '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
           '[&::-webkit-calendar-picker-indicator]:opacity-70',
-          '[&::-webkit-calendar-picker-indicator]:hover:opacity-100',
-          className
+          '[&::-webkit-calendar-picker-indicator]:hover:opacity-100'
         )}
       />
     </div>

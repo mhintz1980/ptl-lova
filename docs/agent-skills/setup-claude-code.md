@@ -7,7 +7,7 @@ Step-by-step guide for setting up awesome-slash workflow automation in Claude Co
 ## Prerequisites
 
 - **Git** installed
-- **Claude Code CLI** installed ([claude.ai/code](https://claude.ai/code))
+- **Claude Code CLI** installed (see [Anthropic docs](https://docs.anthropic.com) for installation)
 - **GitHub CLI (`gh`)** installed and authenticated (for `/ship` command)
 
 ```bash
