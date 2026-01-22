@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { format, parseISO, isValid } from 'date-fns'
-import { Calendar } from 'lucide-react'
 
 export interface DateInputProps {
   value?: string // ISO string or empty
@@ -78,10 +77,6 @@ export function DateInput({
     }
   }
 
-  const openPicker = () => {
-    inputRef.current?.showPicker?.()
-  }
-
   return (
     <div className={cn('relative flex items-center', className)}>
       <input
@@ -100,24 +95,13 @@ export function DateInput({
           'disabled:cursor-not-allowed disabled:opacity-50',
           // Ensure calendar picker is visible in dark mode
           'dark:[color-scheme:dark]',
-          // Make calendar icon clickable area larger
+          // Style the native calendar picker icon
           '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
           '[&::-webkit-calendar-picker-indicator]:opacity-70',
           '[&::-webkit-calendar-picker-indicator]:hover:opacity-100',
           className
         )}
       />
-      {/* Calendar button for non-webkit browsers or as backup */}
-      <button
-        type="button"
-        onClick={openPicker}
-        disabled={disabled}
-        className="absolute right-2 p-1 text-muted-foreground hover:text-foreground transition-colors"
-        tabIndex={-1}
-        aria-label="Open calendar"
-      >
-        <Calendar className="h-3.5 w-3.5" />
-      </button>
     </div>
   )
 }

@@ -26,6 +26,8 @@
 @layer base {
   html {
     font-size: 14px;
+    /* Default to dark color scheme for native controls (cursors, spinners, etc.) */
+    color-scheme: dark;
   }
   :root {
     --background: 220 17% 6%;
@@ -136,7 +138,8 @@
       #0f0f18 60%,
       #050505 100%
     );
-    --ambient-overlay: radial-gradient(
+    --ambient-overlay:
+      radial-gradient(
         circle at 20% 20%,
         rgba(59, 130, 246, 0.15),
         transparent 55%
@@ -146,7 +149,8 @@
         rgba(236, 72, 153, 0.15),
         transparent 70%
       );
-    --ambient-grid: repeating-linear-gradient(
+    --ambient-grid:
+      repeating-linear-gradient(
         0deg,
         rgba(94, 234, 212, 0.05) 0,
         rgba(94, 234, 212, 0.05) 1px,
@@ -170,7 +174,10 @@
     --layer-l2-shadow: var(--shadow-md), 0 0 35px rgba(236, 72, 153, 0.15);
   }
 
+
   .light {
+    /* Override color scheme for native controls when in light mode */
+    color-scheme: light;
     --background: 220 26% 97%;
     --foreground: 215 25% 15%;
 
@@ -216,7 +223,8 @@
       #eef1fb 45%,
       #f9f9ff 100%
     );
-    --ambient-overlay: radial-gradient(
+    --ambient-overlay:
+      radial-gradient(
         circle at 20% 20%,
         rgba(59, 130, 246, 0.12),
         transparent 55%
@@ -226,7 +234,8 @@
         rgba(236, 72, 153, 0.12),
         transparent 70%
       );
-    --ambient-grid: repeating-linear-gradient(
+    --ambient-grid:
+      repeating-linear-gradient(
         0deg,
         rgba(37, 99, 235, 0.08) 0,
         rgba(37, 99, 235, 0.08) 1px,
@@ -324,8 +333,8 @@
       rgba(255, 255, 255, 0.92),
       rgba(239, 242, 250, 0.9)
     );
-    --layer-depth-shadow: 0 28px 80px rgba(15, 23, 42, 0.08),
-      0 0 25px rgba(59, 130, 246, 0.15);
+    --layer-depth-shadow:
+      0 28px 80px rgba(15, 23, 42, 0.08), 0 0 25px rgba(59, 130, 246, 0.15);
     --layer-l2-bg: rgba(255, 255, 255, 0.92);
     --layer-l2-shadow: var(--shadow-md), 0 0 35px rgba(59, 130, 246, 0.12);
 
@@ -353,8 +362,68 @@
     color: hsl(215 18% 35%);
   }
 
+
   .light .chart-legend-row__chip {
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  }
+
+  /* 
+   * Chrome Linux I-Beam Cursor Fix
+   * Chrome on Linux has a known bug where the I-beam (text selection) mouse cursor
+   * renders in white, making it invisible on light backgrounds. The caret-color
+   * property only affects the blinking text caret inside inputs, not the mouse cursor.
+   * 
+   * Solution: Use a custom cursor image that has good contrast on any background.
+   * The cursor is a dark I-beam with a subtle white outline for universal visibility.
+   */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    /* Custom I-beam cursor with fallback to native text cursor */
+    cursor: url('/cursors/text-cursor.svg') 16 16, text;
+    caret-color: currentColor;
+  }
+
+  /* Light mode: ensure dark caret on light backgrounds */
+  .light input,
+  .light textarea,
+  .light [contenteditable="true"] {
+    caret-color: hsl(215 25% 15%); /* Dark text color for light mode */
+  }
+  
+  /* Apply custom cursor to ALL selectable text elements (both light and dark modes)
+   * This ensures consistent cursor visibility across Chrome on Linux */
+  h1, h2, h3, h4, h5, h6,
+  label,
+  p,
+  span,
+  a,
+  li,
+  td, th,
+  dt, dd,
+  figcaption,
+  blockquote,
+  cite,
+  q,
+  em, strong, b, i,
+  small,
+  time,
+  code, pre,
+  [class*="text-"],
+  [class*="font-"] {
+    cursor: url('/cursors/text-cursor.svg') 16 16, auto;
+  }
+  
+  /* Restore pointer cursor for interactive elements */
+  a[href],
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  select,
+  summary {
+    cursor: pointer;
   }
 
   * {
@@ -363,8 +432,13 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
-      'Segoe UI', sans-serif;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
     background-image: var(--body-gradient);
     min-height: 100vh;
   }
@@ -373,8 +447,10 @@
 @layer components {
   .header-button {
     position: relative;
-    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 200ms ease, background 200ms ease;
+    transition:
+      transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms ease,
+      background 200ms ease;
     box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35);
   }
 
@@ -396,7 +472,8 @@
 
   .header-button:hover {
     transform: translateY(-2px) scale(1.07);
-    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25),
+    box-shadow:
+      0 8px 25px rgba(37, 99, 235, 0.25),
       0 0 0 3px rgba(59, 130, 246, 0.08);
   }
 
@@ -610,7 +687,8 @@
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(18px);
     @apply rounded-2xl;
-    box-shadow: 0 0 25px rgba(94, 234, 212, 0.15),
+    box-shadow:
+      0 0 25px rgba(94, 234, 212, 0.15),
       inset 0 0 20px rgba(236, 72, 153, 0.15);
   }
 
@@ -622,7 +700,9 @@
 
   .layer-l1 {
     @apply rounded-2xl border border-white/5 bg-card/90;
-    box-shadow: var(--shadow-md), 0 0 20px rgba(34, 211, 238, 0.12);
+    box-shadow:
+      var(--shadow-md),
+      0 0 20px rgba(34, 211, 238, 0.12);
   }
 
   .layer-l2 {
@@ -643,7 +723,8 @@
 
   .neon-hover {
     position: relative;
-    transition: transform 140ms cubic-bezier(0.25, 0.9, 0.3, 1.2),
+    transition:
+      transform 140ms cubic-bezier(0.25, 0.9, 0.3, 1.2),
       box-shadow 140ms ease;
   }
 
@@ -663,7 +744,9 @@
 
   .chart-canvas {
     filter: drop-shadow(0 20px 45px rgba(5, 10, 20, 0.45));
-    transition: transform 0.25s ease, filter 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      filter 0.25s ease;
   }
 
   .chart-canvas--hovered {
@@ -672,7 +755,9 @@
   }
 
   .chart-slice {
-    transition: transform 0.25s ease, filter 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      filter 0.25s ease;
   }
 
   .chart-card:hover .chart-slice {
@@ -700,7 +785,9 @@
     font-size: clamp(0.65rem, 1.6vw, 0.78rem);
     line-height: 1.2;
     border: 1px solid transparent;
-    transition: border 0.2s ease, color 0.2s ease;
+    transition:
+      border 0.2s ease,
+      color 0.2s ease;
     max-width: 12rem;
     white-space: nowrap;
     overflow: hidden;
