@@ -349,7 +349,7 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
       onClick={onClose}
       role="presentation"
     >
