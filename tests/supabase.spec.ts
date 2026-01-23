@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 // Use vi.hoisted to create mock functions that can be used in vi.mock

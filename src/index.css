@@ -376,11 +376,11 @@
    * Solution: Use a custom cursor image that has good contrast on any background.
    * The cursor is a dark I-beam with a subtle white outline for universal visibility.
    */
-  input,
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
   textarea,
   [contenteditable="true"] {
     /* Custom I-beam cursor with fallback to native text cursor */
-    cursor: url('/cursors/text-cursor.svg') 16 16, text;
+    cursor: url('/cursors/text-cursor.svg') 8 10, text;
     caret-color: currentColor;
   }
 
@@ -391,39 +391,19 @@
     caret-color: hsl(215 25% 15%); /* Dark text color for light mode */
   }
   
-  /* Apply custom cursor to ALL selectable text elements (both light and dark modes)
-   * This ensures consistent cursor visibility across Chrome on Linux */
-  h1, h2, h3, h4, h5, h6,
-  label,
-  p,
-  span,
-  a,
-  li,
-  td, th,
-  dt, dd,
-  figcaption,
-  blockquote,
-  cite,
-  q,
-  em, strong, b, i,
-  small,
-  time,
-  code, pre,
-  [class*="text-"],
-  [class*="font-"] {
-    cursor: url('/cursors/text-cursor.svg') 16 16, auto;
-  }
-  
-  /* Restore pointer cursor for interactive elements */
+  /* Restore pointer cursor for interactive elements - use !important to override any inherited rules */
   a[href],
   button,
   [role="button"],
   [type="button"],
   [type="submit"],
   [type="reset"],
+  [type="checkbox"],
+  [type="radio"],
   select,
-  summary {
-    cursor: pointer;
+  summary,
+  .cursor-pointer {
+    cursor: pointer !important;
   }
 
   * {

@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <!-- Native I-beam cursor: 32x32 canvas, centered vertical bar with serifs -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="20" viewBox="0 0 16 20">
+  <!-- Native-sized I-beam cursor: 16x20, ultra-thin strokes -->
   <!-- White outline for visibility on dark backgrounds -->
-  <path d="M16 3v26M12 3h8M12 29h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M8 2v16M5 2h6M5 18h6" stroke="#ffffff" stroke-width="0.75" stroke-linecap="round" fill="none"/>
   <!-- Black inner stroke - the actual cursor shape -->
-  <path d="M16 3v26M12 3h8M12 29h8" stroke="#000000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M8 2v16M5 2h6M5 18h6" stroke="#1a1a1a" stroke-width="0.4" stroke-linecap="round" fill="none"/>
 </svg>
