@@ -11,7 +11,8 @@ vi.mock('../../store', () => {
   const getStateMock = vi.fn(() => ({
     getModelLeadTimes: vi.fn(),
   }))
-  ;(useAppMock as any).getState = getStateMock
+  ;(useAppMock as unknown as { getState: typeof getStateMock }).getState =
+    getStateMock
   return { useApp: useAppMock }
 })
 
