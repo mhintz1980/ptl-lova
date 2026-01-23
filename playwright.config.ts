@@ -1,6 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173';
+const webServer = process.env.CI
+  ? {
+      command: 'pnpm preview --host --port 5173',
+      port: 5173,
+      reuseExistingServer: false,
+    }
+  : undefined;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -24,6 +31,6 @@ export default defineConfig({
     { name: 'Mobile Safari', use: { ...devices['iPhone 12'] } },
   ],
 
-  // ❌ Disable the automatic web server (Codex sandbox blocks ports)
-  webServer: undefined,
+  // Enable preview server in CI so Playwright has a target to hit.
+  webServer,
 });
