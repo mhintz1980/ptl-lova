@@ -12,12 +12,14 @@ import {
   StickyNote,
   Trash2,
   AlertCircle,
+  UploadCloud,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getModelPrice, getModelBom, getCatalogData } from '../../lib/seed'
 import { cn } from '../../lib/utils'
 import { formatCurrency } from '../../lib/format'
 import { logErrorReport } from '../../lib/error-reporting'
+import { parsePoCsv } from '../../lib/poCsvImport'
 import { PrioritySelect } from '../ui/PrioritySelect'
 
 interface AddPoModalProps {
@@ -45,6 +47,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     },
   ])
   const [isSaving, setIsSaving] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Edit/Note Popup State
   const [activeLineIndex, setActiveLineIndex] = useState<number | null>(null)
@@ -52,6 +55,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
 
   // Ref for modal focus management
   const modalRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // ESC key handler and focus management
   useEffect(() => {
@@ -91,6 +95,30 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     const pumpCustomers = pumps.map((p) => p.customer).filter(Boolean)
     return [...new Set([...catalogCustomers, ...pumpCustomers])].sort()
   }, [pumps])
+
+  const isFormDirty = useMemo(() => {
+    const hasLineData = lines.some((line) =>
+      [
+        line.model,
+        line.color,
+        line.promiseDate,
+        line.valueEach,
+        line.notes,
+        line.engine,
+        line.gearbox,
+        line.quantity !== 1,
+        line.priority && line.priority !== 'Normal',
+      ].some(Boolean)
+    )
+    return Boolean(
+      po ||
+        customer ||
+        dateReceived ||
+        promiseDate ||
+        hasLineData ||
+        lines.length > 1
+    )
+  }, [po, customer, dateReceived, promiseDate, lines])
 
   // Inherit PO promise date
   useEffect(() => {
@@ -145,6 +173,51 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     }
 
     setLines(newLines)
+  }
+
+  const applyImport = (payload: ReturnType<typeof parsePoCsv>) => {
+    setPo(payload.po)
+    setCustomer(payload.customer)
+    setDateReceived(payload.dateReceived ?? '')
+    setPromiseDate(payload.promiseDate ?? '')
+    setLines(payload.lines)
+    setActiveLineIndex(null)
+    setActiveTab('details')
+  }
+
+  const handleCsvFile = async (file: File) => {
+    if (isFormDirty) {
+      const confirmed = window.confirm(
+        'Importing will overwrite the current form. Continue?'
+      )
+      if (!confirmed) return
+    }
+
+    try {
+      const text = await file.text()
+      const payload = parsePoCsv(text)
+      applyImport(payload)
+      toast.success(
+        `Imported ${payload.lines.length} line items from ${file.name}`
+      )
+    } catch (error) {
+      logErrorReport(error, {
+        where: 'AddPoModal.handleCsvFile',
+        what: 'Failed to import PO CSV',
+        request: {
+          route: 'AddPoModal',
+          operation: 'import csv',
+          inputSummary: `file=${file.name}`,
+        },
+      })
+      toast.error(
+        error instanceof Error ? error.message : 'Invalid CSV file'
+      )
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -402,6 +475,27 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                data-testid="po-csv-input"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleCsvFile(file)
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full border-border/50 bg-white/5 hover:bg-white/10 backdrop-blur-sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSaving}
+              >
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Import CSV
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -478,6 +572,27 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
                 className="bg-muted/30 border-border/50 h-9"
               />
             </div>
+          </div>
+          <div
+            className={cn(
+              'mx-6 mb-3 mt-3 rounded-xl border border-dashed px-4 py-2 text-xs text-muted-foreground transition-colors',
+              isDragging
+                ? 'border-primary/70 bg-primary/5 text-primary'
+                : 'border-border/60'
+            )}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsDragging(true)
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsDragging(false)
+              const file = e.dataTransfer.files?.[0]
+              if (file) handleCsvFile(file)
+            }}
+          >
+            Drag and drop a CSV here, or click "Import CSV" to select a file.
           </div>
         </div>
 
