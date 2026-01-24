@@ -90,8 +90,13 @@ export function parsePoCsv(csvText: string): ParsedPo {
     const model = row.model?.trim()
     if (!model) throw new Error('model is required for every row')
 
-    const quantity = Number.parseInt(row.quantity ?? '', 10)
-    if (!Number.isFinite(quantity) || quantity <= 0) {
+    const quantityRaw = row.quantity?.trim() ?? ''
+    const quantity = Number(quantityRaw)
+    if (
+      !Number.isFinite(quantity) ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0
+    ) {
       throw new Error(`quantity must be > 0 for model ${model}`)
     }
 

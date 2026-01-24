@@ -43,4 +43,25 @@ describe('parsePoCsv', () => {
     const csv = ['po,customer,model,quantity', 'PO-1,Acme,DD-6,0'].join('\n')
     expect(() => parsePoCsv(csv)).toThrow(/quantity/i)
   })
+
+  it('fails when quantity is not an integer', () => {
+    const csv = ['po,customer,model,quantity', 'PO-1,Acme,DD-6,1.5'].join('\n')
+    expect(() => parsePoCsv(csv)).toThrow(/quantity/i)
+  })
+
+  it('fails when promise_date is invalid', () => {
+    const csv = [
+      'po,customer,model,quantity,promise_date',
+      'PO-1,Acme,DD-6,1,not-a-date',
+    ].join('\n')
+    expect(() => parsePoCsv(csv)).toThrow(/promise_date/i)
+  })
+
+  it('fails when priority is invalid', () => {
+    const csv = [
+      'po,customer,model,quantity,priority',
+      'PO-1,Acme,DD-6,1,SuperRush',
+    ].join('\n')
+    expect(() => parsePoCsv(csv)).toThrow(/priority/i)
+  })
 })
