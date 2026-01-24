@@ -1,12 +1,7 @@
 # Session State
 
-- Task: /update-docs-around report-only for full repo.
+- Task: Capture top improvement tasks and brainstorm reporting + ultra-easy PO entry requirements.
 - Branch: fix/date-input-fields.
-- Phase status: Scan complete; report pending.
-- Scan summary (report-only):
-  - Markdown files analyzed: 213
-  - Outdated references (heuristic): 265
-  - Syntax errors in code blocks: 45
-  - Missing CHANGELOG.md: 1
-  - README version mismatch: 1 (README 2.0.0 vs package.json 0.0.0)
-- Notes: Many outdated refs/syntax errors are from skills/ docs and example snippets; report will highlight actionable items in docs/ and root.
+- Phase status: Added backlog to plan; awaiting clarification to draft report list.
+- Notes: Reviewed `src/types.ts` to confirm available Pump/PO fields for report feasibility.
+- Next steps: Get answer on cash-flow/revenue recognition + any desired PO intake constraints, then draft report list (current data vs slight additions).
