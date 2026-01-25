@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   deployment-check:
     name: Wait for Vercel Deployment
@@ -33,7 +37,7 @@ jobs:
           sleep 10
 
           # Check if the deployment is accessible
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.vercel-deployment.outputs.url }})
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.vercel-deployment.outputs.url }}")
 
           if [ "$response" = "200" ]; then
             echo "✅ Deployment is accessible (HTTP $response)"

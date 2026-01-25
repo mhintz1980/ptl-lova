@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+  checks: write
+  security-events: write
+
 jobs:
   quality-checks:
     name: Code Quality & Tests
@@ -15,9 +20,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ADDED: Install pnpm so the runner can use it
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
@@ -27,7 +31,6 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      # CHANGED: Use pnpm install instead of npm ci
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -63,9 +66,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ADDED: Install pnpm here too
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
@@ -73,9 +75,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm' # CHANGED: npm -> pnpm
-
-      # CHANGED: npm ci -> pnpm install
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
