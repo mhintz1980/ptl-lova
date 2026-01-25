@@ -15,6 +15,7 @@ import { SettingsModal } from './components/ui/SettingsModal'
 import { ShortcutsHelpModal } from './components/ui/ShortcutsHelpModal'
 import { Dashboard } from './pages/Dashboard'
 import { Kanban } from './pages/Kanban'
+import { OrdersPage } from './pages/OrdersPage'
 import { SchedulingView } from './components/scheduling/SchedulingView'
 import { Toaster } from 'sonner'
 import { Pump } from './types'
@@ -147,6 +148,7 @@ function MainApp() {
   const currentView = useMemo((): AppView => {
     if (location.pathname.includes('/kanban')) return 'kanban'
     if (location.pathname.includes('/scheduling')) return 'scheduling'
+    if (location.pathname.includes('/orders')) return 'orders'
     return 'dashboard'
   }, [location.pathname])
 
@@ -192,6 +194,7 @@ function MainApp() {
                 path="scheduling"
                 element={<SchedulingView pumps={filteredPumps} />}
               />
+              <Route path="orders" element={<OrdersPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           )}

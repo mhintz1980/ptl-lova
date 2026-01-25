@@ -18,6 +18,7 @@
     "test:e2e:install": "playwright install",
     "test:e2e:report": "playwright show-report",
     "context": "node scripts/check-context.js",
+    "preflight": "npx tsx scripts/preflight.ts",
     "audit:fix": "npm audit fix",
     "security": "npm audit"
   },

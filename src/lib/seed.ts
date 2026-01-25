@@ -222,7 +222,8 @@ function generatePumpFromCatalog(
 
   for (let i = 0; i < quantity; i++) {
     const serial = genSerial()
-    const po = `${poBase}-${String(startIndex + i + 1).padStart(2, '0')}`
+    // FIX: Do not append line item to PO string, or grouping fails
+    const po = poBase
 
     // Generate realistic schedule based on lead times
     // Spread POs across past 60 days to ensure variety in stages
@@ -370,9 +371,14 @@ export function seed(count: number = 80): Pump[] {
   for (const model of CATALOG_MODELS) {
     if (generated >= count) break
 
-    // Determine order quantity (1-5 pumps per order)
+    // Determine order quantity
+    // FORCE LARGE ORDERS for the first 20 generated pumps to show off Digital DNA
+    const isLargeOrder = generated < 20
+    const minQ = isLargeOrder ? 5 : 1
+    const maxQ = isLargeOrder ? 12 : 5
+
     const orderQuantity = Math.min(
-      Math.floor(Math.random() * 5) + 1,
+      Math.floor(Math.random() * (maxQ - minQ + 1)) + minQ,
       count - generated
     )
     const customer = CUSTOMERS[generated % CUSTOMERS.length]

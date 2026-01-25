@@ -200,7 +200,8 @@ Full rule text: `docs/process/constitutional-core-rules.md`
 ## Default Workflow (Do This Unless Told Otherwise)
 
 1. **Clarify the goal** (happy path, non-goals, constraints)
-2. **Write a small plan** (checklist, files touched, acceptance criteria)
+2. **Write a small plan** (checklist, files touched, acceptance criteria).
+   - _Tip:_ Check `docs/SKILL_INDEX.md` for relevant skills (e.g., Supabase, React trends, Tool Design) to include in your plan.
 3. **Retcon docs/spec first** _when behavior/contracts change_
 4. **Write tests first** (contract + integration, then unit as needed)
 5. **Implement in small slices** (keep seams clean, avoid "general solution" traps)
