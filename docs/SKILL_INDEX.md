@@ -9,7 +9,7 @@ _How agents should think, manage context, and operate within this repo._
 
 | Skill                    | Description                              | Path                                                                                                   |
 | ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Context Conservation** | Rules for minimizing token usage         | [View](file:///home/markimus/projects/ptl-lova/docs/agent-skills/skills/context-conservation/SKILL.md) |
+| **Context Conservation** | Rules for minimizing token usage         | [View](agent-skills/skills/context-conservation/SKILL.md) |
 | **Context Fundamentals** | Core theory of context engineering       | [View](file:///home/markimus/projects/ptl-lova/docs/agent-skills/skills/context-fundamentals/SKILL.md) |
 | **Tool Design**          | Best practices for creating agent tools  | [View](file:///home/markimus/projects/ptl-lova/docs/agent-skills/skills/tool-design/SKILL.md)          |
 | **Memory Systems**       | Managing cross-session knowledge         | [View](file:///home/markimus/projects/ptl-lova/docs/agent-skills/skills/memory-systems/SKILL.md)       |
