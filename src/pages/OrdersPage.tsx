@@ -256,7 +256,6 @@ function OrderRow({
           <DigitalDNA
             strand={order}
             className="hover:opacity-80 transition-opacity"
-            onSegmentClick={onToggle}
           />
         </TableCell>
         <TableCell className="text-right text-xs">
