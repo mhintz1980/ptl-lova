@@ -289,6 +289,15 @@ def main():
     path = sys.argv[3]
 
     # Validate skill name format
+    import re
+    if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', skill_name):
+        print(f"❌ Error: Skill name '{skill_name}' must be hyphen-case with lowercase letters, digits, and hyphens only")
+        sys.exit(1)
+    if len(skill_name) > 40:
+        print(f"❌ Error: Skill name '{skill_name}' exceeds 40 characters")
+        sys.exit(1)
+
+    # Validate skill name format
     if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', skill_name):
         print(f"❌ Error: Skill name '{skill_name}' must be hyphen-case with lowercase letters, digits, and hyphens only")
         sys.exit(1)
