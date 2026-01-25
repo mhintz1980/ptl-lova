@@ -115,39 +115,69 @@ function getSafetyStatus() {
 // --- Main ---
 
 async function main() {
-  console.log('\n✈️  \x1b[1mAGENT PREFLIGHT CHECK\x1b[0m')
-  console.log('-------------------------')
+  try {
+    const args = process.argv.slice(2)
 
-  // Context
-  const context = getContextUsage()
-  console.log(
-    `📊 Baseline Files: ${context.percentage}% (${context.totalTokens.toLocaleString()} tokens)`
-  )
-  console.log(
-    `   \x1b[90m(Does not include current conversation history)\x1b[0m`
-  )
+    // Help flag check
+    if (args.includes('--help') || args.includes('-h')) {
+      console.log(`
+Usage: ts-node scripts/preflight.ts [options] [context-keywords...]
 
-  // Status
-  const status = getStatus()
-  console.log(`📌 Status: ${status.deployment}`)
-  console.log(`   Task: ${status.activeTask}`)
+Options:
+  -h, --help    Show this help message
 
-  // Safety
-  const safety = getSafetyStatus()
-  console.log(`🛡️  Env: ${safety.env}`)
+Description:
+  Runs preflight checks for agent sessions.
+  Provide optional keywords to get skill recommendations.
+  
+Example:
+  pnpm preflight react auth
+`)
+      process.exit(0)
+    }
 
-  // Skills
-  const args = process.argv.slice(2)
-  const skills = getRecommendedSkills(args)
-  if (skills.length > 0) {
-    console.log(`🧠 Recommended Skills:`)
-    skills.forEach((s) => console.log(`   - ${s}`))
+    console.log('\n✈️  \x1b[1mAGENT PREFLIGHT CHECK\x1b[0m')
+    console.log('-------------------------')
+
+    // Context
+    const context = getContextUsage()
+    console.log(
+      `📊 Baseline Files: ${context.percentage}% (${context.totalTokens.toLocaleString()} tokens)`
+    )
+    console.log(
+      `   \x1b[90m(Does not include current conversation history)\x1b[0m`
+    )
+
+    // Status
+    const status = getStatus()
+    console.log(`📌 Status: ${status.deployment}`)
+    console.log(`   Task: ${status.activeTask}`)
+
+    // Safety
+    const safety = getSafetyStatus()
+    console.log(`🛡️  Env: ${safety.env}`)
+
+    // Skills
+    const skills = getRecommendedSkills(args)
+    if (skills.length > 0) {
+      console.log(`🧠 Recommended Skills:`)
+      skills.forEach((s) => console.log(`   - ${s}`))
+    }
+
+    console.log('-------------------------')
+    console.log(
+      '✅ System Ready. \x1b[36mREMINDER: Update header with estimated Session History.\x1b[0m\n'
+    )
+    process.exit(0)
+  } catch (error) {
+    console.error('\n❌ Preflight validation failed:')
+    if (error instanceof Error) {
+      console.error(`   ${error.message}`)
+    } else {
+      console.error(`   Unknown error: ${String(error)}`)
+    }
+    process.exit(1)
   }
-
-  console.log('-------------------------')
-  console.log(
-    '✅ System Ready. \x1b[36mREMINDER: Update header with estimated Session History.\x1b[0m\n'
-  )
 }
 
 main()
