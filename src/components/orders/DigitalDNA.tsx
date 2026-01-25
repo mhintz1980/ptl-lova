@@ -59,6 +59,15 @@ const DnaSegmentItem: React.FC<DnaSegmentItemProps> = ({
   // - Opacity 20% if future/empty
 
   const isActive = segment.activeRatio > 0
+  const isClickable = Boolean(onClick)
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!isClickable) return
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onClick?.()
+    }
+  }
 
   let opacityClass = 'opacity-20'
   if (isActive)
@@ -94,9 +103,15 @@ const DnaSegmentItem: React.FC<DnaSegmentItemProps> = ({
       }
     >
       <div
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        aria-label={`Stage ${segment.label}`}
+        aria-disabled={!isClickable}
+        onKeyDown={handleKeyDown}
         onClick={onClick}
         className={cn(
-          'h-8 w-3 rounded-none transition-all hover:scale-110 hover:z-10 cursor-pointer relative',
+          'h-8 w-3 rounded-none transition-all hover:scale-110 hover:z-10 relative',
+          isClickable ? 'cursor-pointer' : 'cursor-default',
           'first:rounded-l-sm last:rounded-r-sm', // Rounded ends for the whole strand
           segment.colorClass, // The stage color
           opacityClass,
