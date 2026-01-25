@@ -372,7 +372,7 @@ export function seed(count: number = 80): Pump[] {
     if (generated >= count) break
 
     // Determine order quantity
-    // FORCE LARGE ORDERS for the first 3 batches to show off Digital DNA
+    // FORCE LARGE ORDERS for the first 20 generated pumps to show off Digital DNA
     const isLargeOrder = generated < 20
     const minQ = isLargeOrder ? 5 : 1
     const maxQ = isLargeOrder ? 12 : 5
