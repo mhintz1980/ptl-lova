@@ -61,6 +61,10 @@ def package_skill(skill_path, output_dir=None):
     else:
         output_path = Path.cwd()
 
+    if output_path == skill_path or skill_path in output_path.parents:
+        print("❌ Error: output directory must be outside the skill folder")
+        return None
+
     skill_filename = output_path / f"{skill_name}.skill"
 
     # Create the .skill file (zip format)
