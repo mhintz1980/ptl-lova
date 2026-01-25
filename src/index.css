@@ -20,7 +20,6 @@
 .animate-glow-slow {
   animation: glow-slow 4s ease-in-out infinite;
 }
-
 /* PumpTracker neon layered system */
 
 @layer base {
@@ -721,12 +720,12 @@
   .chart-card__content {
     padding-top: 0;
   }
-
   .chart-canvas {
     filter: drop-shadow(0 20px 45px rgba(5, 10, 20, 0.45));
     transition:
       transform 0.25s ease,
       filter 0.25s ease;
+  }
   }
 
   .chart-canvas--hovered {

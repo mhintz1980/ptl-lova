@@ -16,14 +16,14 @@ PumpTracker Lite is a powerful web application designed to help manufacturing te
 
 All project documents live under [`docs/`](docs/README.md):
 
-| Document                                                     | Purpose                             |
-| ------------------------------------------------------------ | ----------------------------------- |
-| [`docs/architecture.md`](docs/architecture.md)               | UI surfaces, data flow, DDD layers  |
-| [`docs/development.md`](docs/development.md)                 | Setup, workflow, coding conventions |
+| Document                                                     | Purpose                                 |
+| ------------------------------------------------------------ | --------------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md)               | UI surfaces, data flow, DDD layers      |
+| [`docs/development.md`](docs/development.md)                 | Setup, workflow, coding conventions     |
 | [`docs/error-format.md`](docs/error-format.md)               | Error reporting shape + troubleshooting |
-| [`docs/testing.md`](docs/testing.md)                         | Vitest + Playwright instructions    |
-| [`docs/deployment.md`](docs/deployment.md)                   | Hosting and deployment guidance     |
-| [`docs/status/current-work.md`](docs/status/current-work.md) | Active work and next steps          |
+| [`docs/testing.md`](docs/testing.md)                         | Vitest + Playwright instructions        |
+| [`docs/deployment.md`](docs/deployment.md)                   | Hosting and deployment guidance         |
+| [`docs/status/current-work.md`](docs/status/current-work.md) | Active work and next steps              |
 
 ## ✨ Features
 
@@ -72,14 +72,15 @@ All project documents live under [`docs/`](docs/README.md):
 
 PumpTracker Lite includes global keyboard shortcuts for faster navigation and productivity:
 
-| Shortcut | Action | Description |
-| -------- | ------ | ----------- |
-| `Ctrl+N` (or `⌘N` on Mac) | Add Purchase Order | Opens the Add PO modal to create a new purchase order |
-| `Ctrl+F` (or `⌘F` on Mac) | Focus Search | Focuses the search input in the toolbar for quick filtering |
-| `Ctrl+/` (or `⌘/` on Mac) | Show Shortcuts | Opens the keyboard shortcuts help modal |
-| `Escape` | Close Modal | Closes any open modal (Add PO, Settings, Pump Details, Shortcuts Help) |
+| Shortcut                  | Action             | Description                                                            |
+| ------------------------- | ------------------ | ---------------------------------------------------------------------- |
+| `Ctrl+N` (or `⌘N` on Mac) | Add Purchase Order | Opens the Add PO modal to create a new purchase order                  |
+| `Ctrl+F` (or `⌘F` on Mac) | Focus Search       | Focuses the search input in the toolbar for quick filtering            |
+| `Ctrl+/` (or `⌘/` on Mac) | Show Shortcuts     | Opens the keyboard shortcuts help modal                                |
+| `Escape`                  | Close Modal        | Closes any open modal (Add PO, Settings, Pump Details, Shortcuts Help) |
 
 **Features:**
+
 - Shortcuts work globally across all views (Dashboard, Kanban, Scheduling)
 - Smart detection prevents shortcuts from interfering with form inputs (except `Escape`)
 - Cross-platform support: `Ctrl` on Windows/Linux, `⌘` on macOS
@@ -179,13 +180,15 @@ pnpm test:e2e:ui
 
 ## 📊 Bundle Optimization
 
-The Vite config uses manual chunk splitting to keep bundles efficient:
+The Vite config uses manual chunk splitting to keep bundles efficient. To keep Rollup from emitting a single vendor bundle (which triggered the default 500kB chunk-size warning), dependencies in `node_modules` are routed into purpose-specific chunks:
 
 - `react` – React runtime and JSX helpers
 - `charts` – Recharts + date-fns
 - `dnd` – @dnd-kit packages
 - `ui` – Lucide icons, Sonner toasts, Radix primitives
+- `table` – TanStack table utilities
 - `supabase` – Supabase client (tree-shaken when unused)
+- `vendor` – fallback for any other third-party modules
 
 ## 🔧 Environment Variables
 
