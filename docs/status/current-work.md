@@ -3,7 +3,7 @@
 > [!IMPORTANT] > **READ THIS FILE FIRST** in every new conversation.
 > This is the single source of truth for what's happening in the project right now.
 
-> **Last Updated**: 2025-12-27 (Drill-down charts in progress - 3/6 complete)
+> **Last Updated**: 2026-01-25 (Dashboard Engine, Error Handling & Enhanced E2E merged)
 > **Active Branch**: `main` > **Deployment Status**: 🚀 **BETA** (Cloud Mode Active)
 > **Data Strategy**: **Supabase** (Shared) - `pump` table
 
@@ -75,6 +75,9 @@
 ## Completed: Branch Consolidation ✅ (2026-01-17)
 
 - [x] **Batch Merge**: Merged all outstanding feature branches (`dashboard-improvements`, `database-logging`, etc.) into `main`.
+- [x] **Dashboard Engine Merge**: Integrated comprehensive dashboard engine with drill-down state, breadcrumbs, and filtered modes.
+- [x] **Error Handling Strategy**: Implemented structured error reporting in Supabase adapters and UI.
+- [x] **Enhanced E2E**: Merged improved Playwright tests for dashboard workflows.
 - [x] **Cleanup**: Verified all changes from the last 5 days are correctly integrated.
 - [x] **Build Verification**: Confirmed `main` builds successfully after consolidation.
 
