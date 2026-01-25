@@ -22,8 +22,6 @@ const buildPump = (overrides: Partial<Pump>): Pump => ({
   priority: overrides.priority ?? "Normal",
   last_update: overrides.last_update ?? "2024-01-01T00:00:00.000Z",
   value: overrides.value ?? 10_000,
-  scheduledEnd: overrides.scheduledEnd,
-  scheduledStart: overrides.scheduledStart,
   powder_color: overrides.powder_color,
   promiseDate: overrides.promiseDate,
 });
@@ -120,7 +118,7 @@ describe("dashboard chart drilldowns", () => {
     const pumps = [
       buildPump({
         id: "a",
-        scheduledEnd: "2024-01-01",
+        promiseDate: "2024-01-01",
         last_update: "2024-02-01",
         stage: "FABRICATION",
         customer: "Acme",
@@ -144,6 +142,7 @@ describe("dashboard chart drilldowns", () => {
       customerId: undefined,
       modelId: undefined,
       department: undefined,
+      dateRange: { from: null, to: null },
     });
   });
 });

@@ -44,7 +44,9 @@ export function LateOrdersChart({ pumps, filters, onDrilldown }: ChartProps) {
           >
             <div className="flex items-center justify-between">
               <span className="font-semibold">{pump.po}</span>
-              <span className="text-xs text-destructive">{formatDate(pump.scheduledEnd)}</span>
+              <span className="text-xs text-destructive">
+                {formatDate(pump.promiseDate)}
+              </span>
             </div>
             <div className="text-xs text-muted-foreground">
               {pump.customer} · {pump.stage}

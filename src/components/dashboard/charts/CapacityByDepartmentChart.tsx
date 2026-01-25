@@ -35,7 +35,7 @@ export function CapacityByDepartmentChart({
           <YAxis allowDecimals={false} />
           <Tooltip />
           <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-            {data.map((entry, index) => (
+            {data.map((entry) => (
               <Cell
                 key={entry.department}
                 fill={COLORS[entry.department] || "hsl(var(--primary))"}

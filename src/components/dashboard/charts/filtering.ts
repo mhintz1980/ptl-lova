@@ -3,21 +3,20 @@ import type { Pump, Stage, Department } from "../../../types";
 
 const IN_PROGRESS_STAGES: Stage[] = [
   "FABRICATION",
-  "POWDER COAT",
+  "STAGED_FOR_POWDER",
+  "POWDER_COAT",
   "ASSEMBLY",
-  "TESTING",
-  "SHIPPING",
+  "SHIP",
 ];
 const DONE_STAGES: Stage[] = ["CLOSED"];
 
 export const STAGE_DEPARTMENT: Record<Stage, Department> = {
-  UNSCHEDULED: "Fabrication",
-  "NOT STARTED": "Fabrication",
+  QUEUE: "Fabrication",
   FABRICATION: "Fabrication",
-  "POWDER COAT": "Powder Coat",
+  STAGED_FOR_POWDER: "Powder Coat",
+  POWDER_COAT: "Powder Coat",
   ASSEMBLY: "Assembly",
-  TESTING: "Testing & Shipping",
-  SHIPPING: "Testing & Shipping",
+  SHIP: "Testing & Shipping",
   CLOSED: "Testing & Shipping",
 };
 
@@ -107,13 +106,13 @@ export function getLateOrders(
   const now = new Date();
   return filtered
     .filter((pump) => {
-      if (!pump.scheduledEnd) return false;
+      if (!pump.promiseDate) return false;
       if (pump.stage === "CLOSED") return false;
-      return new Date(pump.scheduledEnd) < now;
+      return new Date(pump.promiseDate) < now;
     })
     .sort((a, b) => {
-      const aDate = new Date(a.scheduledEnd ?? "").getTime();
-      const bDate = new Date(b.scheduledEnd ?? "").getTime();
+      const aDate = new Date(a.promiseDate ?? "").getTime();
+      const bDate = new Date(b.promiseDate ?? "").getTime();
       return bDate - aDate;
     });
 }

@@ -32,7 +32,7 @@ export function PumpsByCustomerChart({
           title="Pumps by Customer"
           subtitle="Top customers by active pumps"
           valueFormatter={(value, payload) =>
-            `${value} pumps${payload.name ? ` · ${payload.name}` : ""}`
+            `${value} pumps${payload?.name ? ` · ${payload.name}` : ""}`
           }
         />
       </div>

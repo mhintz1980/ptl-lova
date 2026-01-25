@@ -24,7 +24,7 @@ export function PumpsByModelChart({ pumps, filters, onDrilldown }: ChartProps) {
           title="Pumps by Model"
           subtitle="Top active pump models"
           valueFormatter={(value, payload) =>
-            `${value} units${payload.name ? ` · ${payload.name}` : ""}`
+            `${value} units${payload?.name ? ` · ${payload.name}` : ""}`
           }
         />
       </div>
