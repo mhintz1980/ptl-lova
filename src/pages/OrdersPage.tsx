@@ -224,7 +224,12 @@ function OrderRow({
     <>
       <TableRow
         className={cn('cursor-pointer', isExpanded && 'bg-muted/50 border-b-0')}
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') onToggle()
+        }}
       >
         <TableCell>
           {isExpanded ? (
