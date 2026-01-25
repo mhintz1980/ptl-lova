@@ -387,9 +387,10 @@ async function updateSkillMd(
   const startMarker = '<!-- REFERENCES_START -->'
   const endMarker = '<!-- REFERENCES_END -->'
   const startIndex = content.indexOf(startMarker)
-  const endIndex = content.indexOf(endMarker) + endMarker.length
+  let endIndex = content.indexOf(endMarker)
 
   if (startIndex !== -1 && endIndex !== -1) {
+    endIndex += endMarker.length // Include the marker itself
     content =
       content.slice(0, startIndex) + lines.join('\n') + content.slice(endIndex)
     fs.writeFileSync(skillMdPath, content)
