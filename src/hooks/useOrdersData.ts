@@ -35,14 +35,19 @@ export const useOrdersData = () => {
       // (Simplified for now - just taking raw values if available)
       const startDate = poPumps
         .map((p) => p.forecastStart || p.dateReceived)
-        .filter(Boolean)
-        .sort()[0]
+        .filter((d): d is string => !!d)
+        .reduce<string | undefined>((min, d) => {
+          if (!min) return d
+          return new Date(d).getTime() < new Date(min).getTime() ? d : min
+        }, undefined)
 
       const endDate = poPumps
         .map((p) => p.forecastEnd || p.promiseDate)
-        .filter(Boolean)
-        .sort()
-        .reverse()[0]
+        .filter((d): d is string => !!d)
+        .reduce<string | undefined>((max, d) => {
+          if (!max) return d
+          return new Date(d).getTime() > new Date(max).getTime() ? d : max
+        }, undefined)
 
       // Generate Segments
       const segments: DnaSegment[] = STAGE_SEQUENCE.map((stageId, index) => {
