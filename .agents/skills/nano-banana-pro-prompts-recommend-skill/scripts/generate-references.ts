@@ -289,17 +289,20 @@ async function generateReferences() {
 
     // Categorize by use cases
     const useCases = prompt.imageCategories?.useCases || []
+    let matched = false
+
     if (useCases.length > 0) {
       for (const useCase of useCases) {
         const categorySlug = useCase.slug
         if (categoryPrompts.has(categorySlug)) {
           categoryPrompts.get(categorySlug)!.push(outputPrompt)
+          matched = true
         }
       }
     }
 
-    // If no use cases, add to others
-    if (useCases.length === 0) {
+    // If no use cases matched or no use cases existed, add to others
+    if (!matched) {
       othersPrompts.push(outputPrompt)
     }
   }
