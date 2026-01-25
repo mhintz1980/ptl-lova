@@ -146,10 +146,19 @@ export const SupabaseAdapter: DataAdapter = {
     )
 
     if (!supabase) {
-      console.warn(
-        '⚠️ [Supabase] syncAll() - No client available, operation skipped'
+      const error = new Error(
+        'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
-      return
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.syncAll',
+        what: 'Supabase client not configured - cannot persist data',
+        request: {
+          route: 'DataSync',
+          operation: 'replace all pump rows',
+          inputSummary: `rows=${rows.length}`,
+        },
+      })
+      throw error
     }
 
     if (rows.length === 0) {
@@ -192,10 +201,19 @@ export const SupabaseAdapter: DataAdapter = {
     )
 
     if (!supabase) {
-      console.warn(
-        '⚠️ [Supabase] upsertMany() - No client available, operation skipped'
+      const error = new Error(
+        'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
-      return
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.upsertMany',
+        what: 'Supabase client not configured - cannot persist data',
+        request: {
+          route: 'AddPoModal',
+          operation: 'upsert pump rows',
+          inputSummary: `rows=${rows.length}`,
+        },
+      })
+      throw error
     }
 
     if (rows.length) {
@@ -237,10 +255,19 @@ export const SupabaseAdapter: DataAdapter = {
     console.log('🔵 [Supabase] update() patch keys:', Object.keys(patch))
 
     if (!supabase) {
-      console.warn(
-        '⚠️ [Supabase] update() - No client available, operation skipped'
+      const error = new Error(
+        'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
-      return
+      logErrorReport(error, {
+        where: 'SupabaseAdapter.update',
+        what: 'Supabase client not configured - cannot persist data',
+        request: {
+          route: 'PumpDetail',
+          operation: 'update pump row',
+          inputSummary: `id=${id?.substring(0, 8) ?? 'unknown'} patchKeys=${Object.keys(patch).length}`,
+        },
+      })
+      throw error
     }
 
     const { error } = await supabase.from('pump').update(patch).eq('id', id)
