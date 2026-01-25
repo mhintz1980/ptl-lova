@@ -28,7 +28,7 @@
 | **Read/Write Design Specs**   | [`docs/plans/`](docs/plans/)                                                   |
 | **Find Technical Deep Dives** | [`docs/process/`](docs/process/)                                               |
 | **Support Operations**        | [`docs/process/support-operations.md`](docs/process/support-operations.md)     |
-| **Learn Agent Skills**        | [`docs/agent-skills/`](docs/agent-skills/)                                     |
+| **Learn Agent Skills**        | [`docs/SKILL_INDEX.md`](docs/SKILL_INDEX.md) (Central Registry)                |
 | **⚡ Supabase Operations**    | [`claude-code-supabase-skills/`](claude-code-supabase-skills/) ⚠️ **REQUIRED** |
 | **Architecture Details**      | [`docs/architecture.md`](docs/architecture.md)                                 |
 | **Development Guide**         | [`docs/development.md`](docs/development.md)                                   |
@@ -37,10 +37,12 @@
 
 ### 3. Your First 5 Minutes
 
-1.  Read `docs/status/current-work.md`.
-2.  Check for active terminal processes (is `pnpm dev` running?).
-3.  Assume `main` is the production branch and you are on a feature branch (or should check `git status`).
-4.  **Context Budget**: Monitor token usage. If >70% utilization, summarize to `/ai_working/session-state.md`.
+### 3. Your First 5 Minutes
+
+1.  **Run Preflight**: `npm run preflight`
+    - This summarizes status, environment, and relevant skills.
+2.  **Context Budget**: Start with <10% utilization.
+3.  **Assume Production**: Treat `main` as live.
 
 ---
 
@@ -95,10 +97,13 @@ pnpm format           # Run Prettier
 
 ### Progressive Disclosure
 
-- **Load this bootloader first** (you're reading it now)
-- **Load detailed docs only when needed** for current task
-- **Summarize completed work** before moving to next phase
-- **Use `/ai_working/` directory** for session state and memory
+### Progressive Disclosure
+
+- **Load this bootloader first**
+- **Load detailed docs only when needed**
+- **Use Telemetry Header**: All responses MUST start with:  
+  `[🎫 <Tokens Used> | 📉 <Context Remaining> | 🛡️ <Confidence Score>]`
+- **Use `/ai_working/`** for session state
 
 ### Context Budget Management
 

@@ -1,7 +1,21 @@
 # Session State
 
-- Task: Capture top improvement tasks and brainstorm reporting + ultra-easy PO entry requirements.
-- Branch: fix/date-input-fields.
-- Phase status: Added backlog to plan; awaiting clarification to draft report list.
-- Notes: Reviewed `src/types.ts` to confirm available Pump/PO fields for report feasibility.
-- Next steps: Get answer on cash-flow/revenue recognition + any desired PO intake constraints, then draft report list (current data vs slight additions).
+## Current Task
+
+Digital DNA Visualization (Orders Page)
+
+## Status
+
+- **Phase 1 (Skeleton)**: Complete
+- **Phase 2 (Data & State)**: Complete (Created types/dna.ts, hooks/useOrdersData.ts)
+- **Phase 3 (Visualization)**: Pending
+
+## Files Touched
+
+- src/hooks/useOrdersData.ts (Created)
+- src/types/dna.ts (Created)
+
+## Next Steps
+
+- Implement `DigitalDNA.tsx` component
+- Integrate into `OrdersPage.tsx`
