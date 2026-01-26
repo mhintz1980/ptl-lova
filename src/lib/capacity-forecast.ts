@@ -4,7 +4,10 @@ import {
   isWorkingDay,
   countWorkingDays,
 } from './work-calendar'
-import { getPumpStageMoveEvents, getStagedForPowderHistory } from './stage-history'
+import {
+  getPumpStageMoveEvents,
+  getStagedForPowderHistory,
+} from './stage-history'
 import { getModelLeadTimes, getModelWorkHours } from './seed'
 
 export type StageTimelineBlock = {
@@ -57,7 +60,9 @@ const PRODUCTION_STAGES: Stage[] = [
 ]
 
 const normalizeUtcDay = (date: Date) =>
-  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+  new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  )
 
 const addDaysUtc = (date: Date, days: number) =>
   new Date(date.getTime() + days * MS_PER_DAY)
@@ -137,10 +142,9 @@ const buildStageRequirements = (options: {
   stages: Stage[]
   leadTimes: LeadTimes
   workHours?: WorkHours
-  capacityConfig: CapacityConfig
   stagedBufferDays: number
 }) => {
-  const { stages, leadTimes, workHours, capacityConfig, stagedBufferDays } = options
+  const { stages, leadTimes, workHours, stagedBufferDays } = options
   const resolvedStagedBufferDays = Math.max(0, Math.ceil(stagedBufferDays))
   const getDays = (value: number) => Math.max(0, Math.ceil(value))
   return stages
@@ -206,9 +210,9 @@ const buildStageRequirements = (options: {
       }
       return null
     })
-    .filter((entry): entry is StageRequirement =>
+    .filter((entry) =>
       Boolean(entry && entry.remaining > 0)
-    )
+    ) as StageRequirement[]
 }
 
 export function buildCapacityForecast(options: {
@@ -246,7 +250,10 @@ export function buildCapacityForecast(options: {
     let stagedBufferDays = capacityConfig.stagedForPowderBufferDays ?? 0
     if (stageHistory.completed) {
       stagedBufferDays = 0
-    } else if (pump.stage === 'STAGED_FOR_POWDER' && stageHistory.lastEnteredAt) {
+    } else if (
+      pump.stage === 'STAGED_FOR_POWDER' &&
+      stageHistory.lastEnteredAt
+    ) {
       const elapsed = countWorkingDays(
         stageHistory.lastEnteredAt,
         now,
@@ -266,7 +273,6 @@ export function buildCapacityForecast(options: {
       stages,
       leadTimes,
       workHours,
-      capacityConfig,
       stagedBufferDays,
     })
 
@@ -292,9 +298,11 @@ export function buildCapacityForecast(options: {
 
   if (states.length === 0) return { timelines }
 
-  let cursor = states.reduce((min, state) =>
-    state.stageStart.getTime() < min.getTime() ? state.stageStart : min
-  , states[0].stageStart)
+  let cursor = states.reduce(
+    (min, state) =>
+      state.stageStart.getTime() < min.getTime() ? state.stageStart : min,
+    states[0].stageStart
+  )
 
   const maxIterations = 365 * 5
   let iterations = 0
@@ -303,7 +311,9 @@ export function buildCapacityForecast(options: {
     const dateKey = pump.forecastStart ?? pump.dateReceived
     if (!dateKey) return Number.MAX_SAFE_INTEGER
     const parsed = new Date(dateKey)
-    return Number.isNaN(parsed.getTime()) ? Number.MAX_SAFE_INTEGER : parsed.getTime()
+    return Number.isNaN(parsed.getTime())
+      ? Number.MAX_SAFE_INTEGER
+      : parsed.getTime()
   }
 
   while (states.length > 0 && iterations < maxIterations) {

@@ -16,10 +16,10 @@ export type Stage = (typeof STAGES)[number]
 export type Priority = 'Low' | 'Normal' | 'High' | 'Rush' | 'Urgent'
 
 export type Department =
-  | "Fabrication"
-  | "Powder Coat"
-  | "Assembly"
-  | "Testing & Shipping";
+  | 'Fabrication'
+  | 'Powder Coat'
+  | 'Assembly'
+  | 'Testing & Shipping'
 
 export interface Pump {
   id: string // uuid
@@ -32,6 +32,8 @@ export interface Pump {
   powder_color?: string
   last_update: string // ISO
   value: number // numeric
+  engine?: string // Component data
+  gearbox?: string // Component data
   // Constitution §7: Forecast hints (projection only, not truth)
   forecastEnd?: string // ISO - projected completion date
   forecastStart?: string // ISO - projected start date

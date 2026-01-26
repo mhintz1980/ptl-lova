@@ -21,7 +21,7 @@ describe('KanbanPrintView', () => {
     {
       id: '1',
       model: 'Pump A',
-      serial: '123',
+      serial: 123,
       customer: 'Cust A',
       po: 'PO-100',
       priority: 'Urgent',
@@ -32,7 +32,7 @@ describe('KanbanPrintView', () => {
     {
       id: '2',
       model: 'Pump B',
-      serial: '456',
+      serial: 456,
       customer: 'Cust B',
       po: 'PO-101',
       priority: 'Normal',
@@ -57,7 +57,7 @@ describe('KanbanPrintView', () => {
     originalSnapshot: null,
   }
 
-  it('renders the print header correctly', () => {
+  it('renders all three print pages', () => {
     const loadMock = vi.fn()
     ;(useApp as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       ...defaultMockState,
@@ -67,47 +67,18 @@ describe('KanbanPrintView', () => {
     render(<KanbanPrintView />)
     expect(loadMock).toHaveBeenCalled()
 
-    expect(screen.getByText('Production Status')).toBeInTheDocument()
+    // Page 1: Daily Floor Sheet
+    expect(screen.getByText('Daily Floor Sheet')).toBeInTheDocument()
+    // Check for Kanban columns
+    expect(screen.getAllByText('FABRICATION')).toHaveLength(1)
+    expect(screen.getAllByText('Pump A')).toHaveLength(1) // Pump in Fab
 
-    // Check Total WIP metric (Label + Value in parent)
-    const totalWipLabel = screen.getByText('Total WIP')
-    expect(totalWipLabel.parentElement).toHaveTextContent('2')
+    // Page 2: Weekly Production Schedule
+    expect(screen.getByText('Weekly Production Schedule')).toBeInTheDocument()
+    expect(screen.getByText('Fabrication Targets')).toBeInTheDocument()
 
-    // Check Urgent metric (Label + Value in parent)
-    // "Urgent" string appears in label. The value is '1'.
-    const urgentLabel = screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'div' && content === 'Urgent'
-    })
-    expect(urgentLabel.parentElement).toHaveTextContent('1')
-  })
-
-  it('renders stages and pumps', () => {
-    const loadMock = vi.fn()
-    ;(useApp as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      ...defaultMockState,
-      load: loadMock,
-    })
-
-    render(<KanbanPrintView />)
-    // We expect 2 of each stage (one in visual board, one in report)
-    expect(screen.getAllByText('FABRICATION')).toHaveLength(2)
-    expect(screen.getAllByText('ASSEMBLY')).toHaveLength(2)
-
-    // Pumps appear in both views
-    expect(screen.getAllByText('Pump A')).toHaveLength(2)
-    expect(screen.getAllByText('Pump B')).toHaveLength(2)
-  })
-
-  it('highlights stale pumps', () => {
-    const loadMock = vi.fn()
-    ;(useApp as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      ...defaultMockState,
-      load: loadMock,
-    })
-
-    render(<KanbanPrintView />)
-    const staleDays = screen.getByText('5d')
-    expect(staleDays).toHaveClass('text-red-600')
-    expect(staleDays).toHaveClass('font-bold')
+    // Page 3: Critical Inventory Lookahead
+    expect(screen.getByText('Critical Inventory Lookahead')).toBeInTheDocument()
+    expect(screen.getByText('Cat C15 Oil Filters')).toBeInTheDocument()
   })
 })
