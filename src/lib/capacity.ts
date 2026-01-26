@@ -25,12 +25,14 @@ export const DEFAULT_CAPACITY_CONFIG: CapacityConfig = {
     workDayHours: { ...DEFAULT_WORK_HOURS },
     efficiency: 0.875,
     dailyManHours: 28,
+    maxWip: 4,
   },
   assembly: {
     employeeCount: 2,
     workDayHours: { ...DEFAULT_WORK_HOURS },
     efficiency: 0.875,
     dailyManHours: 14,
+    maxWip: 3,
   },
   // Constitution §2.1: Merged testing+shipping into ship
   ship: {
@@ -38,6 +40,7 @@ export const DEFAULT_CAPACITY_CONFIG: CapacityConfig = {
     workDayHours: { ...DEFAULT_WORK_HOURS },
     efficiency: 0.875,
     dailyManHours: 4, // Combined 2 + 2
+    maxWip: 5,
   },
   powderCoat: {
     vendors: [

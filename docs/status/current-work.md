@@ -37,6 +37,15 @@
 
 ---
 
+## In Progress: Scheduling Forecast Upgrade 🚧
+
+- [ ] **Capacity-aware projections**: WIP caps, even man-hour distribution, weekends + federal holidays excluded.
+- [ ] **Paused segments**: Visual overlay showing delay from capacity pauses.
+- [ ] **Overdue stage alert**: Badge on schedule pill when current stage exceeds estimate.
+- [ ] **Branch**: `feat/capacity-aware-forecast` pending review/merge.
+
+---
+
 ## Completed: Serial Number Gate ✅ (2025-12-24)
 
 - [x] **Serial now nullable**: Pumps created with `serial: null` (unassigned).
