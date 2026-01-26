@@ -105,8 +105,8 @@ export function OrdersPage() {
         }
         case 'status':
           // Late first, then by progress (descending progress usually better but let's stick to field logic)
-          if (a.isLate && !b.isLate) cmp = 1
-          else if (!a.isLate && b.isLate) cmp = -1
+          if (a.isLate && !b.isLate) cmp = -1
+          else if (!a.isLate && b.isLate) cmp = 1
           else cmp = a.overallProgress - b.overallProgress
           break
         case 'po': {
