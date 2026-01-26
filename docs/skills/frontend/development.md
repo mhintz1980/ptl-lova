@@ -5,7 +5,7 @@
 ```bash
 pnpm install          # install dependencies
 pnpm dev              # start Vite on http://localhost:5173
-PNPM_TEST_BASE_URL=http://localhost:5173 pnpm playwright test  # see testing.md for details
+PLAYWRIGHT_TEST_BASE_URL=http://localhost:5173 pnpm playwright test  # see testing.md for details
 ```
 
 Use **pnpm** for scripts. The dev server will warn if the port is taken; adjust with `pnpm dev --port <port> --host 0.0.0.0` and pass the same URL to Playwright.

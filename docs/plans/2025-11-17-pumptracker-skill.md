@@ -11,6 +11,7 @@
 ### Task 1: Prepare Documentation Corpus
 
 **Files:**
+
 - Create: `docs/skills/pumptracker/index.md`
 - Modify: `docs/README.md`, `docs/architecture.md`, `docs/deployment.md`, `docs/development-guide.md`, `docs/testing.md`
 - Copy: `docs/archive/**` (select any still-relevant guides)
@@ -51,7 +52,7 @@ Create `docs/skills/pumptracker/index.md` summarizing when to use each doc and t
 
 - **overview.md** — general product context, env variables (keywords: product, env)
 - **architecture.md** — React/Vite structure, data flow (keywords: react, zustand, supabase)
-...
+  ...
 ```
 
 **Step 5: Commit**
@@ -64,6 +65,7 @@ git commit -m "chore: curate PumpTracker docs for skill packaging"
 ### Task 2: Brainstorm Skill Requirements
 
 **Files:**
+
 - Reference: `docs/skills/pumptracker/index.md`
 - Notes: `.notes/claude-skills/pumptracker-requirements.md` (create)
 
@@ -73,7 +75,7 @@ git commit -m "chore: curate PumpTracker docs for skill packaging"
 ~/.codex/superpowers/.codex/superpowers-codex use-skill superpowers:brainstorming
 ```
 
-Use the prompt from `skill-concept.txt` adapted for PumpTracker:
+Use a prompt adapted for PumpTracker:
 
 ```
 I want to create a skill that reads the docs in this folder @docs/skills/pumptracker/...
@@ -86,6 +88,7 @@ Respond in the required "1/a" format, ensuring activation strategy covers fronte
 **Step 3: Review generated requirements**
 
 Ensure the brainstorming output defines:
+
 - Trigger phrases and manual invocation name `pumptracker-skill`
 - Routing rules for component docs vs deployment docs
 - Response formatting expectations (link to files, include code snippets)
@@ -102,6 +105,7 @@ git commit -m "docs: capture PumpTracker skill requirements"
 ### Task 3: Generate the Claude Skill
 
 **Files:**
+
 - Output: `skills/pumptracker-skill.json` (or `.yaml` depending on superpowers tooling)
 - Source: `docs/skills/pumptracker/**`
 
@@ -114,6 +118,7 @@ git commit -m "docs: capture PumpTracker skill requirements"
 ```
 
 Follow prompts to define:
+
 - Activation phrases ("pumptracker", "stage board", "supabase client")
 - Routing priority (index → component-specific doc → examples)
 - Fallback instructions (ask user which area to load)
@@ -121,6 +126,7 @@ Follow prompts to define:
 **Step 2: Inspect generated skill file**
 
 Open `skills/pumptracker-skill.json` and verify:
+
 - Metadata `knowledge_sources` list every markdown file
 - `routing_rules` map keywords to doc subsets
 - `response_templates` include "Context" + "Implementation guidance" sections
@@ -135,6 +141,7 @@ git commit -m "feat: add PumpTracker Claude skill"
 ### Task 4: Validate Skill in Claude Code
 
 **Files:**
+
 - Scenario doc: `docs/skills/pumptracker/validation.md`
 - Logs: `test-results/skills/pumptracker-validation.md`
 
@@ -166,6 +173,7 @@ git commit -m "test: validate PumpTracker Claude skill"
 ### Task 5: Maintenance Workflow
 
 **Files:**
+
 - `docs/skills/pumptracker/CHANGELOG.md`
 - `docs/plans/maintenance/pumptracker-skill.md`
 
@@ -175,6 +183,7 @@ Create `docs/skills/pumptracker/CHANGELOG.md` with template entries:
 
 ```markdown
 ## 2025-12-01
+
 - Added docs for new chart module
 ```
 

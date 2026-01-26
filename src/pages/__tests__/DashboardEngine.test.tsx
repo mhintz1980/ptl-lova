@@ -1,11 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ChartProps } from "../../dashboard/config";
 import { DashboardEngine } from "../DashboardEngine";
 
 const chartRenderSpy = vi.fn();
 
 vi.mock("../../dashboard/config", () => {
-  const ChartStub = ({ filters, onDrilldown }: any) => {
+  const ChartStub = ({ filters, onDrilldown }: ChartProps) => {
     chartRenderSpy(filters);
     return (
       <button
@@ -61,7 +62,7 @@ vi.mock("../../store", () => {
   };
 
   return {
-    useApp: (selector: (state: typeof state) => any) => selector(state),
+    useApp: <T,>(selector: (state: typeof state) => T) => selector(state),
   };
 });
 

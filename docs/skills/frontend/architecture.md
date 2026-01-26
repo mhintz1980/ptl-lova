@@ -29,7 +29,7 @@
 
 ## File Organization Cheatsheet
 
-```
+```text
 src/
 ├── adapters/         # Local + Supabase persistence
 ├── components/

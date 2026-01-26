@@ -10,9 +10,7 @@ import { STAGE_SEQUENCE } from "../../../lib/stage-constants";
 import type { ChartProps } from "../../../dashboard/config";
 import { filterPumpsForDashboard } from "./filtering";
 
-const DISPLAY_STAGES = STAGE_SEQUENCE.filter(
-  (stage) => stage !== "UNSCHEDULED"
-);
+const DISPLAY_STAGES = STAGE_SEQUENCE.filter((stage) => stage !== "QUEUE");
 
 export function WipByStageChart({ pumps, filters, onDrilldown }: ChartProps) {
   const filtered = filterPumpsForDashboard(pumps, filters);

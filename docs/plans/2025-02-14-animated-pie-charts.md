@@ -11,11 +11,13 @@
 ### Task 1: Create shared animated pie wrapper
 
 **Files:**
+
 - Create: `src/components/charts/HoverAnimatedPieChart.tsx`
 - Modify: `src/components/dashboard/Donuts.tsx`
 - Modify: `src/index.css` (new utility classes)
 
 **Steps:**
+
 1. Define props interface (`data`, `dataKey`, `nameKey`, `colors`, `valueFormatter`, `title`). Set internal state for `activeSlice` and tile hover transforms.
 2. Add tile wrapper JSX with `onMouseMove` capturing cursor `clientX/Y`, compute relative offsets, update CSS custom properties (`--tiltX`, `--tiltY`, `--tiltScale`). Add `onMouseLeave` to reset transforms.
 3. Implement `<PieChart>` with gradients/filters in `<defs>`. Use `Pie` component with `activeIndex={activeSlice}` and custom `activeShape` renderer scaling radius and adding glow/stroke.
@@ -24,14 +26,16 @@
 6. Update `src/index.css` with `.chart-tile`, `.chart-legend`, `.chart-callout`, `.chart-glow` classes plus keyframes for tilt, glow, callout motion.
 7. Export component.
 
-**Verification:** `pnpm test src/components/kanban/StageColumn.test.tsx` (smoke), manual `pnpm dev` to inspect chart behavior.
+**Verification:** `pnpm test src/components/dashboard/charts/chart-drilldowns.test.tsx` (smoke), manual `pnpm dev` to inspect chart behavior.
 
 ### Task 2: Integrate wrapper into Donuts
 
 **Files:**
+
 - Modify: `src/components/dashboard/Donuts.tsx`
 
 **Steps:**
+
 1. Import `HoverAnimatedPieChart` and replace existing Recharts markup for Workload by Customer/Model, Value Breakdown if present.
 2. Ensure data arrays include `value` and `label` fields so callout displays correctly. Provide color palettes.
 3. Wrap each chart tile with `HoverAnimatedPieChart` component, pass `title`, `subtitle`, `valueFormatter` functions.
@@ -41,10 +45,12 @@
 ### Task 3: Documentation updates
 
 **Files:**
+
 - Modify: `docs/development-guide.md`
 - Modify: `README.md`
 
 **Steps:**
+
 1. Add subsection describing `HoverAnimatedPieChart` usage, props, and styling hooks.
 2. Document hover/tilt design rationale and how to add new donut charts using the wrapper.
 3. Mention interactive chart effects in README Feature list.
