@@ -108,6 +108,7 @@ export interface DepartmentStaffing {
   workDayHours: WorkDayHours
   efficiency: number // 0.0 to 1.0 (default 0.85)
   dailyManHours: number // Calculated: employees * 8 * efficiency
+  maxWip: number
 }
 
 export interface PowderCoatVendor {
