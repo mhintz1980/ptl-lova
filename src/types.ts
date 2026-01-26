@@ -15,6 +15,12 @@ export type Stage = (typeof STAGES)[number]
 
 export type Priority = 'Low' | 'Normal' | 'High' | 'Rush' | 'Urgent'
 
+export type Department =
+  | "Fabrication"
+  | "Powder Coat"
+  | "Assembly"
+  | "Testing & Shipping";
+
 export interface Pump {
   id: string // uuid
   serial: number | null // User-assigned serial number, null if unassigned

@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
 import { useApp } from '../store'
-import {
-  STAGE_SEQUENCE,
-  STAGE_LABELS,
-  STAGE_COLORS,
-} from '../lib/stage-constants'
-import type { DigitalDnaStrand, DnaSegment } from '../types/dna'
+import { STAGE_ORDER, getStageColor, type DigitalDnaStrand } from '../types/dna'
 import type { Pump } from '../types'
 
 export const useOrdersData = () => {
@@ -49,44 +44,19 @@ export const useOrdersData = () => {
           return new Date(d).getTime() > new Date(max).getTime() ? d : max
         }, undefined)
 
-      // Generate Segments
-      const segments: DnaSegment[] = STAGE_SEQUENCE.map((stageId, index) => {
-        const stageIndex = index
-
-        let completedCount = 0
-        let activeCount = 0
-        let hasIssues = false
-
-        poPumps.forEach((pump) => {
-          const pumpStageIndex = STAGE_SEQUENCE.indexOf(pump.stage)
-          if (pumpStageIndex > stageIndex) {
-            completedCount++
-          } else if (pumpStageIndex === stageIndex) {
-            activeCount++
-            // Check issues: Paused?
-            if (pump.isPaused) {
-              hasIssues = true
-            }
-          }
-        })
-
-        const completionRatio = totalPumps > 0 ? completedCount / totalPumps : 0
-        const activeRatio = totalPumps > 0 ? activeCount / totalPumps : 0
-
-        return {
-          id: `${poId}-${stageId}`,
-          stage: stageId,
-          label: STAGE_LABELS[stageId].substring(0, 3).toUpperCase(), // Short label
-          totalCount: totalPumps,
-          completedCount,
-          activeCount,
-          completionRatio,
-          activeRatio,
-          colorClass: STAGE_COLORS[stageId],
-          hasIssues,
-          isBlocked: false, // TODO: data-driven blocking check ??
-        }
-      })
+      // Map pumps to visualization items
+      const dnaItems = poPumps
+        .map((pump) => ({
+          id: pump.id,
+          stage: pump.stage,
+          // Use definitions from types/dna
+          colorClass: getStageColor(pump.stage),
+          sortOrder: STAGE_ORDER[pump.stage] ?? 999,
+          // Determine if considered "complete" for visual styling if needed (though color handles most)
+          isCompleted: pump.stage === 'CLOSED' || pump.stage === 'SHIP',
+          hasIssues: !!pump.isPaused,
+        }))
+        .sort((a, b) => a.sortOrder - b.sortOrder)
 
       // Calculate Overall Progress
       // Simple average of segment completion?
@@ -110,7 +80,7 @@ export const useOrdersData = () => {
         customer: poPumps[0]?.customer || 'Unknown',
         startDate,
         endDate,
-        segments,
+        dnaItems, // Replaced segments
         pumps: poPumps,
         overallProgress,
         totalValue,

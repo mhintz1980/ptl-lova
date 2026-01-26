@@ -112,11 +112,11 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
     )
     return Boolean(
       po ||
-        customer ||
-        dateReceived ||
-        promiseDate ||
-        hasLineData ||
-        lines.length > 1
+      customer ||
+      dateReceived ||
+      promiseDate ||
+      hasLineData ||
+      lines.length > 1
     )
   }, [po, customer, dateReceived, promiseDate, lines])
 
@@ -210,9 +210,7 @@ export function AddPoModal({ isOpen, onClose }: AddPoModalProps) {
           inputSummary: `file=${file.name}`,
         },
       })
-      toast.error(
-        error instanceof Error ? error.message : 'Invalid CSV file'
-      )
+      toast.error(error instanceof Error ? error.message : 'Invalid CSV file')
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
