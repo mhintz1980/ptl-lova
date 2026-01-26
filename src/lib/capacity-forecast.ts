@@ -1,5 +1,6 @@
 import type { CapacityConfig, Pump, Stage } from '../types'
-import { buildUsFederalHolidays, isWorkingDay } from './work-calendar'
+import { buildUsFederalHolidays, isWorkingDay, countWorkingDays } from './work-calendar'
+import { getPumpStageMoveEvents, getStagedForPowderHistory } from './stage-history'
 import { getModelLeadTimes, getModelWorkHours } from './seed'
 
 export type StageTimelineBlock = {
@@ -103,48 +104,72 @@ const getStageMaxWip = (stage: Stage, capacityConfig: CapacityConfig) => {
 const buildStageRequirements = (options: {
   stages: Stage[]
   leadTimes: LeadTimes
-  workHours: WorkHours
+  workHours?: WorkHours
   capacityConfig: CapacityConfig
+  stagedBufferDays: number
 }) => {
-  const { stages, leadTimes, workHours, capacityConfig } = options
+  const { stages, leadTimes, workHours, capacityConfig, stagedBufferDays } = options
+  const resolvedStagedBufferDays = Math.max(0, Math.ceil(stagedBufferDays))
+  const getDays = (value: number) => Math.max(0, Math.ceil(value))
   return stages
     .map((stage) => {
       if (stage === 'FABRICATION') {
+        const hours = workHours?.fabrication
+        if (hours && hours > 0) {
+          return {
+            stage,
+            type: 'hours' as const,
+            remaining: Math.max(0, hours),
+          }
+        }
         return {
           stage,
-          type: 'hours' as const,
-          remaining: Math.max(0, workHours.fabrication),
+          type: 'days' as const,
+          remaining: getDays(leadTimes.fabrication),
         }
       }
       if (stage === 'ASSEMBLY') {
+        const hours = workHours?.assembly
+        if (hours && hours > 0) {
+          return {
+            stage,
+            type: 'hours' as const,
+            remaining: Math.max(0, hours),
+          }
+        }
         return {
           stage,
-          type: 'hours' as const,
-          remaining: Math.max(0, workHours.assembly),
+          type: 'days' as const,
+          remaining: getDays(leadTimes.assembly),
         }
       }
       if (stage === 'SHIP') {
+        const hours = workHours?.ship
+        if (hours && hours > 0) {
+          return {
+            stage,
+            type: 'hours' as const,
+            remaining: Math.max(0, hours),
+          }
+        }
         return {
           stage,
-          type: 'hours' as const,
-          remaining: Math.max(0, workHours.ship),
+          type: 'days' as const,
+          remaining: getDays(leadTimes.ship),
         }
       }
       if (stage === 'STAGED_FOR_POWDER') {
         return {
           stage,
           type: 'days' as const,
-          remaining: Math.max(
-            0,
-            Math.ceil(capacityConfig.stagedForPowderBufferDays ?? 0)
-          ),
+          remaining: resolvedStagedBufferDays,
         }
       }
       if (stage === 'POWDER_COAT') {
         return {
           stage,
           type: 'days' as const,
-          remaining: Math.max(0, Math.ceil(leadTimes.powder_coat)),
+          remaining: getDays(leadTimes.powder_coat),
         }
       }
       return null
@@ -174,12 +199,30 @@ export function buildCapacityForecast(options: {
 
   const states: PumpState[] = []
 
+  const now = new Date()
+
   pumps.forEach((pump) => {
     if (pump.stage === 'CLOSED') return
 
     const leadTimes = leadTimeLookup(pump.model)
     const workHours = workHoursLookup(pump.model)
-    if (!leadTimes || !workHours) return
+    if (!leadTimes) return
+
+    const stageHistory = getStagedForPowderHistory(
+      getPumpStageMoveEvents(pump.id)
+    )
+
+    let stagedBufferDays = capacityConfig.stagedForPowderBufferDays ?? 0
+    if (stageHistory.completed) {
+      stagedBufferDays = 0
+    } else if (pump.stage === 'STAGED_FOR_POWDER' && stageHistory.lastEnteredAt) {
+      const elapsed = countWorkingDays(
+        stageHistory.lastEnteredAt,
+        now,
+        holidays
+      )
+      stagedBufferDays = Math.max(0, stagedBufferDays - elapsed)
+    }
 
     const stageStartIndex =
       pump.stage === 'QUEUE'
@@ -193,6 +236,7 @@ export function buildCapacityForecast(options: {
       leadTimes,
       workHours,
       capacityConfig,
+      stagedBufferDays,
     })
 
     if (requirements.length === 0) return
