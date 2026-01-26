@@ -726,7 +726,6 @@
       transform 0.25s ease,
       filter 0.25s ease;
   }
-  }
 
   .chart-canvas--hovered {
     transform: scale(1.025);
