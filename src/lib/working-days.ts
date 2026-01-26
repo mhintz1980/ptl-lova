@@ -1,9 +1,7 @@
-import { differenceInBusinessDays, startOfDay } from 'date-fns'
+import { buildUsFederalHolidays, countWorkingDays as countDays } from './work-calendar'
 
 export function countWorkingDays(start: Date, end: Date): number {
   if (!start || !end) return 0
-  const startDay = startOfDay(start)
-  const endDay = startOfDay(end)
-  if (endDay < startDay) return 0
-  return Math.max(0, differenceInBusinessDays(endDay, startDay))
+  const holidays = buildUsFederalHolidays(start.getFullYear())
+  return countDays(start, end, holidays)
 }
