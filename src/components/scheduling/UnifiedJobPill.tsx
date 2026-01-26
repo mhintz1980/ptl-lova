@@ -163,6 +163,13 @@ export function UnifiedJobPill({
   const shipDate =
     timeline.length > 0 ? timeline[timeline.length - 1].end : null
 
+  const now = useMemo(() => new Date(), [])
+  const currentStageBlock = timeline[0]
+  const isStageOverdue =
+    currentStageBlock &&
+    pump.stage === currentStageBlock.stage &&
+    now.getTime() > currentStageBlock.end.getTime()
+
   // Risk calculation
   const riskResult = calculateRisk(pump, shipDate ?? new Date())
   const riskClasses = getRiskClasses(riskResult.status)
@@ -380,6 +387,16 @@ export function UnifiedJobPill({
               title={`${pump.priority} Priority`}
             >
               {priorityBadge.label}
+            </div>
+          )}
+
+          {isStageOverdue && (
+            <div
+              className="absolute -bottom-0.5 -left-0.5 rounded-full bg-rose-500/90 text-white text-[8px] font-bold px-1.5 py-0.5 shadow-sm"
+              data-testid="stage-overdue"
+              title="Stage overdue"
+            >
+              OVERDUE
             </div>
           )}
 
