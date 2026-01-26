@@ -14,15 +14,33 @@ import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Progress } from '../components/ui/Progress'
-import { ChevronDown, ChevronRight, Search, SortAsc } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { DigitalDnaStrand } from '../types/dna'
 import { cn } from '../lib/utils'
 
+type SortField =
+  | 'date'
+  | 'status'
+  | 'po'
+  | 'customer'
+  | 'value'
+  | 'pumps'
+  | 'promise'
+type SortDirection = 'asc' | 'desc'
+
 export function OrdersPage() {
   const { orders, loading } = useOrdersData()
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<'date' | 'status'>('date')
+  const [sortField, setSortField] = useState<SortField>('date')
+  const [sortDir, setSortDir] = useState<SortDirection>('desc') // Default newest first
   const [filterCustomer, setFilterCustomer] = useState<string | null>(null)
 
   // Expanded rows state: Set of PO IDs
@@ -36,6 +54,24 @@ export function OrdersPage() {
       newExpanded.add(poId)
     }
     setExpandedOrders(newExpanded)
+  }
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDir('asc') // Default to asc for new field (except date maybe?)
+    }
+  }
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />
+    return sortDir === 'asc' ? (
+      <ArrowUp className="ml-2 h-4 w-4" />
+    ) : (
+      <ArrowDown className="ml-2 h-4 w-4" />
+    )
   }
 
   // Derived state: Filtered & Sorted orders
@@ -59,20 +95,49 @@ export function OrdersPage() {
 
     // 3. Sorting
     result.sort((a, b) => {
-      if (sortBy === 'date') {
-        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
-        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
-        return dateB - dateA // Newest first
-      } else {
-        // Status: Late first, then by progress
-        if (a.isLate && !b.isLate) return -1
-        if (!a.isLate && b.isLate) return 1
-        return b.overallProgress - a.overallProgress
+      let cmp = 0
+      switch (sortField) {
+        case 'date': {
+          const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
+          const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
+          cmp = dateA - dateB
+          break
+        }
+        case 'status':
+          // Late first, then by progress (descending progress usually better but let's stick to field logic)
+          if (a.isLate && !b.isLate) cmp = 1
+          else if (!a.isLate && b.isLate) cmp = -1
+          else cmp = a.overallProgress - b.overallProgress
+          break
+        case 'po': {
+          // Numeric sort if possible, else string
+          const poA = parseInt(a.poNumber.replace(/\D/g, '')) || 0
+          const poB = parseInt(b.poNumber.replace(/\D/g, '')) || 0
+          if (poA !== poB) cmp = poA - poB
+          else cmp = a.poNumber.localeCompare(b.poNumber)
+          break
+        }
+        case 'customer':
+          cmp = a.customer.localeCompare(b.customer)
+          break
+        case 'value':
+          cmp = (a.totalValue || 0) - (b.totalValue || 0)
+          break
+        case 'pumps':
+          cmp = (a.pumps?.length || 0) - (b.pumps?.length || 0)
+          break
+        case 'promise': {
+          const promA = a.endDate ? new Date(a.endDate).getTime() : 0
+          const promB = b.endDate ? new Date(b.endDate).getTime() : 0
+          cmp = promA - promB
+          break
+        }
       }
+      return sortDir === 'asc' ? cmp : -cmp
     })
 
     return result
-  }, [orders, search, filterCustomer, sortBy])
+  }, [orders, search, filterCustomer, sortField, sortDir])
 
   // Unique customers for filter dropdown
   const customers = useMemo(() => {
@@ -111,18 +176,6 @@ export function OrdersPage() {
               className="pl-8"
             />
           </div>
-
-          {/* Simple Sort Toggle for now */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() =>
-              setSortBy((prev) => (prev === 'date' ? 'status' : 'date'))
-            }
-            title={`Sort by ${sortBy === 'date' ? 'Status' : 'Date'}`}
-          >
-            <SortAsc className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -159,14 +212,70 @@ export function OrdersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[50px]"></TableHead>
-                <TableHead className="w-[120px]">PO #</TableHead>
-                <TableHead className="w-[150px]">Customer</TableHead>
-                <TableHead className="w-[120px]">Progress</TableHead>
+                <TableHead className="w-[120px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('po')}
+                    className="p-0 hover:bg-transparent font-bold"
+                  >
+                    PO # {getSortIcon('po')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[150px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('customer')}
+                    className="p-0 hover:bg-transparent font-bold"
+                  >
+                    Customer {getSortIcon('customer')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('status')}
+                    className="p-0 hover:bg-transparent font-bold"
+                  >
+                    Progress {getSortIcon('status')}
+                  </Button>
+                </TableHead>
                 <TableHead>Digital DNA</TableHead>
-                <TableHead className="w-[80px] text-right">Pumps</TableHead>
-                <TableHead className="w-[100px] text-right">Value</TableHead>
-                <TableHead className="w-[100px] text-right">Start</TableHead>
-                <TableHead className="w-[100px] text-right">Promise</TableHead>
+                <TableHead className="w-[80px] text-right">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('pumps')}
+                    className="p-0 hover:bg-transparent font-bold w-full justify-end"
+                  >
+                    Pumps {getSortIcon('pumps')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[100px] text-right">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('value')}
+                    className="p-0 hover:bg-transparent font-bold w-full justify-end"
+                  >
+                    Value {getSortIcon('value')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[100px] text-right">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('date')}
+                    className="p-0 hover:bg-transparent font-bold w-full justify-end"
+                  >
+                    Start {getSortIcon('date')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[100px] text-right">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('promise')}
+                    className="p-0 hover:bg-transparent font-bold w-full justify-end"
+                  >
+                    Promise {getSortIcon('promise')}
+                  </Button>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,10 +317,11 @@ function OrderRow({
 }) {
   const percentComplete = Math.round(order.overallProgress * 100)
   const totalPumps = order.pumps ? order.pumps.length : 0
-  const activePumps = order.segments.reduce(
-    (acc, seg) => acc + seg.activeCount,
-    0
-  )
+  const activePumps = order.dnaItems
+    ? order.dnaItems.filter(
+        (item) => item.stage !== 'CLOSED' && item.stage !== 'SHIP'
+      ).length
+    : 0
 
   // Format currency
   const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -238,13 +348,17 @@ function OrderRow({
             <ChevronRight className="h-4 w-4" />
           )}
         </TableCell>
-        <TableCell className="font-medium whitespace-nowrap">
-          {order.poNumber}
-          {order.isLate && (
-            <Badge variant="destructive" className="ml-2 px-1 text-[10px] h-4">
-              LATE
-            </Badge>
-          )}
+        <TableCell className="whitespace-nowrap">
+          <div
+            className={cn(
+              'font-medium transition-colors',
+              order.isLate
+                ? 'text-red-500 font-bold border-l-2 border-red-500 pl-2 -ml-2'
+                : ''
+            )}
+          >
+            {order.poNumber}
+          </div>
         </TableCell>
         <TableCell className="truncate max-w-[150px]" title={order.customer}>
           {order.customer}
