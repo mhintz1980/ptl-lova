@@ -1,15 +1,8 @@
 import { addWeeks, startOfWeek } from 'date-fns'
 import type { Pump, CapacityConfig } from '../types'
-import {
-  type StageDurations,
-  type StageBlock,
-  buildStageTimeline,
-} from './schedule'
+import { type StageDurations, type StageBlock } from './schedule'
 import { countWorkingDays } from './working-days'
-import {
-  getPumpStageMoveEvents,
-  getStagedForPowderHistory,
-} from './stage-history'
+import { buildCapacityForecast } from './capacity-forecast'
 
 export function buildCapacityAwareTimelines(
   pumps: Pump[],
@@ -31,54 +24,34 @@ export function buildCapacityAwareTimelines(
   )
   weeklyPowderCounts.set('pool', {})
 
+  const scheduled = pumps.filter((pump) => pump.forecastStart)
+  if (scheduled.length === 0) {
+    return result
+  }
+
+  const earliestStart = scheduled.reduce((min, pump) => {
+    const start = new Date(pump.forecastStart!)
+    return start.getTime() < min.getTime() ? start : min
+  }, new Date(scheduled[0].forecastStart!))
+
+  const forecast = buildCapacityForecast({
+    pumps: scheduled,
+    capacityConfig,
+    startDate: earliestStart,
+    leadTimeLookup,
+  })
+
   const entries: Array<{ pump: Pump; timeline: StageBlock[] }> = []
 
-  pumps.forEach((pump) => {
-    if (!pump.forecastStart) {
-      console.log(
-        '[DEBUG] Skipping pump - no forecastStart:',
-        pump.id,
-        pump.model
-      )
-      return
-    }
-
-    const leadTimes = leadTimeLookup(pump.model)
-    if (!leadTimes) {
-      console.log('[DEBUG] Skipping pump - no leadTimes for model:', pump.model)
-      return
-    }
-
-    console.log(
-      '[DEBUG] Building timeline for pump:',
-      pump.id,
-      pump.model,
-      'forecastStart:',
-      pump.forecastStart
-    )
-
-    const stageHistory = getStagedForPowderHistory(
-      getPumpStageMoveEvents(pump.id)
-    )
-
-    // Use the centralized buildStageTimeline which now handles capacity and work hours
-    const timeline = buildStageTimeline(pump, leadTimes, {
-      startDate: new Date(pump.forecastStart),
-      capacityConfig,
-      stageHistory,
-    })
-
-    console.log(
-      '[DEBUG] Timeline built for pump:',
-      pump.id,
-      'blocks:',
-      timeline.length,
-      timeline.length > 0
-        ? `first: ${timeline[0].stage}, last: ${
-            timeline[timeline.length - 1].stage
-          }`
-        : 'EMPTY'
-    )
+  scheduled.forEach((pump) => {
+    const blocks = forecast.timelines[pump.id] ?? []
+    const timeline = blocks.map((block) => ({
+      stage: block.stage,
+      start: block.start,
+      end: block.end,
+      days: countWorkingDays(block.start, block.end),
+      pump,
+    }))
 
     if (timeline.length > 0) {
       entries.push({ pump, timeline })
