@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { UnifiedJobPill } from './UnifiedJobPill'
 import type { Pump } from '../../types'
 
@@ -14,6 +14,10 @@ const basePump: Pump = {
   value: 1000,
   last_update: '2026-01-05T00:00:00.000Z',
 }
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('UnifiedJobPill', () => {
   it('renders a paused overlay when a segment has paused days', () => {
@@ -67,7 +71,40 @@ describe('UnifiedJobPill', () => {
     )
 
     expect(screen.getByTestId('stage-overdue')).toBeInTheDocument()
+  })
 
-    vi.useRealTimers()
+  it('rerenders cleanly when the timeline becomes available', () => {
+    const { rerender } = render(
+      <UnifiedJobPill
+        pump={basePump}
+        timeline={[]}
+        viewStart={new Date('2026-01-05T00:00:00.000Z')}
+        totalDays={14}
+        rowIndex={0}
+      />
+    )
+
+    const timeline = [
+      {
+        stage: 'FABRICATION' as const,
+        start: new Date('2026-01-05T00:00:00.000Z'),
+        end: new Date('2026-01-07T00:00:00.000Z'),
+        days: 2,
+        pausedDays: 0,
+        pump: basePump,
+      },
+    ]
+
+    expect(() => {
+      rerender(
+        <UnifiedJobPill
+          pump={basePump}
+          timeline={timeline}
+          viewStart={new Date('2026-01-05T00:00:00.000Z')}
+          totalDays={14}
+          rowIndex={0}
+        />
+      )
+    }).not.toThrow()
   })
 })

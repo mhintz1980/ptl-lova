@@ -157,4 +157,33 @@ describe('capacity forecast', () => {
     const end = result.timelines['p3'][0].end.toISOString().slice(0, 10)
     expect(end).toBe('2026-01-21')
   })
+
+  it('skips next-year holidays when projecting across year boundaries', () => {
+    const pumps: Pump[] = [
+      {
+        id: 'p-cross-year',
+        model: 'M1',
+        stage: 'FABRICATION',
+        priority: 'Normal',
+        forecastStart: '2026-12-30',
+      } as Pump,
+    ]
+
+    const result = buildCapacityForecast({
+      pumps,
+      capacityConfig,
+      startDate: new Date('2026-12-30'),
+      leadTimeLookup,
+      workHoursLookup: () => ({
+        fabrication: 32,
+        assembly: 0,
+        ship: 0,
+      }),
+    })
+
+    const end = result.timelines['p-cross-year'][0].end
+      .toISOString()
+      .slice(0, 10)
+    expect(end).toBe('2027-01-04')
+  })
 })

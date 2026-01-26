@@ -7,22 +7,55 @@ const normalizeUtcDay = (date: Date) =>
 
 export const toIsoDay = (date: Date) => date.toISOString().split('T')[0]
 
+const addDaysUtc = (date: Date, days: number) =>
+  new Date(date.getTime() + days * MS_PER_DAY)
+
+const buildUtcDate = (year: number, month: number, day: number) =>
+  normalizeUtcDay(new Date(Date.UTC(year, month, day)))
+
+const observeFixedHoliday = (date: Date) => {
+  const day = date.getUTCDay()
+  if (day === 6) return addDaysUtc(date, -1)
+  if (day === 0) return addDaysUtc(date, 1)
+  return date
+}
+
+const getNthWeekday = (
+  year: number,
+  month: number,
+  weekday: number,
+  occurrence: number
+) => {
+  const firstOfMonth = buildUtcDate(year, month, 1)
+  const firstWeekday = firstOfMonth.getUTCDay()
+  const offset = (weekday - firstWeekday + 7) % 7
+  const day = 1 + offset + (occurrence - 1) * 7
+  return buildUtcDate(year, month, day)
+}
+
+const getLastWeekday = (year: number, month: number, weekday: number) => {
+  const lastOfMonth = buildUtcDate(year, month + 1, 0)
+  const lastWeekday = lastOfMonth.getUTCDay()
+  const offset = (lastWeekday - weekday + 7) % 7
+  return buildUtcDate(year, month, lastOfMonth.getUTCDate() - offset)
+}
+
 export function buildUsFederalHolidays(year: number): HolidaySet {
-  // Minimal list for current year; expand later if needed.
-  const dates = [
-    `${year}-01-01`, // New Year's Day
-    `${year}-01-19`, // MLK Day (2026)
-    `${year}-02-16`, // Presidents' Day (2026)
-    `${year}-05-25`, // Memorial Day (2026)
-    `${year}-06-19`, // Juneteenth (2026)
-    `${year}-07-04`, // Independence Day (2026)
-    `${year}-09-07`, // Labor Day (2026)
-    `${year}-10-12`, // Columbus Day (2026)
-    `${year}-11-11`, // Veterans Day (2026)
-    `${year}-11-26`, // Thanksgiving (2026)
-    `${year}-12-25`, // Christmas (2026)
-  ]
-  return new Set(dates)
+  const holidays = [
+    observeFixedHoliday(buildUtcDate(year, 0, 1)), // New Year's Day
+    getNthWeekday(year, 0, 1, 3), // MLK Day (3rd Monday in Jan)
+    getNthWeekday(year, 1, 1, 3), // Presidents' Day (3rd Monday in Feb)
+    getLastWeekday(year, 4, 1), // Memorial Day (last Monday in May)
+    observeFixedHoliday(buildUtcDate(year, 5, 19)), // Juneteenth
+    observeFixedHoliday(buildUtcDate(year, 6, 4)), // Independence Day
+    getNthWeekday(year, 8, 1, 1), // Labor Day (1st Monday in Sep)
+    getNthWeekday(year, 9, 1, 2), // Columbus Day (2nd Monday in Oct)
+    observeFixedHoliday(buildUtcDate(year, 10, 11)), // Veterans Day
+    getNthWeekday(year, 10, 4, 4), // Thanksgiving (4th Thursday in Nov)
+    observeFixedHoliday(buildUtcDate(year, 11, 25)), // Christmas
+  ].map((date) => toIsoDay(normalizeUtcDay(date)))
+
+  return new Set(holidays)
 }
 
 export function isWorkingDay(date: Date, holidays: HolidaySet): boolean {

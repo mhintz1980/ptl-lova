@@ -163,12 +163,11 @@ export function UnifiedJobPill({
   const shipDate =
     timeline.length > 0 ? timeline[timeline.length - 1].end : null
 
-  const now = useMemo(() => new Date(), [])
   const currentStageBlock = timeline[0]
   const isStageOverdue =
     currentStageBlock &&
     pump.stage === currentStageBlock.stage &&
-    now.getTime() > currentStageBlock.end.getTime()
+    Date.now() > currentStageBlock.end.getTime()
 
   // Risk calculation
   const riskResult = calculateRisk(pump, shipDate ?? new Date())

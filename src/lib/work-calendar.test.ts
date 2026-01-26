@@ -6,6 +6,7 @@ import {
 } from './work-calendar'
 
 const holidays2026 = buildUsFederalHolidays(2026)
+const holidays2027 = buildUsFederalHolidays(2027)
 
 describe('work-calendar', () => {
   it('treats weekends and holidays as non-working', () => {
@@ -19,5 +20,11 @@ describe('work-calendar', () => {
     const end = new Date('2026-01-22')
     // 16(Fri), 20(Tue), 21(Wed), 22(Thu) => 4 days
     expect(countWorkingDays(start, end, holidays2026)).toBe(4)
+  })
+
+  it('computes observed and movable federal holidays', () => {
+    expect(holidays2026.has('2026-07-03')).toBe(true) // Observed Independence Day
+    expect(holidays2026.has('2026-01-19')).toBe(true) // MLK Day (3rd Mon Jan)
+    expect(holidays2027.has('2027-11-25')).toBe(true) // Thanksgiving (4th Thu Nov)
   })
 })

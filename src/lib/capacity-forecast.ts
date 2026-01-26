@@ -1,5 +1,9 @@
 import type { CapacityConfig, Pump, Stage } from '../types'
-import { buildUsFederalHolidays, isWorkingDay, countWorkingDays } from './work-calendar'
+import {
+  buildUsFederalHolidays,
+  isWorkingDay,
+  countWorkingDays,
+} from './work-calendar'
 import { getPumpStageMoveEvents, getStagedForPowderHistory } from './stage-history'
 import { getModelLeadTimes, getModelWorkHours } from './seed'
 
@@ -58,14 +62,42 @@ const normalizeUtcDay = (date: Date) =>
 const addDaysUtc = (date: Date, days: number) =>
   new Date(date.getTime() + days * MS_PER_DAY)
 
-const ensureWorkingDay = (date: Date, holidays: Set<string>) => {
-  if (isWorkingDay(date, holidays)) return date
-  return nextWorkingDay(date, holidays)
+const holidayCache = new Map<number, Set<string>>()
+
+const getHolidaysForYear = (year: number) => {
+  const cached = holidayCache.get(year)
+  if (cached) return cached
+  const holidays = buildUsFederalHolidays(year)
+  holidayCache.set(year, holidays)
+  return holidays
 }
 
-const nextWorkingDay = (date: Date, holidays: Set<string>) => {
+const getHolidaysForDate = (date: Date) =>
+  getHolidaysForYear(date.getUTCFullYear())
+
+const getHolidaysForRange = (start: Date, end: Date) => {
+  const startYear = start.getUTCFullYear()
+  const endYear = end.getUTCFullYear()
+  const holidays = new Set<string>()
+  for (let year = startYear; year <= endYear; year += 1) {
+    for (const holiday of getHolidaysForYear(year)) {
+      holidays.add(holiday)
+    }
+  }
+  return holidays
+}
+
+const isWorkingDayForDate = (date: Date) =>
+  isWorkingDay(date, getHolidaysForDate(date))
+
+const ensureWorkingDay = (date: Date) => {
+  if (isWorkingDayForDate(date)) return date
+  return nextWorkingDay(date)
+}
+
+const nextWorkingDay = (date: Date) => {
   let cursor = addDaysUtc(date, 1)
-  while (!isWorkingDay(cursor, holidays)) {
+  while (!isWorkingDayForDate(cursor)) {
     cursor = addDaysUtc(cursor, 1)
   }
   return cursor
@@ -194,7 +226,6 @@ export function buildCapacityForecast(options: {
     workHoursLookup = getModelWorkHours,
   } = options
 
-  const holidays = buildUsFederalHolidays(startDate.getFullYear())
   const timelines: Record<string, StageTimelineBlock[]> = {}
 
   const states: PumpState[] = []
@@ -219,7 +250,7 @@ export function buildCapacityForecast(options: {
       const elapsed = countWorkingDays(
         stageHistory.lastEnteredAt,
         now,
-        holidays
+        getHolidaysForRange(stageHistory.lastEnteredAt, now)
       )
       stagedBufferDays = Math.max(0, stagedBufferDays - elapsed)
     }
@@ -247,7 +278,7 @@ export function buildCapacityForecast(options: {
     const normalizedStart = normalizeUtcDay(
       baseStart.getTime() < startDate.getTime() ? startDate : baseStart
     )
-    const stageStart = ensureWorkingDay(normalizedStart, holidays)
+    const stageStart = ensureWorkingDay(normalizedStart)
 
     states.push({
       pump,
@@ -278,7 +309,7 @@ export function buildCapacityForecast(options: {
   while (states.length > 0 && iterations < maxIterations) {
     iterations += 1
 
-    if (!isWorkingDay(cursor, holidays)) {
+    if (!isWorkingDayForDate(cursor)) {
       cursor = addDaysUtc(cursor, 1)
       continue
     }
@@ -334,7 +365,7 @@ export function buildCapacityForecast(options: {
 
         if (current.remaining > 0) return
 
-        const end = nextWorkingDay(cursor, holidays)
+        const end = nextWorkingDay(cursor)
         state.timeline.push({
           stage: current.stage,
           start: state.stageStart,
