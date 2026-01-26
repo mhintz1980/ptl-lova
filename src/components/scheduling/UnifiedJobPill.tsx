@@ -118,11 +118,18 @@ export function UnifiedJobPill({
           return false
         })()
 
+        const workingDays = block.days ?? 0
+        const pausedDays = block.pausedDays ?? 0
+        const pausedRatio =
+          workingDays > 0 ? Math.min(1, pausedDays / workingDays) : 0
+
         return {
           stage: block.stage,
           offsetPercent: (offsetInPill / pillBounds.span) * 100,
           widthPercent: (widthInPill / pillBounds.span) * 100,
           hasWeekend,
+          pausedWidthPercent:
+            (widthInPill / pillBounds.span) * 100 * pausedRatio,
         }
       })
       .filter((seg) => seg.widthPercent > 0)
@@ -393,7 +400,7 @@ export function UnifiedJobPill({
             <div
               key={i}
               className={cn(
-                'h-full flex-shrink-0',
+                'relative h-full flex-shrink-0',
                 STAGE_COLORS[seg.stage],
                 seg.hasWeekend && 'weekend-pattern'
               )}
@@ -402,7 +409,15 @@ export function UnifiedJobPill({
               }}
               data-testid="calendar-segment"
               data-stage={seg.stage}
-            />
+            >
+              {seg.pausedWidthPercent > 0 && (
+                <div
+                  className="absolute inset-y-0 right-0 bg-slate-950/35 border-l border-white/20"
+                  style={{ width: `${seg.pausedWidthPercent}%` }}
+                  data-testid="calendar-segment-paused"
+                />
+              )}
+            </div>
           ))}
         </div>
       </Tooltip>

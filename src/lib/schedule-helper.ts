@@ -50,6 +50,7 @@ export function buildCapacityAwareTimelines(
       start: block.start,
       end: block.end,
       days: countWorkingDays(block.start, block.end),
+      pausedDays: block.pausedDays,
       pump,
     }))
 
