@@ -1,7 +1,11 @@
-// src/lib/seed.ts
 import { Pump, Stage, Priority } from '../types'
 import { nanoid } from 'nanoid'
 import catalogData from '../data/pumptracker-data.json'
+import {
+  type DomainEvent,
+  createEvent,
+} from '../domain/production/events/DomainEvent'
+import { pumpStageMoved } from '../domain/production/events/PumpStageMoved'
 
 // Type definitions for catalog data
 interface CatalogModel {
@@ -207,6 +211,112 @@ function assignPriority(model: CatalogModel): Priority {
   return 'Normal' // Default priority
 }
 
+// Use mapped type instead of any for type safety
+interface GeneratedDates {
+  poDate: Date
+  fabricationStart: Date
+  fabricationEnd: Date
+  powderCoatEnd: Date
+  assemblyEnd: Date
+  testingEnd: Date
+}
+
+// Helper to generate events for stage history
+function generateStageEvents(
+  pump: Pump,
+  model: CatalogModel,
+  leadTimes: CatalogModel['lead_times'],
+  dates: GeneratedDates
+): DomainEvent[] {
+  const events: DomainEvent[] = []
+
+  // Only generate events if we've moved past QUEUE
+  if (pump.stage === 'QUEUE') return events
+
+  const context = {
+    serial: pump.serial,
+    model: pump.model,
+    customer: pump.customer,
+    po: pump.po,
+  }
+
+  // 1. Created -> QUEUE (at Date Received/PO Date)
+  // 2. QUEUE -> FABRICATION
+  if (dates.fabricationStart) {
+    events.push(
+      createEvent(pumpStageMoved(pump.id, 'QUEUE', 'FABRICATION', context), {
+        occurredAt: dates.fabricationStart,
+      })
+    )
+  }
+
+  // 3. FABRICATION -> STAGED_FOR_POWDER
+  if (
+    dates.fabricationEnd &&
+    ['STAGED_FOR_POWDER', 'POWDER_COAT', 'ASSEMBLY', 'SHIP', 'CLOSED'].includes(
+      pump.stage
+    )
+  ) {
+    events.push(
+      createEvent(
+        pumpStageMoved(pump.id, 'FABRICATION', 'STAGED_FOR_POWDER', context),
+        {
+          occurredAt: dates.fabricationEnd,
+        }
+      )
+    )
+  }
+
+  // 4. STAGED_FOR_POWDER -> POWDER_COAT
+  // Note: Powder Coat End is when it LEAVES powder coat, so start is approximate or based on stage duration
+  // For simplicity using a calculated start based on fabrication end + buffer
+  if (['POWDER_COAT', 'ASSEMBLY', 'SHIP', 'CLOSED'].includes(pump.stage)) {
+    // If we are PAST powder coat, we must have entered it.
+    // We trigger this event at fabricationEnd + random buffer (1-3 days) or immediately if expedited
+    const enterPowder = addBusinessDays(dates.fabricationEnd, 1)
+    events.push(
+      createEvent(
+        pumpStageMoved(pump.id, 'STAGED_FOR_POWDER', 'POWDER_COAT', context),
+        {
+          occurredAt: enterPowder,
+        }
+      )
+    )
+  }
+
+  // 5. POWDER_COAT -> ASSEMBLY
+  if (
+    dates.powderCoatEnd &&
+    ['ASSEMBLY', 'SHIP', 'CLOSED'].includes(pump.stage)
+  ) {
+    events.push(
+      createEvent(pumpStageMoved(pump.id, 'POWDER_COAT', 'ASSEMBLY', context), {
+        occurredAt: dates.powderCoatEnd,
+      })
+    )
+  }
+
+  // 6. ASSEMBLY -> SHIP (Testing/Shipping)
+  if (dates.assemblyEnd && ['SHIP', 'CLOSED'].includes(pump.stage)) {
+    events.push(
+      createEvent(pumpStageMoved(pump.id, 'ASSEMBLY', 'SHIP', context), {
+        occurredAt: dates.assemblyEnd,
+      })
+    )
+  }
+
+  // 7. SHIP -> CLOSED
+  if (dates.testingEnd && pump.stage === 'CLOSED') {
+    events.push(
+      createEvent(pumpStageMoved(pump.id, 'SHIP', 'CLOSED', context), {
+        occurredAt: dates.testingEnd,
+      })
+    )
+  }
+
+  return events
+}
+
 // Generate deterministic pump from catalog model
 function generatePumpFromCatalog(
   model: CatalogModel,
@@ -214,8 +324,9 @@ function generatePumpFromCatalog(
   poBase: string,
   quantity: number,
   startIndex: number
-): Pump[] {
+): { pumps: Pump[]; events: DomainEvent[] } {
   const pumps: Pump[] = []
+  const events: DomainEvent[] = []
   const basePrice = getEffectivePrice(model.price, model.model)
   const priority = assignPriority(model)
   const hasColor = Math.random() > 0.3 // 70% have powder coat
@@ -247,6 +358,16 @@ function generatePumpFromCatalog(
       model.lead_times.assembly
     )
     const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
+
+    // Capture dates for event generation
+    const dates: GeneratedDates = {
+      poDate,
+      fabricationStart,
+      fabricationEnd,
+      powderCoatEnd,
+      assemblyEnd,
+      testingEnd,
+    }
 
     // Generate promise date distribution for On-Time Risk chart visualization:
     // - 75% On Track: promise date > 7 days in future
@@ -284,6 +405,7 @@ function generatePumpFromCatalog(
     // 3-5 = QUEUE (15% -> 6 jobs)
     // 6-12 = FABRICATION (35% -> 14 jobs)
     // 13-19 = POWDER_COAT (35% -> 14 jobs)
+    // 13-19 NOTE: Split roughly half between POWDER_COAT and STAGED_FOR_POWDER
     const stageSlot = globalIndex % 20
 
     if (stageSlot === 0) {
@@ -317,7 +439,7 @@ function generatePumpFromCatalog(
       lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
     }
 
-    pumps.push({
+    const pump: Pump = {
       id: nanoid(),
       serial,
       po,
@@ -343,26 +465,30 @@ function generatePumpFromCatalog(
       description: model.description,
       total_lead_days: model.lead_times.total_days,
       work_hours: model.work_hours,
-    } as Pump & {
-      engine_model?: string | null
-      gearbox_model?: string | null
-      control_panel_model?: string | null
-      description?: string
-      total_lead_days?: number
-    })
+    }
+
+    pumps.push(pump)
+
+    // Generate events for this pump
+    const pumpEvents = generateStageEvents(pump, model, model.lead_times, dates)
+    events.push(...pumpEvents)
   }
 
-  return pumps
+  return { pumps, events }
 }
 
 // Main seed function
-export function seed(count: number = 80): Pump[] {
+export function seed(count: number = 80): {
+  pumps: Pump[]
+  events: DomainEvent[]
+} {
   // Reset state for deterministic results
   usedSerials.clear()
   nextSerial = 1000
   poCounter = 1
 
   const pumps: Pump[] = []
+  const events: DomainEvent[] = []
 
   // Create realistic orders based on catalog models
   let generated = 0
@@ -384,7 +510,7 @@ export function seed(count: number = 80): Pump[] {
     const customer = CUSTOMERS[generated % CUSTOMERS.length]
     const poBase = genPONumber()
 
-    const modelPumps = generatePumpFromCatalog(
+    const { pumps: modelPumps, events: modelEvents } = generatePumpFromCatalog(
       model,
       customer,
       poBase,
@@ -393,6 +519,7 @@ export function seed(count: number = 80): Pump[] {
     )
 
     pumps.push(...modelPumps)
+    events.push(...modelEvents)
     generated += orderQuantity
   }
 
@@ -403,15 +530,17 @@ export function seed(count: number = 80): Pump[] {
     const poBase = genPONumber()
     const remainingQuantity = Math.min(3, count - generated) // Small batches
 
-    const additionalPumps = generatePumpFromCatalog(
-      model,
-      customer,
-      poBase,
-      remainingQuantity,
-      generated
-    )
+    const { pumps: additionalPumps, events: additionalEvents } =
+      generatePumpFromCatalog(
+        model,
+        customer,
+        poBase,
+        remainingQuantity,
+        generated
+      )
 
     pumps.push(...additionalPumps)
+    events.push(...additionalEvents)
     generated += remainingQuantity
   }
 
@@ -436,7 +565,15 @@ export function seed(count: number = 80): Pump[] {
     }
   }
 
-  return finalPumps
+  // NOTE: events list might contain events for pumps that were sliced off if we generated too many.
+  // Not a critical issue for dev data, but cleaner to filter.
+  const finalPumpIds = new Set(finalPumps.map((p) => p.id))
+  const finalEvents = events.filter((e) => finalPumpIds.has(e.aggregateId))
+
+  // Sort events by occurrence
+  finalEvents.sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+
+  return { pumps: finalPumps, events: finalEvents }
 }
 
 // Export catalog data for store integration

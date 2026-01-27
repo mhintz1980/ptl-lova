@@ -31,6 +31,7 @@ export interface StageBlock {
   end: Date
   days: number
   pump: Pump
+  pausedDays?: number
 }
 
 export interface CalendarStageEvent {

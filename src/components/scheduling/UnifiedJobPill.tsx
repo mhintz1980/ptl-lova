@@ -118,11 +118,18 @@ export function UnifiedJobPill({
           return false
         })()
 
+        const workingDays = block.days ?? 0
+        const pausedDays = block.pausedDays ?? 0
+        const pausedRatio =
+          workingDays > 0 ? Math.min(1, pausedDays / workingDays) : 0
+
         return {
           stage: block.stage,
           offsetPercent: (offsetInPill / pillBounds.span) * 100,
           widthPercent: (widthInPill / pillBounds.span) * 100,
           hasWeekend,
+          pausedWidthPercent:
+            (widthInPill / pillBounds.span) * 100 * pausedRatio,
         }
       })
       .filter((seg) => seg.widthPercent > 0)
@@ -155,6 +162,12 @@ export function UnifiedJobPill({
   // Calculate final ship date from timeline
   const shipDate =
     timeline.length > 0 ? timeline[timeline.length - 1].end : null
+
+  const currentStageBlock = timeline[0]
+  const isStageOverdue =
+    currentStageBlock &&
+    pump.stage === currentStageBlock.stage &&
+    Date.now() > currentStageBlock.end.getTime()
 
   // Risk calculation
   const riskResult = calculateRisk(pump, shipDate ?? new Date())
@@ -376,6 +389,16 @@ export function UnifiedJobPill({
             </div>
           )}
 
+          {isStageOverdue && (
+            <div
+              className="absolute -bottom-0.5 -left-0.5 rounded-full bg-rose-500/90 text-white text-[8px] font-bold px-1.5 py-0.5 shadow-sm"
+              data-testid="stage-overdue"
+              title="Stage overdue"
+            >
+              OVERDUE
+            </div>
+          )}
+
           {/* Text Overlay - Absolute positioned over segments */}
           <div className="absolute inset-0 flex items-center px-3 z-10">
             <span className="truncate font-bold text-xs text-white drop-shadow-md leading-tight">
@@ -393,7 +416,7 @@ export function UnifiedJobPill({
             <div
               key={i}
               className={cn(
-                'h-full flex-shrink-0',
+                'relative h-full flex-shrink-0',
                 STAGE_COLORS[seg.stage],
                 seg.hasWeekend && 'weekend-pattern'
               )}
@@ -402,7 +425,15 @@ export function UnifiedJobPill({
               }}
               data-testid="calendar-segment"
               data-stage={seg.stage}
-            />
+            >
+              {seg.pausedWidthPercent > 0 && (
+                <div
+                  className="absolute inset-y-0 right-0 bg-slate-950/35 border-l border-white/20"
+                  style={{ width: `${seg.pausedWidthPercent}%` }}
+                  data-testid="calendar-segment-paused"
+                />
+              )}
+            </div>
           ))}
         </div>
       </Tooltip>
