@@ -224,8 +224,6 @@ interface GeneratedDates {
 // Helper to generate events for stage history
 function generateStageEvents(
   pump: Pump,
-  model: CatalogModel,
-  leadTimes: CatalogModel['lead_times'],
   dates: GeneratedDates
 ): DomainEvent[] {
   const events: DomainEvent[] = []
@@ -244,7 +242,8 @@ function generateStageEvents(
   // 2. QUEUE -> FABRICATION
   if (dates.fabricationStart) {
     events.push(
-      createEvent(pumpStageMoved(pump.id, 'QUEUE', 'FABRICATION', context), {
+      createEvent({
+        ...pumpStageMoved(pump.id, 'QUEUE', 'FABRICATION', context),
         occurredAt: dates.fabricationStart,
       })
     )
@@ -258,12 +257,10 @@ function generateStageEvents(
     )
   ) {
     events.push(
-      createEvent(
-        pumpStageMoved(pump.id, 'FABRICATION', 'STAGED_FOR_POWDER', context),
-        {
-          occurredAt: dates.fabricationEnd,
-        }
-      )
+      createEvent({
+        ...pumpStageMoved(pump.id, 'FABRICATION', 'STAGED_FOR_POWDER', context),
+        occurredAt: dates.fabricationEnd,
+      })
     )
   }
 
@@ -275,12 +272,10 @@ function generateStageEvents(
     // We trigger this event at fabricationEnd + random buffer (1-3 days) or immediately if expedited
     const enterPowder = addBusinessDays(dates.fabricationEnd, 1)
     events.push(
-      createEvent(
-        pumpStageMoved(pump.id, 'STAGED_FOR_POWDER', 'POWDER_COAT', context),
-        {
-          occurredAt: enterPowder,
-        }
-      )
+      createEvent({
+        ...pumpStageMoved(pump.id, 'STAGED_FOR_POWDER', 'POWDER_COAT', context),
+        occurredAt: enterPowder,
+      })
     )
   }
 
@@ -290,7 +285,8 @@ function generateStageEvents(
     ['ASSEMBLY', 'SHIP', 'CLOSED'].includes(pump.stage)
   ) {
     events.push(
-      createEvent(pumpStageMoved(pump.id, 'POWDER_COAT', 'ASSEMBLY', context), {
+      createEvent({
+        ...pumpStageMoved(pump.id, 'POWDER_COAT', 'ASSEMBLY', context),
         occurredAt: dates.powderCoatEnd,
       })
     )
@@ -299,7 +295,8 @@ function generateStageEvents(
   // 6. ASSEMBLY -> SHIP (Testing/Shipping)
   if (dates.assemblyEnd && ['SHIP', 'CLOSED'].includes(pump.stage)) {
     events.push(
-      createEvent(pumpStageMoved(pump.id, 'ASSEMBLY', 'SHIP', context), {
+      createEvent({
+        ...pumpStageMoved(pump.id, 'ASSEMBLY', 'SHIP', context),
         occurredAt: dates.assemblyEnd,
       })
     )
@@ -308,7 +305,8 @@ function generateStageEvents(
   // 7. SHIP -> CLOSED
   if (dates.testingEnd && pump.stage === 'CLOSED') {
     events.push(
-      createEvent(pumpStageMoved(pump.id, 'SHIP', 'CLOSED', context), {
+      createEvent({
+        ...pumpStageMoved(pump.id, 'SHIP', 'CLOSED', context),
         occurredAt: dates.testingEnd,
       })
     )
@@ -439,7 +437,7 @@ function generatePumpFromCatalog(
       lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
     }
 
-    const pump: Pump = {
+    const pump = {
       id: nanoid(),
       serial,
       po,
@@ -464,13 +462,13 @@ function generatePumpFromCatalog(
       // Additional metadata
       description: model.description,
       total_lead_days: model.lead_times.total_days,
-      work_hours: model.work_hours,
+      work_hours: getModelWorkHours(model.model),
     }
 
     pumps.push(pump)
 
     // Generate events for this pump
-    const pumpEvents = generateStageEvents(pump, model, model.lead_times, dates)
+    const pumpEvents = generateStageEvents(pump, dates)
     events.push(...pumpEvents)
   }
 
