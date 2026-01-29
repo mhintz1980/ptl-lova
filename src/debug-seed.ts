@@ -14,8 +14,9 @@ export function debugSeed() {
   console.log('==========================');
 
   try {
-    const pumps = seed(5); // Generate 5 pumps for testing
+    const { pumps, events } = seed(5) // Generate 5 pumps for testing
     console.log(`✅ Generated ${pumps.length} pumps`);
+    console.log(`✅ Generated ${events.length} events`);
 
     pumps.forEach((pump, index) => {
       console.log(`\n🏭 Pump ${index + 1}:`);
@@ -31,7 +32,7 @@ export function debugSeed() {
 
       // Show BOM details if available
       if ('engine_model' in pump) {
-        const extendedPump = pump as typeof pumps[0] & {
+        const extendedPump = pump as (typeof pumps)[number] & {
           engine_model?: string | null;
           gearbox_model?: string | null;
           control_panel_model?: string | null;

@@ -24,6 +24,13 @@ describe('Department Staffing Logic', () => {
     expect(ship.dailyManHours).toBe(4) // Combined 2 + 2
   })
 
+  it('exposes per-stage maxWip values', () => {
+    const { capacityConfig } = useApp.getState()
+    expect(capacityConfig.fabrication.maxWip).toBeGreaterThan(0)
+    expect(capacityConfig.assembly.maxWip).toBeGreaterThan(0)
+    expect(capacityConfig.ship.maxWip).toBeGreaterThan(0)
+  })
+
   it('should update dailyManHours when employeeCount changes (decimal)', () => {
     const { updateDepartmentStaffing } = useApp.getState()
 

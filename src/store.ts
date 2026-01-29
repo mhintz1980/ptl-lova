@@ -223,19 +223,27 @@ export const useApp = create<AppState>()(
 
           const { seed } = await import('./lib/seed')
           const { SandboxAdapter } = await import('./adapters/sandbox')
-          const seedData = seed(40) // Generate 40 test pumps for good chart coverage
+          const { pumps: seedPumps, events: seedEvents } = seed(40) // Generate 40 test pumps for good chart coverage
 
           console.log(
             '🧪 [Store] Sandbox mode - Generated',
-            seedData.length,
-            'test pumps'
+            seedPumps.length,
+            'test pumps and',
+            seedEvents.length,
+            'domain events'
           )
           console.log(
             '🧪 [Store] Sandbox mode - Using SandboxAdapter (all writes = no-op)'
           )
 
+          // Clear and repopulate event store
+          await eventStore.clear()
+          for (const event of seedEvents) {
+            await eventStore.append(event)
+          }
+
           set({
-            pumps: seedData,
+            pumps: seedPumps,
             loading: false,
             isSandbox: true,
             originalSnapshot: [], // Empty - no production data to restore
@@ -317,6 +325,8 @@ export const useApp = create<AppState>()(
             stage: 'QUEUE' as Stage,
             priority: line.priority ?? 'Normal',
             powder_color: line.color,
+            engine: line.engine,
+            gearbox: line.gearbox,
             last_update: new Date().toISOString(),
             value: line.valueEach || 0,
             // Convert empty strings to undefined to avoid PostgreSQL timestamp errors

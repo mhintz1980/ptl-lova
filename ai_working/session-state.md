@@ -2,24 +2,27 @@
 
 ## Current Task
 
-Digital DNA Visualization (Orders Page) & Syncing with Main
+Verify whether PR review recommendations have been applied in the repo.
 
 ## Status
 
-- **Features Merged**: Pulled `feat/csv-po-import` from `main`.
-- **Agent Skills**: Installed `skill-creator` and `supabase-postgres-best-practices`.
-- **Digital DNA**:
-  - Phase 1 (Skeleton): Complete
-  - Phase 2 (Data & State): Complete
-  - Phase 3 (Visualization): Pending
+- Checked branch and current work status.
+- Located or attempted to locate each referenced file.
+- Verified existing content where files exist.
 
 ## Files Touched
 
-- .agents/skills/ (Added)
-- docs/SKILL_INDEX.md (Updated)
-- src/components/orders/DigitalDNA.tsx (Pending)
+- ai_working/session-state.md (updated)
+
+## Findings So Far
+
+- `skill-concept.txt` not present in repo.
+- `src/components/scheduling/UnifiedJobPill.test.tsx` not present in repo.
+- `src/components/scheduling/UnifiedJobPill.tsx` has no conditional `useMemo` for `now`.
+- `src/lib/capacity-forecast.ts` not present in repo.
+- `src/lib/work-calendar.ts` and `buildUsFederalHolidays` not present in repo.
+- `src/lib/working-days.ts` still uses `differenceInBusinessDays` without holiday handling.
 
 ## Next Steps
 
-- [x] Merge `main` to get CSV import
-- [ ] Implement `DigitalDNA.tsx` visualization
+- Report per-item status to user.
