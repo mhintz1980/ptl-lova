@@ -13,7 +13,7 @@ export const LocalAdapter: DataAdapter = {
     const raw = localStorage.getItem(KEY)
     if (raw) return JSON.parse(raw)
 
-    return CONFIG.USE_TEST_DATASET ? getTestPumps() : seed()
+    return CONFIG.USE_TEST_DATASET ? getTestPumps() : seed().pumps
   },
   async replaceAll(rows: Pump[]) {
     // Note: For local storage, this is safe since we're not dealing with production data

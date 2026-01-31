@@ -14,8 +14,7 @@ const STAGE_COLORS: Record<string, string> = {
   FABRICATION: '#0ea5e9',
   POWDER_COAT: '#d946ef',
   ASSEMBLY: '#f97316',
-  TESTING: '#fb7185',
-  SHIPPING: '#22c55e',
+  SHIP: '#22c55e',
 }
 
 const BOTTLENECK_COLOR = '#ef4444' // Red for bottleneck

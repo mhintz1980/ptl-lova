@@ -23,8 +23,7 @@ const STAGE_TO_DEPT: Record<string, string> = {
   STAGED_FOR_POWDER: 'Powder Coat',
   POWDER_COAT: 'Powder Coat',
   ASSEMBLY: 'Assembly',
-  TESTING: 'Testing & Shipping',
-  SHIPPING: 'Testing & Shipping',
+  SHIP: 'Testing & Shipping',
 }
 
 export function WorkloadByDeptProportional({
