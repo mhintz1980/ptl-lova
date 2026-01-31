@@ -128,8 +128,7 @@ export function UnifiedJobPill({
           offsetPercent: (offsetInPill / pillBounds.span) * 100,
           widthPercent: (widthInPill / pillBounds.span) * 100,
           hasWeekend,
-          pausedWidthPercent:
-            (widthInPill / pillBounds.span) * 100 * pausedRatio,
+          pausedRatio,
         }
       })
       .filter((seg) => seg.widthPercent > 0)
@@ -426,10 +425,10 @@ export function UnifiedJobPill({
               data-testid="calendar-segment"
               data-stage={seg.stage}
             >
-              {seg.pausedWidthPercent > 0 && (
+              {seg.pausedRatio > 0 && (
                 <div
                   className="absolute inset-y-0 right-0 bg-slate-950/35 border-l border-white/20"
-                  style={{ width: `${seg.pausedWidthPercent}%` }}
+                  style={{ width: `${seg.pausedRatio * 100}%` }}
                   data-testid="calendar-segment-paused"
                 />
               )}
