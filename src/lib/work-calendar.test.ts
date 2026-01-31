@@ -32,4 +32,33 @@ describe('work-calendar', () => {
     const holidays2021 = buildUsFederalHolidays(2021)
     expect(holidays2021.has('2021-12-31')).toBe(true)
   })
+
+  it('handles boundary conditions for day counting', () => {
+    // End before Start -> 0
+    expect(
+      countWorkingDays(
+        new Date('2026-01-20'),
+        new Date('2026-01-19'),
+        holidays2026
+      )
+    ).toBe(0)
+
+    // Start == End (Working Day) -> 1
+    expect(
+      countWorkingDays(
+        new Date('2026-01-20'),
+        new Date('2026-01-20'),
+        holidays2026
+      )
+    ).toBe(1)
+
+    // Start == End (Weekend) -> 0
+    expect(
+      countWorkingDays(
+        new Date('2026-01-18'), // Sunday
+        new Date('2026-01-18'),
+        holidays2026
+      )
+    ).toBe(0)
+  })
 })

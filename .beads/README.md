@@ -21,7 +21,7 @@ Configuration required for correct merging of `issues.jsonl`:
    ```
 
 2. Ensure `.gitattributes` contains:
-   ```
+   ```text
    .beads/issues.jsonl merge=beads
    ```
 

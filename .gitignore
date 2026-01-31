@@ -55,3 +55,4 @@ logs/security/
 # Agent Artifacts
 .codex/
 .opencode/
+.beads/export-state/
