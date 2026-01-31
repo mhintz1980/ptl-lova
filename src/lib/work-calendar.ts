@@ -3,7 +3,9 @@ export type HolidaySet = Set<string>
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 const normalizeUtcDay = (date: Date) =>
-  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+  new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  )
 
 export const toIsoDay = (date: Date) =>
   normalizeUtcDay(date).toISOString().split('T')[0]
@@ -79,7 +81,8 @@ export function countWorkingDays(
   const last = normalizeUtcDay(end)
   let count = 0
   if (isWorkingDay(startDay, holidays)) count += 1
-  if (last.getTime() <= startDay.getTime()) return Math.max(0, count)
+  if (last.getTime() < startDay.getTime()) return 0
+  if (last.getTime() === startDay.getTime()) return Math.max(0, count)
   let cursor = new Date(startDay.getTime() + MS_PER_DAY)
   while (cursor.getTime() <= last.getTime()) {
     if (isWorkingDay(cursor, holidays)) count += 1

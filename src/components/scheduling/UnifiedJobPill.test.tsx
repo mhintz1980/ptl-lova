@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { UnifiedJobPill } from './UnifiedJobPill'
 import type { Pump } from '../../types'
+import { StageIds } from '../../lib/stage-constants'
 
 const basePump: Pump = {
   id: 'pump-1',
@@ -9,7 +10,7 @@ const basePump: Pump = {
   po: 'PO-100',
   customer: 'Acme',
   model: 'DD-4',
-  stage: 'FABRICATION',
+  stage: StageIds.FABRICATION,
   priority: 'High',
   value: 1000,
   last_update: '2026-01-05T00:00:00.000Z',
@@ -23,7 +24,7 @@ describe('UnifiedJobPill', () => {
   it('sizes the paused overlay relative to the segment width', () => {
     const timeline = [
       {
-        stage: 'FABRICATION' as const,
+        stage: StageIds.FABRICATION,
         start: new Date('2026-01-01T00:00:00.000Z'),
         end: new Date('2026-01-03T00:00:00.000Z'),
         days: 2,
@@ -31,7 +32,7 @@ describe('UnifiedJobPill', () => {
         pump: basePump,
       },
       {
-        stage: 'ASSEMBLY' as const,
+        stage: StageIds.ASSEMBLY,
         start: new Date('2026-01-03T00:00:00.000Z'),
         end: new Date('2026-01-05T00:00:00.000Z'),
         days: 2,
@@ -61,7 +62,7 @@ describe('UnifiedJobPill', () => {
 
     const timeline = [
       {
-        stage: 'FABRICATION' as const,
+        stage: StageIds.FABRICATION,
         start: new Date('2026-01-05T00:00:00.000Z'),
         end: new Date('2026-01-07T00:00:00.000Z'),
         days: 2,
@@ -96,7 +97,7 @@ describe('UnifiedJobPill', () => {
 
     const timeline = [
       {
-        stage: 'FABRICATION' as const,
+        stage: StageIds.FABRICATION,
         start: new Date('2026-01-05T00:00:00.000Z'),
         end: new Date('2026-01-07T00:00:00.000Z'),
         days: 2,
