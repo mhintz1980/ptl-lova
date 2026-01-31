@@ -5,7 +5,8 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000
 const normalizeUtcDay = (date: Date) =>
   new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
 
-export const toIsoDay = (date: Date) => date.toISOString().split('T')[0]
+export const toIsoDay = (date: Date) =>
+  normalizeUtcDay(date).toISOString().split('T')[0]
 
 const addDaysUtc = (date: Date, days: number) =>
   new Date(date.getTime() + days * MS_PER_DAY)
@@ -42,7 +43,9 @@ const getLastWeekday = (year: number, month: number, weekday: number) => {
 
 export function buildUsFederalHolidays(year: number): HolidaySet {
   const holidays = [
+    observeFixedHoliday(buildUtcDate(year - 1, 0, 1)), // Adjacent year New Year
     observeFixedHoliday(buildUtcDate(year, 0, 1)), // New Year's Day
+    observeFixedHoliday(buildUtcDate(year + 1, 0, 1)), // Adjacent year New Year
     getNthWeekday(year, 0, 1, 3), // MLK Day (3rd Monday in Jan)
     getNthWeekday(year, 1, 1, 3), // Presidents' Day (3rd Monday in Feb)
     getLastWeekday(year, 4, 1), // Memorial Day (last Monday in May)
@@ -53,16 +56,17 @@ export function buildUsFederalHolidays(year: number): HolidaySet {
     observeFixedHoliday(buildUtcDate(year, 10, 11)), // Veterans Day
     getNthWeekday(year, 10, 4, 4), // Thanksgiving (4th Thursday in Nov)
     observeFixedHoliday(buildUtcDate(year, 11, 25)), // Christmas
-  ].map((date) => toIsoDay(normalizeUtcDay(date)))
+  ].map((date) => toIsoDay(date))
 
   return new Set(holidays)
 }
 
 export function isWorkingDay(date: Date, holidays: HolidaySet): boolean {
   if (!date) return false
-  const day = date.getUTCDay()
+  const normalized = normalizeUtcDay(date)
+  const day = normalized.getUTCDay()
   if (day === 0 || day === 6) return false
-  return !holidays.has(toIsoDay(date))
+  return !holidays.has(toIsoDay(normalized))
 }
 
 export function countWorkingDays(
@@ -73,9 +77,10 @@ export function countWorkingDays(
   if (!start || !end) return 0
   const startDay = normalizeUtcDay(start)
   const last = normalizeUtcDay(end)
-  if (last.getTime() <= startDay.getTime()) return 0
-  let cursor = new Date(startDay.getTime() + MS_PER_DAY)
   let count = 0
+  if (isWorkingDay(startDay, holidays)) count += 1
+  if (last.getTime() <= startDay.getTime()) return Math.max(0, count)
+  let cursor = new Date(startDay.getTime() + MS_PER_DAY)
   while (cursor.getTime() <= last.getTime()) {
     if (isWorkingDay(cursor, holidays)) count += 1
     cursor = new Date(cursor.getTime() + MS_PER_DAY)

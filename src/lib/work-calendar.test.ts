@@ -18,13 +18,18 @@ describe('work-calendar', () => {
   it('counts working days excluding weekends and holidays', () => {
     const start = new Date('2026-01-15')
     const end = new Date('2026-01-22')
-    // 16(Fri), 20(Tue), 21(Wed), 22(Thu) => 4 days
-    expect(countWorkingDays(start, end, holidays2026)).toBe(4)
+    // 15(Thu), 16(Fri), 20(Tue), 21(Wed), 22(Thu) => 5 days
+    expect(countWorkingDays(start, end, holidays2026)).toBe(5)
   })
 
   it('computes observed and movable federal holidays', () => {
     expect(holidays2026.has('2026-07-03')).toBe(true) // Observed Independence Day
     expect(holidays2026.has('2026-01-19')).toBe(true) // MLK Day (3rd Mon Jan)
     expect(holidays2027.has('2027-11-25')).toBe(true) // Thanksgiving (4th Thu Nov)
+  })
+
+  it('includes observed New Year from adjacent year when Jan 1 is Saturday', () => {
+    const holidays2021 = buildUsFederalHolidays(2021)
+    expect(holidays2021.has('2021-12-31')).toBe(true)
   })
 })

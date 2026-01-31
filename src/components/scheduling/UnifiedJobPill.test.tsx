@@ -20,14 +20,22 @@ afterEach(() => {
 })
 
 describe('UnifiedJobPill', () => {
-  it('renders a paused overlay when a segment has paused days', () => {
+  it('sizes the paused overlay relative to the segment width', () => {
     const timeline = [
       {
         stage: 'FABRICATION' as const,
-        start: new Date('2026-01-05T00:00:00.000Z'),
-        end: new Date('2026-01-07T00:00:00.000Z'),
+        start: new Date('2026-01-01T00:00:00.000Z'),
+        end: new Date('2026-01-03T00:00:00.000Z'),
         days: 2,
         pausedDays: 1,
+        pump: basePump,
+      },
+      {
+        stage: 'ASSEMBLY' as const,
+        start: new Date('2026-01-03T00:00:00.000Z'),
+        end: new Date('2026-01-05T00:00:00.000Z'),
+        days: 2,
+        pausedDays: 0,
         pump: basePump,
       },
     ]
@@ -36,13 +44,15 @@ describe('UnifiedJobPill', () => {
       <UnifiedJobPill
         pump={basePump}
         timeline={timeline}
-        viewStart={new Date('2026-01-05T00:00:00.000Z')}
+        viewStart={new Date('2026-01-01T00:00:00.000Z')}
         totalDays={14}
         rowIndex={0}
       />
     )
 
-    expect(screen.getByTestId('calendar-segment-paused')).toBeInTheDocument()
+    expect(screen.getByTestId('calendar-segment-paused')).toHaveStyle({
+      width: '50%',
+    })
   })
 
   it('shows an overdue badge when current stage exceeds its estimate', () => {
