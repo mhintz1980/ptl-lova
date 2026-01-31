@@ -17,6 +17,19 @@ export const STAGE_SEQUENCE: Stage[] = [
 ]
 
 /**
+ * Stage IDs for constant access
+ */
+export const StageIds = {
+  QUEUE: 'QUEUE',
+  FABRICATION: 'FABRICATION',
+  STAGED_FOR_POWDER: 'STAGED_FOR_POWDER',
+  POWDER_COAT: 'POWDER_COAT',
+  ASSEMBLY: 'ASSEMBLY',
+  SHIP: 'SHIP',
+  CLOSED: 'CLOSED',
+} as const
+
+/**
  * Production stages (excludes QUEUE)
  */
 export const PRODUCTION_STAGES: Stage[] = [

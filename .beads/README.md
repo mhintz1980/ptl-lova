@@ -1,3 +1,20 @@
+# Beads Issue Tracker
+
+Configuration required for correct merging of issues.jsonl:
+
+1. Add the following to your git config (e.g. `~/.gitconfig` or `.git/config`):
+
+   ```ini
+   [merge "beads"]
+   name = Beads Merge Driver
+   driver = beads merge %O %A %B %P
+   ```
+
+2. Ensure `.gitattributes` contains:
+   ```
+   .beads/issues.jsonl merge=beads
+   ```
+
 # Beads - AI-Native Issue Tracking
 
 Welcome to Beads! This repository uses **Beads** for issue tracking - a modern, AI-native tool designed to live directly in your codebase alongside your code.
@@ -33,6 +50,7 @@ bd sync
 ### Working with Issues
 
 Issues in Beads are:
+
 - **Git-native**: Stored in `.beads/issues.jsonl` and synced like code
 - **AI-friendly**: CLI-first design works perfectly with AI coding agents
 - **Branch-aware**: Issues can follow your branch workflow
@@ -41,16 +59,19 @@ Issues in Beads are:
 ## Why Beads?
 
 ✨ **AI-Native Design**
+
 - Built specifically for AI-assisted development workflows
 - CLI-first interface works seamlessly with AI coding agents
 - No context switching to web UIs
 
 🚀 **Developer Focused**
+
 - Issues live in your repo, right next to your code
 - Works offline, syncs when you push
 - Fast, lightweight, and stays out of your way
 
 🔧 **Git Integration**
+
 - Automatic sync with git commits
 - Branch-aware issue tracking
 - Intelligent JSONL merge resolution
@@ -78,4 +99,4 @@ bd create "Try out Beads"
 
 ---
 
-*Beads: Issue tracking that moves at the speed of thought* ⚡
+_Beads: Issue tracking that moves at the speed of thought_ ⚡
