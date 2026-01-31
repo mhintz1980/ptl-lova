@@ -1,6 +1,16 @@
-# Beads Issue Tracker
+# Beads - AI-Native Issue Tracking
 
-Configuration required for correct merging of issues.jsonl:
+Welcome to Beads! This repository uses **Beads** for issue tracking - a modern, AI-native tool designed to live directly in your codebase alongside your code.
+
+## What is Beads?
+
+Beads is issue tracking that lives in your repo, making it perfect for AI coding agents and developers who want their issues close to their code. No web UI required - everything works through the CLI and integrates seamlessly with git.
+
+**Learn more:** [github.com/steveyegge/beads](https://github.com/steveyegge/beads)
+
+## Configuration
+
+Configuration required for correct merging of `issues.jsonl`:
 
 1. Add the following to your git config (e.g. `~/.gitconfig` or `.git/config`):
 
@@ -14,16 +24,6 @@ Configuration required for correct merging of issues.jsonl:
    ```
    .beads/issues.jsonl merge=beads
    ```
-
-# Beads - AI-Native Issue Tracking
-
-Welcome to Beads! This repository uses **Beads** for issue tracking - a modern, AI-native tool designed to live directly in your codebase alongside your code.
-
-## What is Beads?
-
-Beads is issue tracking that lives in your repo, making it perfect for AI coding agents and developers who want their issues close to their code. No web UI required - everything works through the CLI and integrates seamlessly with git.
-
-**Learn more:** [github.com/steveyegge/beads](https://github.com/steveyegge/beads)
 
 ## Quick Start
 
