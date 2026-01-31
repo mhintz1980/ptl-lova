@@ -71,6 +71,14 @@ export function isWorkingDay(date: Date, holidays: HolidaySet): boolean {
   return !holidays.has(toIsoDay(normalized))
 }
 
+/**
+ * Count working days (weekdays excluding the provided holidays) between two dates, inclusive, using UTC-day normalization.
+ *
+ * @param start - Start date; the function normalizes this to the UTC calendar day (00:00:00 UTC) before counting.
+ * @param end - End date; the function normalizes this to the UTC calendar day (00:00:00 UTC) before counting.
+ * @param holidays - Set of ISO day strings (YYYY-MM-DD) representing holidays to exclude from the count.
+ * @returns The number of working days between `start` and `end` inclusive. Returns `0` if `start` or `end` is falsy or if the normalized end day is before the normalized start day. If `start` and `end` normalize to the same day, returns `1` when that day is a working day and `0` otherwise.
+ */
 export function countWorkingDays(
   start: Date,
   end: Date,
