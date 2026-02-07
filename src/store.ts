@@ -35,7 +35,6 @@ import { pumpPaused } from './domain/production/events/PumpPaused'
 import { pumpResumed } from './domain/production/events/PumpResumed'
 import { lockDateChanged } from './domain/production/events/LockDateChanged'
 import { priorityChanged } from './domain/production/events/PriorityChanged'
-import { WORK_STAGES } from './lib/stage-constants'
 import { logErrorReport } from './lib/error-reporting'
 
 // --- Store Definition ---
@@ -420,35 +419,10 @@ export const useApp = create<AppState>()(
             console.error('Failed to publish stage move event:', err)
           })
 
-        // 2. Check if entering a full WORK stage -> auto-pause (Constitution §3.3)
-        let shouldAutoPause = false
-        if (WORK_STAGES.includes(to)) {
-          const { pumps, wipLimits } = get()
-          const wipLimit = wipLimits[to]
-          if (wipLimit !== null) {
-            // Count ACTIVE (non-paused) pumps in target stage
-            const activeInStage = pumps.filter(
-              (p) => p.stage === to && !p.isPaused && p.id !== id
-            ).length
-            shouldAutoPause = activeInStage >= wipLimit
-          }
-        }
-
-        // 3. Update pump state
+        // 2. Update pump state (auto-pause removed - departments move freely)
         const patch: Partial<Pump> = {
           stage: to,
           last_update: now,
-        }
-
-        if (shouldAutoPause) {
-          patch.isPaused = true
-          patch.pausedAt = now
-          patch.pausedStage = to
-          // Emit auto-pause event
-          const pauseEvent = pumpPaused(id, to, 'auto')
-          eventStore.append(pauseEvent).catch((err) => {
-            console.error('Failed to persist pause event:', err)
-          })
         }
 
         const newPumps = get().pumps.map((p) =>
@@ -544,27 +518,10 @@ export const useApp = create<AppState>()(
         get().updatePump(id, patch)
       },
 
-      // Constitution §3.3: Unpause blocked if would exceed capacity
+      // Resume a paused pump (WIP-gating removed - departments move freely)
       resumePump: (id) => {
         const pump = get().pumps.find((p) => p.id === id)
         if (!pump || !pump.isPaused) return
-
-        // Constitution §3.3: Block resume if it would exceed WIP limit
-        if (WORK_STAGES.includes(pump.stage)) {
-          const { pumps, wipLimits } = get()
-          const wipLimit = wipLimits[pump.stage]
-          if (wipLimit !== null) {
-            const activeInStage = pumps.filter(
-              (p) => p.stage === pump.stage && !p.isPaused && p.id !== id
-            ).length
-            if (activeInStage >= wipLimit) {
-              console.warn(
-                `Cannot resume pump ${id}: Stage ${pump.stage} at WIP limit (${activeInStage}/${wipLimit})`
-              )
-              return // Block resume
-            }
-          }
-        }
 
         const now = new Date()
         const pausedAt = pump.pausedAt ? new Date(pump.pausedAt) : now

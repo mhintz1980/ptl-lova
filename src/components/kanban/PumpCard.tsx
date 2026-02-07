@@ -97,7 +97,6 @@ export function PumpCard({
         isGhost
           ? 'border-dashed border-yellow-500 bg-yellow-50/50'
           : 'border-border',
-        pump.isPaused && 'border-dashed border-red-400 bg-card/70',
         disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing',
         !disabled && 'hover:-translate-y-[2px] hover:shadow-layer-lg'
       )}
@@ -113,26 +112,6 @@ export function PumpCard({
             : 'No powder coat'
         }
       />
-      {/* PAUSED stamp - large rubber stamp style */}
-      {pump.isPaused && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-visible">
-          <div
-            className="border-[5px] border-red-600 rounded-md px-4 py-1 opacity-65 select-none bg-white/20 dark:bg-black/10"
-            style={{
-              transform: 'rotate(-22deg) scale(1.4)',
-            }}
-          >
-            <span
-              className="text-red-600 font-black text-2xl tracking-[0.15em] uppercase"
-              style={{
-                fontFamily: 'Impact, Haettenschweiler, sans-serif',
-              }}
-            >
-              PAUSED
-            </span>
-          </div>
-        </div>
-      )}
 
       {isGhost && (
         <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-bl z-20">
@@ -140,7 +119,7 @@ export function PumpCard({
         </div>
       )}
 
-      {isLocked && !isGhost && !pump.isPaused && (
+      {isLocked && !isGhost && (
         <div className="absolute top-0 left-0 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-br z-20 flex items-center gap-0.5">
           <Lock className="h-2.5 w-2.5" />
           LOCKED
@@ -148,7 +127,7 @@ export function PumpCard({
       )}
 
       {/* Priority indicator in top right */}
-      {!isGhost && !pump.isPaused && !isLocked && (
+      {!isGhost && !isLocked && (
         <div className="absolute top-2 right-2 z-10">
           <span
             className={`block h-3 w-3 rounded-full ${
@@ -219,14 +198,6 @@ export function PumpCard({
               </span>
             </div>
           )}
-          {pump.isPaused &&
-            pump.totalPausedDays !== undefined &&
-            pump.totalPausedDays > 0 && (
-              <div className="flex items-center justify-between text-orange-600">
-                <span>Days Paused</span>
-                <span className="font-bold">{pump.totalPausedDays}</span>
-              </div>
-            )}
           <div className="flex items-center justify-between border-t border-border/60 pt-1.5 text-[11px]">
             <span>Last update</span>
             <span className="text-foreground/80">
