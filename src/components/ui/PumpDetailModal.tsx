@@ -359,33 +359,9 @@ export function PumpDetailModal({ pump, onClose }: PumpDetailModalProps) {
         aria-modal="true"
         aria-labelledby="pump-detail-title"
         tabIndex={-1}
-        className={cn(
-          'relative w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none',
-          currentPump.isPaused && 'grayscale-[50%]'
-        )}
+        className="relative w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* PAUSED stamp - large rubber stamp style */}
-        {currentPump.isPaused && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 overflow-visible">
-            <div
-              className="border-[5px] border-red-600 rounded-md px-6 py-2 opacity-80 select-none bg-white/20 dark:bg-black/10 backdrop-blur-sm"
-              style={{
-                transform: 'rotate(-22deg) scale(2)',
-              }}
-            >
-              <span
-                className="text-red-600 font-black text-4xl tracking-[0.15em] uppercase"
-                style={{
-                  fontFamily: 'Impact, Haettenschweiler, sans-serif',
-                }}
-              >
-                PAUSED
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Header - matches AddPoModal structure */}
         <div className="flex-shrink-0 border-b border-border bg-card px-6 py-[5px]">
           <div className="md:flex items-start justify-between">
