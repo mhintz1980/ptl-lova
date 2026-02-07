@@ -77,6 +77,11 @@ export default defineConfig(() => ({
     environment: 'jsdom',
     pool: 'threads',
     setupFiles: ['vitest.setup.ts'],
+    // CRITICAL: Clear Supabase credentials to prevent tests from connecting to production
+    env: {
+      VITE_SUPABASE_URL: '',
+      VITE_SUPABASE_ANON_KEY: '',
+    },
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',
       'tests/**/*.spec.ts',

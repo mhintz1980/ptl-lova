@@ -3,11 +3,40 @@ import { createClient } from '@supabase/supabase-js'
 import { Pump, DataAdapter } from '../types'
 import { logErrorReport } from '../lib/error-reporting'
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 🛡️ TEST ENVIRONMENT GUARD: Prevent tests from using SupabaseAdapter
+// ═══════════════════════════════════════════════════════════════════════════
+// This is the FINAL safety layer. Even if vitest.setup.ts and vite.config.ts
+// fail to clear env vars, this will throw and prevent production writes.
+// ═══════════════════════════════════════════════════════════════════════════
+const isTestEnvironment =
+  typeof process !== 'undefined' &&
+  (process.env.VITEST === 'true' ||
+    process.env.NODE_ENV === 'test' ||
+    // @ts-expect-error - vitest global
+    typeof globalThis.__vitest_worker__ !== 'undefined')
+
 // NOTE: This client is configured to use environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 // which must be set in a .env file for this adapter to work.
 
 const url = (import.meta.env.VITE_SUPABASE_URL as string) || ''
 const key = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || ''
+
+// CRITICAL: Block Supabase initialization in test environment
+if (isTestEnvironment && (url || key)) {
+  console.error(`
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🚨  DANGER: SUPABASE CREDENTIALS DETECTED IN TEST ENVIRONMENT  🚨          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  This should NEVER happen. Tests must use LocalAdapter or SandboxAdapter.   ║
+║  Check vite.config.ts test.env and vitest.setup.ts are configured properly. ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+`)
+  throw new Error(
+    'SupabaseAdapter cannot be initialized in test environment. ' +
+      'This is a critical safety violation that could write to production.'
+  )
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE ADAPTER CONFIGURATION
