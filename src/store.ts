@@ -548,26 +548,14 @@ export const useApp = create<AppState>()(
 
       // Constitution §7: Set forecast hint (projection only)
       setForecastHint: (id, dropDate) => {
-        console.log('[DEBUG setForecastHint] Called with:', { id, dropDate })
         // When dropping on calendar, we set stage to QUEUE (conceptually "Scheduled Queue")
         // The distinction is purely whether forecastStart is set.
         const pump = get().pumps.find((p) => p.id === id)
-        if (!pump) {
-          console.log('[DEBUG setForecastHint] Pump not found:', id)
-          return
-        }
+        if (!pump) return
 
         // Calculate end date based on lead time
         const leadTimes = get().getModelLeadTimes(pump.model)
-        if (!leadTimes) {
-          console.log(
-            '[DEBUG setForecastHint] No lead times for model:',
-            pump.model
-          )
-          return
-        }
-
-        console.log('[DEBUG setForecastHint] Lead times found:', leadTimes)
+        if (!leadTimes) return
 
         const capacityConfig = get().capacityConfig
 
@@ -586,10 +574,6 @@ export const useApp = create<AppState>()(
             )
           : {}
         const timeline = timelines[id] ?? []
-        console.log('[DEBUG setForecastHint] Timeline built:', {
-          pumpId: id,
-          timelineLength: timeline.length,
-        })
         const end =
           timeline.length > 0
             ? timeline[timeline.length - 1].end
@@ -604,10 +588,6 @@ export const useApp = create<AppState>()(
           last_update: new Date().toISOString(),
         }
 
-        console.log(
-          '[DEBUG setForecastHint] Calling updatePump with patch:',
-          patch
-        )
         get().updatePump(id, patch)
       },
 

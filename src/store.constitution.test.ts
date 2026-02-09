@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * Constitution Compliance Tests
  *
@@ -7,6 +6,7 @@
  * - moveStage creates PumpStageMoved events
  * - Locked pumps cannot be moved
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useApp } from './store'

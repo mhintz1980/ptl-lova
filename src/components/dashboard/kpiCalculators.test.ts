@@ -1,7 +1,7 @@
-/* eslint-disable */
 /**
  * Unit tests for dashboard KPI calculators
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Pump } from '../../types'
 import {

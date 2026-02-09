@@ -47,7 +47,9 @@ interface PumpRow {
 /**
  * Get pumps with optional filters
  */
-async function getPumpsInternal(input: z.infer<typeof GetPumpsInputSchema>) {
+export async function getPumpsInternal(
+  input: z.infer<typeof GetPumpsInputSchema>
+) {
   const { stage, customer, priority, limit = 20 } = input
 
   const client = getSupabaseAdmin()
@@ -129,7 +131,10 @@ async function getPumpsInternal(input: z.infer<typeof GetPumpsInputSchema>) {
 /**
  * Get job status by PO or serial number
  */
-async function getJobStatusInternal(input: { po?: string; serial?: number }) {
+export async function getJobStatusInternal(input: {
+  po?: string
+  serial?: number
+}) {
   // Validate that at least one filter is provided
   if (!input.po && !input.serial) {
     return { jobs: [], error: 'Please provide a PO number or serial number' }
@@ -188,7 +193,7 @@ async function getJobStatusInternal(input: { po?: string; serial?: number }) {
 /**
  * Get shop capacity summary by date
  */
-async function getShopCapacityInternal(_input: { date?: string }) {
+export async function getShopCapacityInternal(_input: { date?: string }) {
   const client = getSupabaseAdmin()
   if (!client) {
     return { summary: null, error: 'Database not configured' }
