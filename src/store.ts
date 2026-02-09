@@ -551,11 +551,22 @@ export const useApp = create<AppState>()(
         // When dropping on calendar, we set stage to QUEUE (conceptually "Scheduled Queue")
         // The distinction is purely whether forecastStart is set.
         const pump = get().pumps.find((p) => p.id === id)
-        if (!pump) return
+        if (!pump) {
+          console.warn('[setForecastHint] Pump not found:', {
+            pumpId: id.slice(0, 8),
+          })
+          return
+        }
 
         // Calculate end date based on lead time
         const leadTimes = get().getModelLeadTimes(pump.model)
-        if (!leadTimes) return
+        if (!leadTimes) {
+          console.warn('[setForecastHint] Lead times not found:', {
+            pumpId: id.slice(0, 8),
+            model: pump.model,
+          })
+          return
+        }
 
         const capacityConfig = get().capacityConfig
 

@@ -296,7 +296,17 @@ function getCurrentStep(stage: string): string {
 // Vercel AI SDK chat endpoint
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json()
+    const body = await req.json()
+
+    // Validate request body
+    if (!body || !Array.isArray(body.messages)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request: messages must be an array' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { messages } = body
 
     const result = await streamText({
       model: openai('gpt-4o-mini'),
@@ -358,12 +368,10 @@ Tool usage:
 
     return result.toTextStreamResponse()
   } catch (err) {
-    console.error('[chat] Error:', err)
-    return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : 'Internal server error',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    console.error('[chat] Error:', err instanceof Error ? err.stack : err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
