@@ -27,8 +27,7 @@ import { PrintLayout } from './components/print/PrintLayout'
 import { MondayBrief } from './components/print/MondayBrief'
 import { CapacityForecast } from './components/print/CapacityForecast'
 import { KanbanPrintView } from './components/print/KanbanPrintView'
-// Debug import for development
-import './debug-seed'
+import { ChatAssistant } from './components/chat/ChatAssistant'
 
 // Initialize infrastructure (ledger subscriber, etc.)
 import './init-infrastructure'
@@ -220,6 +219,8 @@ function MainApp() {
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
       />
+
+      <ChatAssistant />
     </ProtectedRoute>
   )
 }
