@@ -6,7 +6,7 @@
 import { streamText, tool, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import type { z } from 'zod'
-import { getSupabaseAdmin } from './lib/supabase-admin'
+import { getSupabaseAdmin } from './lib/supabase-admin.js'
 import {
   GetPumpsInputSchema,
   GetJobStatusInputSchema,
@@ -14,7 +14,7 @@ import {
   PumpSchema,
   ShopCapacitySummarySchema,
   STAGES,
-} from './tools/schemas'
+} from './tools/schemas.js'
 
 /**
  * Supabase pump row type (snake_case from DB)
