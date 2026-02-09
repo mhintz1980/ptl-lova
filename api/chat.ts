@@ -340,7 +340,7 @@ Tool usage:
           description:
             'Query pumps with optional filters for stage, customer, priority, and limit',
           inputSchema: GetPumpsInputSchema,
-          execute: async (input) => {
+          execute: async (input: z.infer<typeof GetPumpsInputSchema>) => {
             const { pumps, error } = await getPumpsInternal(input)
             if (error) {
               return { pumps: [], error }
@@ -352,7 +352,7 @@ Tool usage:
           description:
             'Get job status by purchase order (PO) number or serial number',
           inputSchema: GetJobStatusInputSchema,
-          execute: async (input) => {
+          execute: async (input: z.infer<typeof GetJobStatusInputSchema>) => {
             const { jobs, error } = await getJobStatusInternal(input)
             if (error) {
               return { jobs: [], error }
@@ -364,7 +364,9 @@ Tool usage:
           description:
             'Get shop capacity summary showing pumps in progress by stage',
           inputSchema: GetShopCapacityInputSchema,
-          execute: async (input) => {
+          execute: async (
+            input: z.infer<typeof GetShopCapacityInputSchema>
+          ) => {
             const { summary, error } = await getShopCapacityInternal(input)
             if (error) {
               return { summary: null, error }
