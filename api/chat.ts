@@ -306,6 +306,15 @@ function getCurrentStep(stage: string): string {
 // Vercel AI SDK chat endpoint
 export async function POST(req: Request) {
   try {
+    // Validate required environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('[chat] OPENAI_API_KEY is not configured')
+      return new Response(
+        JSON.stringify({ error: 'AI service not configured' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const body = await req.json()
 
     // Validate request body
