@@ -106,10 +106,20 @@ export async function getPumpsInternal(
         promiseDate: row.promisedate,
         dateReceived: row.datereceived,
         powderCoatVendorId: row.powdercoatvendorid,
-        work_hours:
-          typeof row.work_hours === 'string'
-            ? JSON.parse(row.work_hours)
-            : row.work_hours,
+        work_hours: (() => {
+          if (typeof row.work_hours !== 'string') {
+            return row.work_hours
+          }
+          try {
+            return JSON.parse(row.work_hours)
+          } catch (e) {
+            console.error(
+              `[getPumps] Invalid JSON for work_hours on pump ${row.id}:`,
+              e
+            )
+            return null
+          }
+        })(),
       })) || []
 
     const result = PumpSchema.array().safeParse(pumps)
