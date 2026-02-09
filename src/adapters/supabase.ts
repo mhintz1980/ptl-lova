@@ -41,31 +41,18 @@ if (isTestEnvironment && (url || key)) {
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE ADAPTER CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════
-console.log('🔵 [Supabase] Module loaded at:', new Date().toISOString())
-console.log('🔵 [Supabase] Configuration:', {
-  hasUrl: !!url,
-  urlPrefix: url ? url.substring(0, 30) + '...' : 'NOT SET',
-  hasKey: !!key,
-  keyPrefix: key ? key.substring(0, 10) + '...' : 'NOT SET',
-})
 
 // Prevent crash if keys are missing (Local Mode)
 export const supabase = url && key ? createClient(url, key) : null
 
-if (supabase) {
-  console.log('✅ [Supabase] Client initialized successfully')
-} else {
-  console.warn('⚠️ [Supabase] Client NOT initialized - missing URL or API key')
+if (!supabase) {
+  console.warn('[Supabase] Client NOT initialized - missing URL or API key')
 }
 
 export const SupabaseAdapter: DataAdapter = {
   async load(): Promise<Pump[]> {
-    console.log('🔵 [Supabase] load() called at:', new Date().toISOString())
-
     if (!supabase) {
-      console.warn(
-        '⚠️ [Supabase] load() - No client available, returning empty array'
-      )
+      console.warn('[Supabase] load() - No client available, returning empty array')
       return []
     }
 
@@ -74,21 +61,9 @@ export const SupabaseAdapter: DataAdapter = {
     const backoffIntervals = [500, 1000, 1500]
 
     while (attempts < maxAttempts) {
-      console.log(
-        '🔵 [Supabase] load() - Fetching from pump table (attempt',
-        attempts + 1,
-        'of',
-        maxAttempts,
-        ')'
-      )
       const { data, error } = await supabase.from('pump').select('*')
 
       if (!error) {
-        console.log(
-          '✅ [Supabase] load() SUCCESS - Retrieved',
-          data?.length ?? 0,
-          'rows from database'
-        )
         // Supabase returns snake_case, we assume the data is normalized to camelCase by the time it hits the store
         // For Lite, we cast and assume the DB schema matches the Pump interface (which it should, as per spec)
         return data as Pump[]
@@ -108,8 +83,7 @@ export const SupabaseAdapter: DataAdapter = {
 
       const delayIndex = Math.min(attempts - 1, backoffIntervals.length - 1)
       const delay = backoffIntervals[delayIndex]
-      // Retry attempt logging
-      console.warn(`⚠️ [Supabase] Retrying in ${delay}ms...`)
+      console.warn(`[Supabase] Retrying in ${delay}ms...`)
 
       if (attempts >= maxAttempts) {
         logErrorReport(error, {
@@ -128,7 +102,7 @@ export const SupabaseAdapter: DataAdapter = {
     }
 
     // This part should not be reachable, throw to ensure we never silently fail
-    console.error('❌ [Supabase] load() - Exhausted retries without success')
+    console.error('[Supabase] load() - Exhausted retries without success')
     throw new Error('Failed to load data after maximum retries')
   },
   /**
@@ -155,10 +129,7 @@ export const SupabaseAdapter: DataAdapter = {
         inputSummary: `rows=${rows.length} - OPERATION BLOCKED FOR SAFETY`,
       },
     })
-    console.error(
-      '🚨 [Supabase] replaceAll() is DISABLED to prevent data loss!'
-    )
-    console.error('🚨 Use syncAll() or upsertMany() instead.')
+    console.error('[Supabase] replaceAll() is DISABLED to prevent data loss! Use syncAll() or upsertMany() instead.')
     throw error
   },
 
@@ -167,13 +138,6 @@ export const SupabaseAdapter: DataAdapter = {
    * Does NOT delete any existing data - only inserts or updates provided rows.
    */
   async syncAll(rows: Pump[]) {
-    console.log(
-      '🔵 [Supabase] syncAll() called with',
-      rows.length,
-      'rows at:',
-      new Date().toISOString()
-    )
-
     if (!supabase) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
@@ -190,18 +154,10 @@ export const SupabaseAdapter: DataAdapter = {
       throw error
     }
 
-    if (rows.length === 0) {
-      console.log('🔵 [Supabase] syncAll() - No rows provided, nothing to sync')
-      return
-    }
+    if (rows.length === 0) return
 
     // Safe UPSERT-only approach: inserts new rows, updates existing ones
     // Does NOT delete any data - much safer than replaceAll
-    console.log(
-      '🔵 [Supabase] syncAll() - Upserting',
-      rows.length,
-      'rows (safe mode - no deletions)...'
-    )
     const { error: upsertError } = await supabase.from('pump').upsert(rows)
     if (upsertError) {
       logErrorReport(upsertError, {
@@ -215,20 +171,8 @@ export const SupabaseAdapter: DataAdapter = {
       })
       throw upsertError
     }
-    console.log(
-      '✅ [Supabase] syncAll() SUCCESS - Synced',
-      rows.length,
-      'rows (no deletions)'
-    )
   },
   async upsertMany(rows: Pump[]) {
-    console.log(
-      '🔵 [Supabase] upsertMany() called with',
-      rows.length,
-      'rows at:',
-      new Date().toISOString()
-    )
-
     if (!supabase) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
@@ -246,10 +190,6 @@ export const SupabaseAdapter: DataAdapter = {
     }
 
     if (rows.length) {
-      console.log(
-        '🔵 [Supabase] upsertMany() - Upserting rows:',
-        rows.map((r) => ({ id: r.id?.substring(0, 8), model: r.model }))
-      )
       const { error } = await supabase.from('pump').upsert(rows)
       if (error) {
         logErrorReport(error, {
@@ -263,26 +203,9 @@ export const SupabaseAdapter: DataAdapter = {
         })
         throw error
       }
-      console.log(
-        '✅ [Supabase] upsertMany() SUCCESS - Upserted',
-        rows.length,
-        'rows'
-      )
-    } else {
-      console.log(
-        '🔵 [Supabase] upsertMany() - No rows provided, nothing to upsert'
-      )
     }
   },
   async update(id: string, patch: Partial<Pump>) {
-    console.log(
-      '🔵 [Supabase] update() called for id:',
-      id?.substring(0, 8) + '...',
-      'at:',
-      new Date().toISOString()
-    )
-    console.log('🔵 [Supabase] update() patch keys:', Object.keys(patch))
-
     if (!supabase) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
@@ -312,9 +235,5 @@ export const SupabaseAdapter: DataAdapter = {
       })
       throw error
     }
-    console.log(
-      '✅ [Supabase] update() SUCCESS for id:',
-      id?.substring(0, 8) + '...'
-    )
   },
 }

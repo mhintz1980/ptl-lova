@@ -5,28 +5,28 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { useBrandColors } from "../useBrandColors";
+} from 'recharts'
+import { useBrandColors } from '../useBrandColors'
 
 const SAMPLE_SERIES = [
-  { label: "01 Feb", dev: 1500, design: 643 },
-  { label: "02 Feb", dev: 1418, design: 413 },
-  { label: "03 Feb", dev: 1456, design: 765 },
-  { label: "04 Feb", dev: 1526, design: 412 },
-  { label: "05 Feb", dev: 1356, design: 1423 },
-  { label: "06 Feb", dev: 1256, design: 1731 },
-];
+  { label: '01 Feb', dev: 1500, design: 643 },
+  { label: '02 Feb', dev: 1418, design: 413 },
+  { label: '03 Feb', dev: 1456, design: 765 },
+  { label: '04 Feb', dev: 1526, design: 412 },
+  { label: '05 Feb', dev: 1356, design: 1423 },
+  { label: '06 Feb', dev: 1256, design: 1731 },
+]
 
 export interface LineAreaChartProps {
-  data?: typeof SAMPLE_SERIES;
-  className?: string;
+  data?: typeof SAMPLE_SERIES
+  className?: string
 }
 
 export function LineAreaChart({
   data = SAMPLE_SERIES,
   className,
 }: LineAreaChartProps) {
-  const [primary, secondary] = useBrandColors();
+  const [primary, secondary] = useBrandColors()
 
   return (
     <div className={className}>
@@ -46,15 +46,17 @@ export function LineAreaChart({
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--color-fg-muted)", fontSize: 12 }}
+            tick={{ fill: 'var(--color-fg-muted)', fontSize: 12 }}
           />
           <YAxis hide />
           <Tooltip
             contentStyle={{
-              borderRadius: "12px",
-              border: "1px solid var(--color-border-muted)",
+              borderRadius: '12px',
+              border: '1px solid var(--color-border-muted)',
             }}
-            formatter={(value: number) => `$${value.toLocaleString()}`}
+            formatter={(value: number | undefined) =>
+              value != null ? `$${value.toLocaleString()}` : ''
+            }
           />
           <Area
             type="monotone"
@@ -75,5 +77,5 @@ export function LineAreaChart({
         </AreaChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
