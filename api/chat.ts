@@ -3,7 +3,7 @@
  * @description Vercel AI SDK chat endpoint with OpenAI provider and pump management tools
  */
 
-import { streamText, tool } from 'ai'
+import { streamText, tool, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import type { z } from 'zod'
 import { getSupabaseAdmin } from './lib/supabase-admin'
@@ -302,9 +302,18 @@ export async function POST(req: Request) {
       model: openai('gpt-4o-mini'),
       system: `You are a helpful assistant for PumpTracker, a pump manufacturing management system.
 You help users query production data about pumps, purchase orders, and shop capacity.
+
+IMPORTANT: When users ask questions, USE THE TOOLS IMMEDIATELY with default values. Do NOT ask for optional parameters.
+- All filter parameters (stage, customer, priority) are OPTIONAL
+- Default limit is 20 pumps - sufficient for most queries
+- If the user doesn't specify filters, call the tool without them
+
 Stages in order: QUEUE → FABRICATION → STAGED_FOR_POWDER → POWDER_COAT → ASSEMBLY → SHIP → CLOSED.
-When users ask about "where is my order" or "PO status", use the getJobStatus tool.
-When users ask about capacity or bottlenecks, use the getShopCapacity tool.`,
+
+Tool usage:
+- getPumps: For any question about pumps, counts, or "how many" - call immediately with the stage filter if mentioned
+- getJobStatus: For "where is my order", PO status, or serial number lookups
+- getShopCapacity: For capacity, bottlenecks, or workload questions (date is optional)`,
       messages,
       tools: {
         getPumps: tool({
@@ -344,6 +353,7 @@ When users ask about capacity or bottlenecks, use the getShopCapacity tool.`,
           },
         }),
       },
+      stopWhen: stepCountIs(3), // Allow tool calls and follow-up responses
     })
 
     return result.toTextStreamResponse()
