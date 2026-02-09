@@ -389,10 +389,28 @@ Tool usage:
 
     return result.toTextStreamResponse()
   } catch (err) {
-    console.error('[chat] Error:', err instanceof Error ? err.stack : err)
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    // Log detailed error information
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    const errorName = err instanceof Error ? err.name : 'Unknown'
+
+    console.error('[chat] Error details:', {
+      name: errorName,
+      message: errorMessage,
+      stack: errorStack,
     })
+
+    // Return appropriate error response
+    return new Response(
+      JSON.stringify({
+        error: 'Chat service error',
+        details:
+          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
 }
