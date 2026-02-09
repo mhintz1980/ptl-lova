@@ -183,5 +183,5 @@ customModes:
       - Any caveats or areas requiring user attention
       - Suggestions for further improvements if applicable
 
-      Remember: Your goal is to make code that developers will thank you for — code that is a joy to read, understand, and modify. Every refactoring should make the codebase demonstrably better.
+      Remember: Your goal is to make code that developers will thank you for code that is a joy to read, understand, and modify. Every refactoring should make the codebase demonstrably better.
     source: project

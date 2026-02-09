@@ -19,7 +19,7 @@ Use this skill when you need to:
 - **Package and distribute** skills to your team
 
 Also use this skill when:
-- **User says they want to create/share a skill**
+- **User says he wants to create/share his skill** 
 
 This skill is ideal for:
 - Creating skills as part of team workflows
