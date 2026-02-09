@@ -98,9 +98,22 @@ export function useChat({
           const { done, value } = await reader.read()
           if (done) break
 
-          const chunk = decoder.decode(value)
+          const chunk = decoder.decode(value, { stream: true })
           assistantContent += chunk
 
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? { ...msg, content: assistantContent }
+                : msg
+            )
+          )
+        }
+
+        // Flush any remaining bytes from the decoder
+        const remaining = decoder.decode()
+        if (remaining) {
+          assistantContent += remaining
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessage.id

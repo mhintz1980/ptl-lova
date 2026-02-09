@@ -76,16 +76,6 @@ export function UnifiedJobPill({
     }
   }, [timeline, viewStart, totalDays])
 
-  // DEBUG: Log pillBounds for debugging
-  console.log(
-    '[DEBUG UnifiedJobPill]',
-    pump.id.slice(-6),
-    'pillBounds:',
-    JSON.stringify(pillBounds),
-    'timeline.length:',
-    timeline.length
-  )
-
   // Calculate internal segment proportions
   const segments = useMemo(() => {
     if (!pillBounds || !timeline.length) return []
@@ -133,15 +123,6 @@ export function UnifiedJobPill({
       })
       .filter((seg) => seg.widthPercent > 0)
   }, [timeline, pillBounds, viewStart, totalDays])
-
-  // DEBUG: Log segments for debugging
-  console.log(
-    '[DEBUG segments]',
-    pump.id.slice(-6),
-    'segments:',
-    segments.length,
-    segments.map((s) => ({ stage: s.stage, width: s.widthPercent.toFixed(1) }))
-  )
 
   // Draggable setup using first segment as reference
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({

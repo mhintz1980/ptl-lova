@@ -3,7 +3,7 @@
  * @description Vercel AI SDK chat endpoint with OpenAI provider and pump management tools
  */
 
-import { streamText, tool } from 'ai'
+import { streamText, tool, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import type { z } from 'zod'
 import { getSupabaseAdmin } from './lib/supabase-admin'
@@ -47,7 +47,9 @@ interface PumpRow {
 /**
  * Get pumps with optional filters
  */
-async function getPumpsInternal(input: z.infer<typeof GetPumpsInputSchema>) {
+export async function getPumpsInternal(
+  input: z.infer<typeof GetPumpsInputSchema>
+) {
   const { stage, customer, priority, limit = 20 } = input
 
   const client = getSupabaseAdmin()
@@ -104,10 +106,20 @@ async function getPumpsInternal(input: z.infer<typeof GetPumpsInputSchema>) {
         promiseDate: row.promisedate,
         dateReceived: row.datereceived,
         powderCoatVendorId: row.powdercoatvendorid,
-        work_hours:
-          typeof row.work_hours === 'string'
-            ? JSON.parse(row.work_hours)
-            : row.work_hours,
+        work_hours: (() => {
+          if (typeof row.work_hours !== 'string') {
+            return row.work_hours
+          }
+          try {
+            return JSON.parse(row.work_hours)
+          } catch (e) {
+            console.error(
+              `[getPumps] Invalid JSON for work_hours on pump ${row.id}:`,
+              e
+            )
+            return null
+          }
+        })(),
       })) || []
 
     const result = PumpSchema.array().safeParse(pumps)
@@ -129,7 +141,10 @@ async function getPumpsInternal(input: z.infer<typeof GetPumpsInputSchema>) {
 /**
  * Get job status by PO or serial number
  */
-async function getJobStatusInternal(input: { po?: string; serial?: number }) {
+export async function getJobStatusInternal(input: {
+  po?: string
+  serial?: number
+}) {
   // Validate that at least one filter is provided
   if (!input.po && !input.serial) {
     return { jobs: [], error: 'Please provide a PO number or serial number' }
@@ -188,7 +203,7 @@ async function getJobStatusInternal(input: { po?: string; serial?: number }) {
 /**
  * Get shop capacity summary by date
  */
-async function getShopCapacityInternal(_input: { date?: string }) {
+export async function getShopCapacityInternal(_input: { date?: string }) {
   const client = getSupabaseAdmin()
   if (!client) {
     return { summary: null, error: 'Database not configured' }
@@ -291,15 +306,34 @@ function getCurrentStep(stage: string): string {
 // Vercel AI SDK chat endpoint
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json()
+    const body = await req.json()
+
+    // Validate request body
+    if (!body || !Array.isArray(body.messages)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request: messages must be an array' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { messages } = body
 
     const result = await streamText({
       model: openai('gpt-4o-mini'),
       system: `You are a helpful assistant for PumpTracker, a pump manufacturing management system.
 You help users query production data about pumps, purchase orders, and shop capacity.
+
+IMPORTANT: When users ask questions, USE THE TOOLS IMMEDIATELY with default values. Do NOT ask for optional parameters.
+- All filter parameters (stage, customer, priority) are OPTIONAL
+- Default limit is 20 pumps - sufficient for most queries
+- If the user doesn't specify filters, call the tool without them
+
 Stages in order: QUEUE → FABRICATION → STAGED_FOR_POWDER → POWDER_COAT → ASSEMBLY → SHIP → CLOSED.
-When users ask about "where is my order" or "PO status", use the getJobStatus tool.
-When users ask about capacity or bottlenecks, use the getShopCapacity tool.`,
+
+Tool usage:
+- getPumps: For any question about pumps, counts, or "how many" - call immediately with the stage filter if mentioned
+- getJobStatus: For "where is my order", PO status, or serial number lookups
+- getShopCapacity: For capacity, bottlenecks, or workload questions (date is optional)`,
       messages,
       tools: {
         getPumps: tool({
@@ -339,16 +373,15 @@ When users ask about capacity or bottlenecks, use the getShopCapacity tool.`,
           },
         }),
       },
+      stopWhen: stepCountIs(3), // Allow tool calls and follow-up responses
     })
 
     return result.toTextStreamResponse()
   } catch (err) {
-    console.error('[chat] Error:', err)
-    return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : 'Internal server error',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    console.error('[chat] Error:', err instanceof Error ? err.stack : err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

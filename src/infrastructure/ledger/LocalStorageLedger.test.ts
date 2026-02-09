@@ -1,14 +1,12 @@
-/* eslint-disable */
 /**
  * LocalStorageLedger tests
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   stageLedger,
   createStageMoveRecord,
   LEDGER_STORAGE_KEY,
 } from './LocalStorageLedger'
-import type { StageMoveRecord } from './StageLedger'
 
 describe('LocalStorageLedger', () => {
   beforeEach(() => {

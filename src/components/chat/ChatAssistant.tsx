@@ -124,12 +124,12 @@ export function ChatAssistant({ className }: ChatAssistantProps) {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
             {error && (
               <div className="text-destructive text-xs px-4 py-2 bg-destructive/10 rounded">
                 {error}
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area */}
