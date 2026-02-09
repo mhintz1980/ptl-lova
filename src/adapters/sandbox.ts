@@ -1,4 +1,4 @@
-import { Pump, DataAdapter } from '../types'
+import { DataAdapter } from '../types'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ⚠️⚠️⚠️ SANDBOX ADAPTER ACTIVE ⚠️⚠️⚠️
