@@ -346,6 +346,29 @@
       }
     },
     {
+      "model": "DP-200",
+      "description": "8\" Vacuum Assisted Centrifugal Trash Pump",
+      "price": 25000,
+      "bom": {
+        "engine": "Deutz TCD 2.9",
+        "gearbox": null,
+        "control_panel": "MPC-10"
+      },
+      "lead_times": {
+        "fabrication": 1.5,
+        "powder_coat": 7,
+        "assembly": 1,
+        "testing": 0.25,
+        "total_days": 9.75
+      },
+      "work_hours": {
+        "fabrication": 42,
+        "assembly": 14,
+        "testing": 0.5,
+        "shipping": 0.5
+      }
+    },
+    {
       "model": "HP-150",
       "description": "6\" x 3\" High Pressure Centrifugal Pump",
       "price": 25000,
