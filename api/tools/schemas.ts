@@ -214,6 +214,7 @@ export const GetPumpsInputSchema = z.object({
   customer: z.string().optional(),
   priority: z.enum(PRIORITIES).optional(),
   limit: z.number().int().min(1).max(100).default(20),
+  delayedOnly: z.boolean().default(false),
 })
 
 export type GetPumpsInput = z.infer<typeof GetPumpsInputSchema>
@@ -230,6 +231,74 @@ export const GetShopCapacityInputSchema = z.object({
 })
 
 export type GetShopCapacityInput = z.infer<typeof GetShopCapacityInputSchema>
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CUSTOMER INFO TOOL SCHEMA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const GetCustomerInfoInputSchema = z.object({
+  customerName: z.string().describe('Partial customer name to search for'),
+  includeRecentOrders: z.boolean().default(true),
+})
+
+export type GetCustomerInfoInput = z.infer<typeof GetCustomerInfoInputSchema>
+
+export const CustomerInfoSchema = z.object({
+  customerName: z.string(),
+  totalActiveOrders: z.number().int().nonnegative(),
+  totalCompletedOrders: z.number().int().nonnegative(),
+  totalValue: z.number().nonnegative(),
+  lastOrderDate: z.string().datetime({ offset: true }).nullable(),
+  activeOrdersByStage: z.record(z.enum(STAGES), z.number()),
+  recentOrders: z.array(PurchaseOrderSchema).optional(),
+})
+
+export type CustomerInfo = z.infer<typeof CustomerInfoSchema>
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KPI REPORT TOOL SCHEMA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const GetKPIReportInputSchema = z.object({
+  metric: z.enum([
+    'throughput', // Completed pumps over time
+    'cycleTime', // Avg time from Start -> Ship
+    'onTimeDelivery', // % shipped before promise date
+    'wipAging', // Avg age of current WIP
+  ]),
+  dateRange: z
+    .object({
+      start: z.string().date(),
+      end: z.string().date(),
+    })
+    .optional()
+    .describe('Defaults to last 30 days'),
+})
+
+export type GetKPIReportInput = z.infer<typeof GetKPIReportInputSchema>
+
+export const KPIReportSchema = z.object({
+  metric: z.string(),
+  period: z.object({
+    start: z.string(),
+    end: z.string(),
+  }),
+  value: z.number(),
+  unit: z.string(),
+  trend: z.enum(['up', 'down', 'stable']).optional(),
+  dataPoints: z
+    .array(
+      z.object({
+        date: z.string(),
+        value: z.number(),
+        label: z.string().optional(),
+      })
+    )
+    .optional(),
+  insight: z.string().optional(),
+})
+
+export type KPIReport = z.infer<typeof KPIReportSchema>
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHOP CAPACITY SUMMARY SCHEMA (lighter alternative for AI responses)

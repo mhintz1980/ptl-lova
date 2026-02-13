@@ -11,10 +11,20 @@ import {
   GetPumpsInputSchema,
   GetJobStatusInputSchema,
   GetShopCapacityInputSchema,
+  GetCustomerInfoInputSchema,
+  GetKPIReportInputSchema,
   PumpSchema,
   ShopCapacitySummarySchema,
   STAGES,
 } from './tools/schemas.js'
+import { getCustomerInfoInternal } from './tools/customer.js'
+import { getKPIReportInternal } from './tools/kpi.js'
+
+// Force Node.js runtime for Supabase Admin compatibility
+export const config = {
+  maxDuration: 60,
+  runtime: 'nodejs',
+}
 
 /**
  * Supabase pump row type (snake_case from DB)
@@ -34,10 +44,7 @@ interface PumpRow {
   gearbox: string | null
   forecastend: string | null
   forecaststart: string | null
-  ispaused: boolean | null
-  pausedat: string | null
-  pausedstage: string | null
-  totalpauseddays: number | null
+  // ispaused, pausedat, pausedstage, totalpauseddays REMOVED (deprecated)
   promisedate: string | null
   datereceived: string | null
   powdercoatvendorid: string | null
@@ -50,7 +57,7 @@ interface PumpRow {
 export async function getPumpsInternal(
   input: z.infer<typeof GetPumpsInputSchema>
 ) {
-  const { stage, customer, priority, limit = 20 } = input
+  const { stage, customer, priority, limit = 20, delayedOnly } = input
 
   const client = getSupabaseAdmin()
   if (!client) {
@@ -68,6 +75,14 @@ export async function getPumpsInternal(
     }
     if (priority) {
       query = query.eq('priority', priority)
+    }
+
+    // Delayed logic: Promised date < now AND not shipped
+    if (delayedOnly) {
+      const now = new Date().toISOString()
+      query = query
+        .lt('promisedate', now)
+        .not('stage', 'in', '("SHIP","CLOSED")')
     }
 
     query = query.order('last_update', { ascending: false }).limit(limit)
@@ -99,10 +114,11 @@ export async function getPumpsInternal(
         gearbox: row.gearbox,
         forecastEnd: row.forecastend,
         forecastStart: row.forecaststart,
-        isPaused: row.ispaused,
-        pausedAt: row.pausedat,
-        pausedStage: row.pausedstage,
-        totalPausedDays: row.totalpauseddays,
+        // Deprecated paused fields mapped to null
+        isPaused: null,
+        pausedAt: null,
+        pausedStage: null,
+        totalPausedDays: null,
         promiseDate: row.promisedate,
         dateReceived: row.datereceived,
         powderCoatVendorId: row.powdercoatvendorid,
@@ -330,24 +346,24 @@ export async function POST(req: Request) {
     const result = await streamText({
       model: openai('gpt-4o-mini'),
       system: `You are a helpful assistant for PumpTracker, a pump manufacturing management system.
-You help users query production data about pumps, purchase orders, and shop capacity.
+You help users query production data, customer info, and KPIs.
 
-IMPORTANT: When users ask questions, USE THE TOOLS IMMEDIATELY with default values. Do NOT ask for optional parameters.
-- All filter parameters (stage, customer, priority) are OPTIONAL
-- Default limit is 20 pumps - sufficient for most queries
-- If the user doesn't specify filters, call the tool without them
-
-Stages in order: QUEUE → FABRICATION → STAGED_FOR_POWDER → POWDER_COAT → ASSEMBLY → SHIP → CLOSED.
+IMPORTANT: When users ask questions, USE THE TOOLS IMMEDIATELY.
+- All filter parameters are OPTIONAL.
+- Default limit is 20 pumps.
+- Stages: QUEUE → FABRICATION → STAGED_FOR_POWDER → POWDER_COAT → ASSEMBLY → SHIP → CLOSED.
 
 Tool usage:
-- getPumps: For any question about pumps, counts, or "how many" - call immediately with the stage filter if mentioned
-- getJobStatus: For "where is my order", PO status, or serial number lookups
-- getShopCapacity: For capacity, bottlenecks, or workload questions (date is optional)`,
+- getPumps: Standard queries about pumps, counts, or "how many". Use 'delayedOnly' if asked about late/overdue pumps.
+- getJobStatus: For "where is my order", PO status, or serial number lookups.
+- getShopCapacity: For capacity, bottlenecks, or shop workload.
+- getCustomerInfo: For customer summaries, recent orders, or "who is our biggest customer".
+- getKPIReport: For "throughput", "cycle time", "on-time delivery", or "WIP aging" stats.`,
       messages,
       tools: {
         getPumps: tool({
           description:
-            'Query pumps with optional filters for stage, customer, priority, and limit',
+            'Query pumps with optional filters for stage, customer, priority, and delayed status',
           inputSchema: GetPumpsInputSchema,
           execute: async (input: z.infer<typeof GetPumpsInputSchema>) => {
             const { pumps, error } = await getPumpsInternal(input)
@@ -383,8 +399,29 @@ Tool usage:
             return { summary, error: null }
           },
         }),
+        getCustomerInfo: tool({
+          description: 'Get customer summary, order history, and active status',
+          inputSchema: GetCustomerInfoInputSchema,
+          execute: async (
+            input: z.infer<typeof GetCustomerInfoInputSchema>
+          ) => {
+            const { customerInfo, error } = await getCustomerInfoInternal(input)
+            if (error) return { customerInfo: null, error }
+            return { customerInfo, error: null }
+          },
+        }),
+        getKPIReport: tool({
+          description:
+            'Generate manufacturing KPI reports (throughput, cycle time, on-time delivery)',
+          inputSchema: GetKPIReportInputSchema,
+          execute: async (input: z.infer<typeof GetKPIReportInputSchema>) => {
+            const { report, error } = await getKPIReportInternal(input)
+            if (error) return { report: null, error }
+            return { report, error: null }
+          },
+        }),
       },
-      stopWhen: stepCountIs(3), // Allow tool calls and follow-up responses
+      stopWhen: stepCountIs(5), // Allow for multi-step reasoning
     })
 
     return result.toTextStreamResponse()
