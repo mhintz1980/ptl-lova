@@ -21,8 +21,8 @@ describe('SupabaseAdapter', () => {
     vi.resetModules()
     vi.useFakeTimers()
     // Mock environment variables so SupabaseAdapter initializes the client
-    vi.stubEnv('VITE_SUPABASE_URL', 'https://mock.supabase.co')
-    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'mock-key')
+    // vi.stubEnv('VITE_SUPABASE_URL', 'https://mock.supabase.co')
+    // vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'mock-key')
 
     // Clear mock history
     vi.clearAllMocks()
@@ -55,20 +55,26 @@ describe('SupabaseAdapter', () => {
         error: null,
       })
 
-    // 2. Import the real adapter (dynamic import to pick up env vars)
-    const { SupabaseAdapter } = await import('../src/adapters/supabase')
+    // 2. Mock client
+    const mockClient = {
+      from: mockFrom,
+    }
 
-    // 3. Start the operation (do not await yet)
-    const loadPromise = SupabaseAdapter.load()
+    // 3. Create adapter using factory
+    const { createSupabaseAdapter } = await import('../src/adapters/supabase')
+    const adapter = createSupabaseAdapter(mockClient)
 
-    // 4. Fast-forward timers to skip backoff delays
+    // 4. Start the operation (do not await yet)
+    const loadPromise = adapter.load()
+
+    // 5. Fast-forward timers to skip backoff delays
     // We use runAllTimersAsync to handle the recursive async/await + setTimeout loop
     await vi.runAllTimersAsync()
 
-    // 5. Await result
+    // 6. Await result
     const data = await loadPromise
 
-    // 6. Assertions
+    // 7. Assertions
     expect(mockFrom).toHaveBeenCalledTimes(3)
     expect(mockSelect).toHaveBeenCalledTimes(3)
     // Should log error for the first 2 failures
@@ -92,25 +98,31 @@ describe('SupabaseAdapter', () => {
     // Always fail
     mockSelect.mockResolvedValue({ data: null, error })
 
-    // 2. Import the real adapter
-    const { SupabaseAdapter } = await import('../src/adapters/supabase')
+    // 2. Mock client
+    const mockClient = {
+      from: mockFrom,
+    }
 
-    // 3. Start operation
-    const loadPromise = SupabaseAdapter.load()
+    // 3. Create adapter using factory
+    const { createSupabaseAdapter } = await import('../src/adapters/supabase')
+    const adapter = createSupabaseAdapter(mockClient)
 
-    // 4. Handle rejection to prevent usage error during timer flush
+    // 4. Start operation
+    const loadPromise = adapter.load()
+
+    // 5. Handle rejection to prevent usage error during timer flush
     const safePromise = loadPromise.catch((e) => e)
 
-    // 5. Fast-forward timers
+    // 6. Fast-forward timers
     await vi.runAllTimersAsync()
 
-    // 6. Await result (which is the caught error)
+    // 7. Await result (which is the caught error)
     const result = await safePromise
 
-    // 7. Assert it failed with the correct error
+    // 8. Assert it failed with the correct error
     expect(result).toBe(error)
 
-    // 8. Assertions
+    // 9. Assertions
     // It tries 3 times (maxAttempts)
     expect(mockFrom).toHaveBeenCalledTimes(3)
     expect(mockSelect).toHaveBeenCalledTimes(3)

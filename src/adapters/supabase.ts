@@ -49,10 +49,13 @@ if (!supabase) {
   console.warn('[Supabase] Client NOT initialized - missing URL or API key')
 }
 
-export const SupabaseAdapter: DataAdapter = {
+// Factory function for dependency injection (testing)
+export const createSupabaseAdapter = (client: any): DataAdapter => ({
   async load(): Promise<Pump[]> {
-    if (!supabase) {
-      console.warn('[Supabase] load() - No client available, returning empty array')
+    if (!client) {
+      console.warn(
+        '[Supabase] load() - No client available, returning empty array'
+      )
       return []
     }
 
@@ -61,7 +64,7 @@ export const SupabaseAdapter: DataAdapter = {
     const backoffIntervals = [500, 1000, 1500]
 
     while (attempts < maxAttempts) {
-      const { data, error } = await supabase.from('pump').select('*')
+      const { data, error } = await client.from('pump').select('*')
 
       if (!error) {
         // Supabase returns snake_case, we assume the data is normalized to camelCase by the time it hits the store
@@ -129,7 +132,9 @@ export const SupabaseAdapter: DataAdapter = {
         inputSummary: `rows=${rows.length} - OPERATION BLOCKED FOR SAFETY`,
       },
     })
-    console.error('[Supabase] replaceAll() is DISABLED to prevent data loss! Use syncAll() or upsertMany() instead.')
+    console.error(
+      '[Supabase] replaceAll() is DISABLED to prevent data loss! Use syncAll() or upsertMany() instead.'
+    )
     throw error
   },
 
@@ -138,7 +143,7 @@ export const SupabaseAdapter: DataAdapter = {
    * Does NOT delete any existing data - only inserts or updates provided rows.
    */
   async syncAll(rows: Pump[]) {
-    if (!supabase) {
+    if (!client) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
@@ -158,7 +163,7 @@ export const SupabaseAdapter: DataAdapter = {
 
     // Safe UPSERT-only approach: inserts new rows, updates existing ones
     // Does NOT delete any data - much safer than replaceAll
-    const { error: upsertError } = await supabase.from('pump').upsert(rows)
+    const { error: upsertError } = await client.from('pump').upsert(rows)
     if (upsertError) {
       logErrorReport(upsertError, {
         where: 'SupabaseAdapter.syncAll',
@@ -173,7 +178,7 @@ export const SupabaseAdapter: DataAdapter = {
     }
   },
   async upsertMany(rows: Pump[]) {
-    if (!supabase) {
+    if (!client) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
@@ -190,7 +195,7 @@ export const SupabaseAdapter: DataAdapter = {
     }
 
     if (rows.length) {
-      const { error } = await supabase.from('pump').upsert(rows)
+      const { error } = await client.from('pump').upsert(rows)
       if (error) {
         logErrorReport(error, {
           where: 'SupabaseAdapter.upsertMany',
@@ -206,7 +211,7 @@ export const SupabaseAdapter: DataAdapter = {
     }
   },
   async update(id: string, patch: Partial<Pump>) {
-    if (!supabase) {
+    if (!client) {
       const error = new Error(
         'Supabase client not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.'
       )
@@ -222,7 +227,7 @@ export const SupabaseAdapter: DataAdapter = {
       throw error
     }
 
-    const { error } = await supabase.from('pump').update(patch).eq('id', id)
+    const { error } = await client.from('pump').update(patch).eq('id', id)
     if (error) {
       logErrorReport(error, {
         where: 'SupabaseAdapter.update',
@@ -236,4 +241,6 @@ export const SupabaseAdapter: DataAdapter = {
       throw error
     }
   },
-}
+})
+
+export const SupabaseAdapter: DataAdapter = createSupabaseAdapter(supabase)

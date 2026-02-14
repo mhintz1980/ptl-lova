@@ -50,11 +50,13 @@ beforeEach(async () => {
   const { useApp } = await import('./src/store')
   const { LocalAdapter } = await import('./src/adapters/local')
 
-  useApp.setState({
-    adapter: LocalAdapter,
-    pumps: [],
-    loading: false,
-  })
+  if (useApp && typeof useApp.setState === 'function') {
+    useApp.setState({
+      adapter: LocalAdapter,
+      pumps: [],
+      loading: false,
+    })
+  }
 })
 
 afterEach(() => {
