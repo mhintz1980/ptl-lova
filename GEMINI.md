@@ -37,12 +37,12 @@
 
 ### 3. Your First 5 Minutes
 
-### 3. Your First 5 Minutes
-
-1.  **Run Preflight**: `npm run preflight`
+1.  **Read the Rules**: Load and follow `using-superpowers` skill from `/home/markimus/.codex/superpowers/skills/using-superpowers/SKILL.md`.
+    - **Trigger**: Mandatory for every new conversation.
+2.  **Run Preflight**: `npm run preflight`
     - This summarizes status, environment, and relevant skills.
-2.  **Context Budget**: Start with <10% utilization.
-3.  **Assume Production**: Treat `main` as live.
+3.  **Context Budget**: Start with <10% utilization.
+4.  **Assume Production**: Treat `main` as live.
 
 ---
 
