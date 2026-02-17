@@ -46,6 +46,15 @@
 
 ---
 
+## In Progress: Hybrid Closed Lane (Phase 1-3) 🚧
+
+- [x] **PO Scoreboard**: Sticky header with real-time progress bars for active POs.
+- [x] **Chronological Manifest**: Grouping by Today, Yesterday, This Week, Older.
+- [x] **Undo Interaction**: Success toast with Undo action for Closed moves.
+- [x] **Branch**: `feat/hybrid-closed-lane` pushed and ready for PR.
+
+---
+
 ## Completed: Serial Number Gate ✅ (2025-12-24)
 
 - [x] **Serial now nullable**: Pumps created with `serial: null` (unassigned).
