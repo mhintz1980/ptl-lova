@@ -391,12 +391,8 @@ export const useApp = create<AppState>()(
           'CLOSED',
         ]
 
-        // Guard: Prevent moving FROM Closed unless it's a specific "Reopen" action (which we map to 'SHIP')
-        // AND ensure sequential flow if coming from CLOSED.
-        // Actually, Reopen is handled by UI calling moveStage(id, 'SHIP').
-        // We just need to ensure we don't allow arbitrary moves out of CLOSED if that's the rule.
-        // But the requirement says "enforce sequential transitions".
-        // CLOSED should only go to SHIP (Reopen).
+        // Guard: Prevent moving FROM Closed unless it's a specific "Reopen" action
+        // We enforce sequential process: CLOSED -> SHIP (Reopen)
         if (fromStage === 'CLOSED' && to !== 'SHIP') {
           toast.error('Closed orders can only be reopened to Shipping.')
           return

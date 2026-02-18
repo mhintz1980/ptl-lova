@@ -110,9 +110,8 @@ export function ClosedLane({
   }
 
   const handleReopen = (pump: Pump) => {
-    // PR Feedback: Use fromStage if available (with strict sequential check in store)
-    // Default to 'SHIP' if no history, as it's the only valid entry to CLOSED
-    moveStage(pump.id, pump.fromStage ?? 'SHIP')
+    // Strict Process: Reopening always goes to Shipping for verification
+    moveStage(pump.id, 'SHIP')
   }
 
   return (
