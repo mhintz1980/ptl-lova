@@ -162,8 +162,16 @@ export function ClosedLane({
                     return (
                       <div
                         key={po}
-                        className="group flex flex-col gap-1 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setFilters({ po, q: undefined })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            setFilters({ po, q: undefined })
+                          }
+                        }}
+                        className="group flex flex-col gap-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 rounded-sm"
                       >
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="font-mono font-bold text-foreground group-hover:text-primary transition-colors">
