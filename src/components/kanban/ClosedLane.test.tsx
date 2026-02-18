@@ -16,7 +16,7 @@ const basePump: Pump = {
   model: 'Model X',
   stage: 'CLOSED',
   priority: 'Normal',
-  last_update: new Date().toISOString(),
+  last_update: '2024-01-10T00:00:00.000Z',
   value: 5000,
 }
 

@@ -96,6 +96,9 @@ function KanbanBoardComponent({
       const message = `Moved ${pump.model} (Serial #${displaySerial}) to ${nextStage}`
 
       if (nextStage === 'CLOSED') {
+        // No Undo for moving to CLOSED explicitly to enforce process
+        toast.success(message)
+      } else {
         const fromStage = pump.stage
         toast.success(message, {
           action: {
@@ -103,8 +106,6 @@ function KanbanBoardComponent({
             onClick: () => moveStage(pumpId, fromStage),
           },
         })
-      } else {
-        toast.success(message)
       }
     }
   }
@@ -124,6 +125,7 @@ function KanbanBoardComponent({
               pumps={pumpsByStage[stage] ?? []}
               allPumps={pumps}
               activeId={activePump?.id}
+              onCardClick={onCardClick}
             />
           ) : (
             <StageColumn

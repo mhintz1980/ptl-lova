@@ -20,6 +20,7 @@ interface ClosedLaneProps {
   pumps: Pump[]
   allPumps: Pump[]
   activeId?: string | null
+  onCardClick?: (pump: Pump) => void
 }
 
 export function ClosedLane({
@@ -27,9 +28,12 @@ export function ClosedLane({
   pumps,
   allPumps,
   activeId,
+  onCardClick,
 }: ClosedLaneProps) {
-  const { collapsedStages, toggleStageCollapse, moveStage, setFilters } =
-    useApp()
+  const collapsedStages = useApp((state) => state.collapsedStages)
+  const toggleStageCollapse = useApp((state) => state.toggleStageCollapse)
+  const moveStage = useApp((state) => state.moveStage)
+  const setFilters = useApp((state) => state.setFilters)
 
   const isCollapsed = collapsedStages[stage]
 
@@ -94,7 +98,7 @@ export function ClosedLane({
     Object.keys(groups).forEach((key) => {
       groups[key].sort(
         (a, b) =>
-          new Date(b.last_update).getTime() - new Date(a.last_update).getTime()
+          parseISO(b.last_update).getTime() - parseISO(a.last_update).getTime()
       )
     })
 
@@ -106,7 +110,9 @@ export function ClosedLane({
   }
 
   const handleReopen = (pump: Pump) => {
-    moveStage(pump.id, 'SHIP')
+    // PR Feedback: Use fromStage if available (with strict sequential check in store)
+    // Default to 'SHIP' if no history, as it's the only valid entry to CLOSED
+    moveStage(pump.id, pump.fromStage ?? 'SHIP')
   }
 
   return (
@@ -211,6 +217,7 @@ export function ClosedLane({
                               key={pump.id}
                               pump={pump}
                               onReopen={handleReopen}
+                              onClick={onCardClick}
                             />
                           ))}
                         </div>
