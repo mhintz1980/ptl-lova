@@ -390,6 +390,13 @@ export const useApp = create<AppState>()(
           'SHIP',
           'CLOSED',
         ]
+
+        // Guard: Prevent moving FROM Closed unless it's a specific "Reopen" action
+        // We enforce sequential process: CLOSED -> SHIP (Reopen)
+        if (fromStage === 'CLOSED' && to !== 'SHIP') {
+          toast.error('Closed orders can only be reopened to Shipping.')
+          return
+        }
         const isUnassignedSerial = pump.serial === null
         if (REQUIRES_SERIAL_STAGES.includes(to) && isUnassignedSerial) {
           toast.error(
@@ -423,6 +430,8 @@ export const useApp = create<AppState>()(
         const patch: Partial<Pump> = {
           stage: to,
           last_update: now,
+          // If we are observing a move, record where it came from so we can Undo/Reopen to it
+          fromStage: fromStage,
         }
 
         const newPumps = get().pumps.map((p) =>

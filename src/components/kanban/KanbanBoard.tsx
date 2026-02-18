@@ -12,6 +12,7 @@ import {
 } from '@dnd-kit/core'
 import { Pump, Stage } from '../../types'
 import { StageColumn } from './StageColumn'
+import { ClosedLane } from './ClosedLane'
 import { PumpCard } from './PumpCard'
 import { useApp } from '../../store'
 import { toast } from 'sonner'
@@ -92,9 +93,20 @@ function KanbanBoardComponent({
 
       moveStage(pumpId, nextStage)
       const displaySerial = isUnassignedSerial ? 'pending' : pump.serial
-      toast.success(
-        `Moved ${pump.model} (Serial #${displaySerial}) to ${nextStage}`
-      )
+      const message = `Moved ${pump.model} (Serial #${displaySerial}) to ${nextStage}`
+
+      if (nextStage === 'CLOSED') {
+        // No Undo for moving to CLOSED explicitly to enforce process
+        toast.success(message)
+      } else {
+        const fromStage = pump.stage
+        toast.success(message, {
+          action: {
+            label: 'Undo',
+            onClick: () => moveStage(pumpId, fromStage),
+          },
+        })
+      }
     }
   }
 
@@ -105,16 +117,27 @@ function KanbanBoardComponent({
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-full min-h-full w-full gap-4 overflow-x-auto pb-2 pr-4 scrollbar-themed pt-[14px]">
-        {STAGES.map((stage) => (
-          <StageColumn
-            key={stage}
-            stage={stage}
-            pumps={pumpsByStage[stage] ?? []}
-            collapsed={collapsed}
-            onCardClick={onCardClick}
-            activeId={activePump?.id}
-          />
-        ))}
+        {STAGES.map((stage) =>
+          stage === 'CLOSED' ? (
+            <ClosedLane
+              key={stage}
+              stage={stage}
+              pumps={pumpsByStage[stage] ?? []}
+              allPumps={pumps}
+              activeId={activePump?.id}
+              onCardClick={onCardClick}
+            />
+          ) : (
+            <StageColumn
+              key={stage}
+              stage={stage}
+              pumps={pumpsByStage[stage] ?? []}
+              collapsed={collapsed}
+              onCardClick={onCardClick}
+              activeId={activePump?.id}
+            />
+          )
+        )}
       </div>
 
       <DragOverlay>

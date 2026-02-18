@@ -41,6 +41,7 @@ export interface Pump {
   isPaused?: boolean // true if job is in limbo
   pausedAt?: string // ISO timestamp when paused
   pausedStage?: Stage // stage where job was paused
+  fromStage?: Stage // Previous stage before current (e.g. for Undo/Reopen)
   totalPausedDays?: number // accumulated pause duration
   // derived, non-persistent:
   promiseDate?: string // from PO line
