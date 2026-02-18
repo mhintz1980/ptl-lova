@@ -35,7 +35,7 @@ describe('ClosedLane', () => {
     const pumps: Pump[] = [
       { ...basePump, id: 'p1', last_update: '2024-01-10T10:00:00Z' }, // Today
       { ...basePump, id: 'p2', last_update: '2024-01-09T10:00:00Z' }, // Yesterday
-      { ...basePump, id: 'p3', last_update: '2024-01-07T10:00:00Z' }, // This Week
+      { ...basePump, id: 'p3', last_update: '2024-01-08T10:00:00Z' }, // This Week
       { ...basePump, id: 'p4', last_update: '2023-12-25T10:00:00Z' }, // Older
     ]
 

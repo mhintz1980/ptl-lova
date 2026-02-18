@@ -87,7 +87,7 @@ export function ClosedLane({
           groups.Today.push(pump)
         } else if (isYesterday(date)) {
           groups.Yesterday.push(pump)
-        } else if (isThisWeek(date)) {
+        } else if (isThisWeek(date, { weekStartsOn: 1 })) {
           groups['This Week'].push(pump)
         } else {
           groups.Older.push(pump)
@@ -211,9 +211,9 @@ export function ClosedLane({
                         className="flex w-full items-center gap-1.5 px-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 hover:text-foreground transition-colors"
                       >
                         {isExpanded ? (
-                          <ChevronDown className="h-3 w-3" />
-                        ) : (
                           <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
                         )}
                         {group} ({items.length})
                       </button>
