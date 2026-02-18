@@ -211,7 +211,6 @@ export function ClosedLane({
                         onClick={() => toggleGroup(group)}
                         className="flex w-full items-center gap-1.5 px-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 hover:text-foreground transition-colors"
                       >
-                      >
                         {isExpanded ? (
                           <ChevronUp className="h-3 w-3" />
                         ) : (
