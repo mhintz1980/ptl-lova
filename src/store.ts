@@ -69,6 +69,10 @@ export interface AppState {
   // Rebuilds only when pumps, capacityConfig, or leadTimes change
   timelines: Record<string, import('./lib/schedule').StageBlock[]>
 
+  // Kanban Hub UI state
+  chartsDrawerOpen: boolean
+  scheduleModalOpen: boolean
+
   // actions
   setAdapter: (a: DataAdapter) => void
   load: () => Promise<void>
@@ -113,6 +117,10 @@ export interface AppState {
 
   // Performance: Rebuild memoized timeline cache
   rebuildTimelines: () => void
+
+  // Kanban Hub UI actions
+  toggleChartsDrawer: () => void
+  toggleScheduleModal: () => void
 
   // Sandbox Actions
   enterSandbox: () => Promise<void>
@@ -184,6 +192,16 @@ export const useApp = create<AppState>()(
 
       // Performance: Memoized timeline cache
       timelines: {},
+
+      // Kanban Hub UI state
+      chartsDrawerOpen: false,
+      scheduleModalOpen: false,
+
+      // Kanban Hub UI actions
+      toggleChartsDrawer: () =>
+        set((state) => ({ chartsDrawerOpen: !state.chartsDrawerOpen })),
+      toggleScheduleModal: () =>
+        set((state) => ({ scheduleModalOpen: !state.scheduleModalOpen })),
 
       setAdapter: (a) => set({ adapter: a }),
 
@@ -1175,6 +1193,8 @@ export const useApp = create<AppState>()(
         capacityConfig: state.capacityConfig,
         schedulingStageFilters: state.schedulingStageFilters,
         lockDate: state.lockDate,
+        chartsDrawerOpen: state.chartsDrawerOpen,
+        scheduleModalOpen: state.scheduleModalOpen,
         // Do NOT persist pumps, adapter, or timelines; let load() rebuild them.
         // Timelines are performance cache and will be rebuilt on load via rebuildTimelines()
       }),

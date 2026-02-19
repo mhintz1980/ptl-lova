@@ -1,4 +1,6 @@
 import {
+  BarChart3,
+  Calendar,
   Filter,
   Moon,
   Package,
@@ -6,6 +8,10 @@ import {
   Search,
   Settings,
   Sun,
+  AlertTriangle,
+  Activity,
+  Clock,
+  Zap,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '../ui/Button'
@@ -16,25 +22,19 @@ import { ControlFlyout } from './ControlFlyout'
 import { useApp } from '../../store'
 import { AddPoButton } from '../toolbar/AddPoButton'
 import { CollapseToggle } from './CollapseToggle'
-import { NAV_ITEMS, type AppView } from './navigation'
 
 interface HeaderProps {
-  currentView: AppView
-  onChangeView: (view: AppView) => void
   onOpenAddPo: () => void
   onOpenSettings: () => void
 }
 
-export function Header({
-  currentView,
-  onChangeView,
-  onOpenAddPo,
-  onOpenSettings,
-}: HeaderProps) {
+export function Header({ onOpenAddPo, onOpenSettings }: HeaderProps) {
   const { mode, toggle } = useTheme()
-  const { filters, setFilters } = useApp()
+  const { pumps, filters, setFilters } = useApp()
   const collapsedCards = useApp((state) => state.collapsedCards)
   const toggleCollapsedCards = useApp((state) => state.toggleCollapsedCards)
+  const toggleChartsDrawer = useApp((state) => state.toggleChartsDrawer)
+  const toggleScheduleModal = useApp((state) => state.toggleScheduleModal)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const activeFilterCount = useMemo(
@@ -49,6 +49,44 @@ export function Header({
       ].filter(Boolean).length,
     [filters]
   )
+
+  // KPI calculations
+  const kpis = useMemo(() => {
+    const nonClosed = pumps.filter((p) => p.stage !== 'CLOSED')
+    const active = nonClosed.length
+
+    // Late count: pumps past promise date
+    const now = new Date()
+    const late = nonClosed.filter((p) => {
+      if (!p.promiseDate) return false
+      return new Date(p.promiseDate) < now
+    }).length
+
+    // Average build time: days from creation to CLOSED for closed pumps
+    const closedPumps = pumps.filter((p) => p.stage === 'CLOSED')
+    let avgBuildTime = 0
+    if (closedPumps.length > 0) {
+      const totalDays = closedPumps.reduce((sum, p) => {
+        if (!p.dateReceived || !p.last_update) return sum
+        const start = new Date(p.dateReceived).getTime()
+        const end = new Date(p.last_update).getTime()
+        const days = Math.max(
+          1,
+          Math.round((end - start) / (1000 * 60 * 60 * 24))
+        )
+        return sum + days
+      }, 0)
+      avgBuildTime = Math.round(totalDays / closedPumps.length)
+    }
+
+    // Efficiency: closed / total as percentage
+    const efficiency =
+      pumps.length > 0
+        ? Math.round((closedPumps.length / pumps.length) * 100)
+        : 0
+
+    return { active, late, avgBuildTime, efficiency }
+  }, [pumps])
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 text-foreground backdrop-blur-xl">
@@ -67,25 +105,68 @@ export function Header({
           </div>
         </div>
 
-        <nav className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-            <Button
-              key={id}
-              variant="ghost"
-              size="icon"
+        {/* KPI Badges — replacing nav icons */}
+        <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+          <div
+            className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-3 py-1.5"
+            title="Active pumps (non-closed)"
+          >
+            <Activity className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+            <span className="text-xs font-semibold text-foreground">
+              {kpis.active}
+            </span>
+            <span className="text-[10px] text-muted-foreground">Active</span>
+          </div>
+
+          <div
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5',
+              kpis.late > 0
+                ? 'border-destructive/40 bg-destructive/10'
+                : 'border-border/60 bg-card/70'
+            )}
+            title="Pumps past promise date"
+          >
+            <AlertTriangle
               className={cn(
-                'header-button h-[45px] w-[45px] rounded-full border border-border/60 bg-card/70 text-foreground/70',
-                currentView === id &&
-                  'border-primary/40 bg-primary/15 text-foreground'
+                'h-3.5 w-3.5',
+                kpis.late > 0 ? 'text-destructive' : 'text-muted-foreground'
               )}
-              onClick={() => onChangeView(id)}
-              title={label}
-              aria-label={`Go to ${label}`}
+              strokeWidth={2.5}
+            />
+            <span
+              className={cn(
+                'text-xs font-semibold',
+                kpis.late > 0 ? 'text-destructive' : 'text-foreground'
+              )}
             >
-              <Icon className="h-5 w-5" strokeWidth={2.5} />
-            </Button>
-          ))}
-        </nav>
+              {kpis.late}
+            </span>
+            <span className="text-[10px] text-muted-foreground">Late</span>
+          </div>
+
+          <div
+            className="hidden items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-3 py-1.5 md:flex"
+            title="Average build time (days)"
+          >
+            <Clock className="h-3.5 w-3.5 text-amber-500" strokeWidth={2.5} />
+            <span className="text-xs font-semibold text-foreground">
+              {kpis.avgBuildTime}d
+            </span>
+            <span className="text-[10px] text-muted-foreground">Avg</span>
+          </div>
+
+          <div
+            className="hidden items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-3 py-1.5 lg:flex"
+            title="Completion efficiency"
+          >
+            <Zap className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.5} />
+            <span className="text-xs font-semibold text-foreground">
+              {kpis.efficiency}%
+            </span>
+            <span className="text-[10px] text-muted-foreground">Done</span>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <div className="relative hidden h-[40px] w-[225px] items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 text-sm text-foreground/80 shadow-sm md:flex">
@@ -117,6 +198,30 @@ export function Header({
             onToggle={toggleCollapsedCards}
           />
 
+          {/* Charts drawer toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground"
+            onClick={toggleChartsDrawer}
+            title="Charts & Analytics"
+            aria-label="Toggle Charts Drawer"
+          >
+            <BarChart3 className="h-5 w-5" strokeWidth={2.5} />
+          </Button>
+
+          {/* Schedule modal toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground"
+            onClick={toggleScheduleModal}
+            title="Schedule Forecast"
+            aria-label="Open Schedule Modal"
+          >
+            <Calendar className="h-5 w-5" strokeWidth={2.5} />
+          </Button>
+
           <Button
             variant="ghost"
             size="icon"
@@ -145,18 +250,16 @@ export function Header({
 
           <AddPoButton onClick={onOpenAddPo} />
 
-          {currentView === 'kanban' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground ml-2"
-              onClick={() => window.open('/print/kanban', '_blank')}
-              title="Print View"
-              aria-label="Print Kanban Board"
-            >
-              <Printer className="h-5 w-5" strokeWidth={2.5} />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="header-button h-[40px] w-[40px] rounded-full border border-border/60 bg-card/80 text-foreground ml-2"
+            onClick={() => window.open('/print/kanban', '_blank')}
+            title="Print View"
+            aria-label="Print Kanban Board"
+          >
+            <Printer className="h-5 w-5" strokeWidth={2.5} />
+          </Button>
         </div>
       </div>
 

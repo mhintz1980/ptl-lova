@@ -1,26 +1,17 @@
 import { useEffect, useState, useMemo } from 'react'
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useApp } from './store'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { AddPoModal } from './components/toolbar/AddPoModal'
 import { PumpDetailModal } from './components/ui/PumpDetailModal'
 import { SettingsModal } from './components/ui/SettingsModal'
 import { ShortcutsHelpModal } from './components/ui/ShortcutsHelpModal'
-import { Dashboard } from './pages/Dashboard'
-import { Kanban } from './pages/Kanban'
-import { OrdersPage } from './pages/OrdersPage'
-import { SchedulingView } from './components/scheduling/SchedulingView'
+import { KanbanBoard } from './components/kanban/KanbanBoard'
+import { ChartsDrawer } from './components/drawers/ChartsDrawer'
+import { ScheduleModal } from './components/modals/ScheduleModal'
 import { Toaster } from 'sonner'
 import { Pump } from './types'
 import { AppShell } from './components/layout/AppShell'
-import type { AppView } from './components/layout/navigation'
 import { applyFilters } from './lib/utils'
 import { sortPumps } from './lib/sort'
 import { PrintLayout } from './components/print/PrintLayout'
@@ -68,15 +59,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function MainApp() {
   const { load, pumps, filters, sortField, sortDirection, loading } = useApp()
+  const collapsedCards = useApp((state) => state.collapsedCards)
+  const chartsDrawerOpen = useApp((state) => state.chartsDrawerOpen)
+  const scheduleModalOpen = useApp((state) => state.scheduleModalOpen)
+  const toggleChartsDrawer = useApp((state) => state.toggleChartsDrawer)
+  const toggleScheduleModal = useApp((state) => state.toggleScheduleModal)
   const { register } = useKeyboardShortcuts()
-  // ... existing code ...
   const [isAddPoModalOpen, setIsAddPoModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false)
   const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
-
-  const location = useLocation()
-  const navigate = useNavigate()
 
   useEffect(() => {
     load()
@@ -115,11 +107,15 @@ function MainApp() {
       description: 'Show keyboard shortcuts',
     })
 
-    // Escape: Close any open modal
+    // Escape: Close any open modal/drawer
     register({
       key: 'Escape',
       handler: () => {
-        if (isAddPoModalOpen) {
+        if (scheduleModalOpen) {
+          toggleScheduleModal()
+        } else if (chartsDrawerOpen) {
+          toggleChartsDrawer()
+        } else if (isAddPoModalOpen) {
           setIsAddPoModalOpen(false)
         } else if (isSettingsModalOpen) {
           setIsSettingsModalOpen(false)
@@ -137,6 +133,10 @@ function MainApp() {
     isSettingsModalOpen,
     isShortcutsHelpOpen,
     selectedPump,
+    chartsDrawerOpen,
+    scheduleModalOpen,
+    toggleChartsDrawer,
+    toggleScheduleModal,
   ])
 
   const filteredPumps = useMemo(() => {
@@ -144,22 +144,11 @@ function MainApp() {
     return sortPumps(filtered, sortField, sortDirection)
   }, [pumps, filters, sortField, sortDirection])
 
-  const currentView = useMemo((): AppView => {
-    if (location.pathname.includes('/kanban')) return 'kanban'
-    if (location.pathname.includes('/scheduling')) return 'scheduling'
-    if (location.pathname.includes('/orders')) return 'orders'
-    return 'dashboard'
-  }, [location.pathname])
-
   return (
     <ProtectedRoute>
       <SandboxToolbar />
       <Toaster position="top-right" richColors />
       <AppShell
-        currentView={currentView}
-        onChangeView={(view) =>
-          navigate(view === 'dashboard' ? '/' : `/${view}`)
-        }
         onOpenAddPo={() => setIsAddPoModalOpen(true)}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
       >
@@ -169,36 +158,35 @@ function MainApp() {
               Loading...
             </div>
           ) : (
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Dashboard
-                    pumps={filteredPumps}
-                    onSelectPump={setSelectedPump}
-                  />
-                }
-              />
-              <Route path="dashboard" element={<Navigate to="/" replace />} />
-              <Route
-                path="kanban"
-                element={
-                  <Kanban
-                    pumps={filteredPumps}
-                    onSelectPump={setSelectedPump}
-                  />
-                }
-              />
-              <Route
-                path="scheduling"
-                element={<SchedulingView pumps={filteredPumps} />}
-              />
-              <Route path="orders" element={<OrdersPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <div
+              className="flex h-[calc(100vh-95px)] flex-col"
+              data-testid="kanban-view"
+            >
+              <div className="flex-1">
+                <KanbanBoard
+                  pumps={filteredPumps}
+                  collapsed={collapsedCards}
+                  onCardClick={setSelectedPump}
+                />
+              </div>
+            </div>
           )}
         </div>
       </AppShell>
+
+      {/* Charts Drawer — slides from right */}
+      <ChartsDrawer
+        isOpen={chartsDrawerOpen}
+        onClose={toggleChartsDrawer}
+        onSelectPump={setSelectedPump}
+      />
+
+      {/* Schedule Modal — full-screen overlay */}
+      <ScheduleModal
+        isOpen={scheduleModalOpen}
+        onClose={toggleScheduleModal}
+        pumps={filteredPumps}
+      />
 
       <AddPoModal
         isOpen={isAddPoModalOpen}
@@ -233,10 +221,10 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/update-password" element={<UpdatePasswordPage />} />
 
-          {/* Main Application */}
+          {/* Main Application — Kanban Hub (single page) */}
           <Route path="/*" element={<MainApp />} />
 
-          {/* Print Views - Protected? Ideally yes, but keeping open for simplicity if needed, or protect them too. Let's protect them. */}
+          {/* Print Views */}
           <Route
             path="/print"
             element={
@@ -250,7 +238,7 @@ function App() {
             <Route path="kanban" element={<KanbanPrintView />} />
           </Route>
 
-          {/* Kiosk Views - Protected? Maybe not, kiosk might be shared. But for now let's protect everything to be safe. */}
+          {/* Kiosk Views */}
           <Route
             path="/kiosk"
             element={
