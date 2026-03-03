@@ -40,7 +40,9 @@ import { ShopFloorHUD } from './components/kiosk/ShopFloorHUD'
 
 import { AuthProvider } from './context/AuthContext'
 import { LoginPage } from './pages/LoginPage'
+import { ResetPasswordPage } from './pages/reset-password'
 import { UpdatePasswordPage } from './pages/UpdatePasswordPage'
+import { UpdatePasswordPage as AccountUpdatePasswordPage } from './pages/account/update-password'
 import { useAuth } from './hooks/useAuth'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -231,6 +233,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/account/update-password" element={<AccountUpdatePasswordPage />} />
           <Route path="/update-password" element={<UpdatePasswordPage />} />
 
           {/* Main Application */}
