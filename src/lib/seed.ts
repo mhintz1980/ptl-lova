@@ -107,9 +107,6 @@ const CATALOG_STAGES: Stage[] = [
   'CLOSED',
 ]
 
-// Customers from catalog
-const CUSTOMERS = (catalogData as CatalogData).customers
-
 // Models from catalog
 const CATALOG_MODELS = (catalogData as CatalogData).models
 
@@ -200,7 +197,7 @@ function addBusinessDays(startDate: Date, days: number): Date {
 // PO number generation
 let poCounter = 1
 function genPONumber(): string {
-  return `PO2025-${String(poCounter++).padStart(4, '0')}`
+  return `PO2026-${String(poCounter++).padStart(4, '0')}`
 }
 
 // Priority assignment logic
@@ -222,10 +219,7 @@ interface GeneratedDates {
 }
 
 // Helper to generate events for stage history
-function generateStageEvents(
-  pump: Pump,
-  dates: GeneratedDates
-): DomainEvent[] {
+function generateStageEvents(pump: Pump, dates: GeneratedDates): DomainEvent[] {
   const events: DomainEvent[] = []
 
   // Only generate events if we've moved past QUEUE
@@ -315,168 +309,119 @@ function generateStageEvents(
   return events
 }
 
-// Generate deterministic pump from catalog model
-function generatePumpFromCatalog(
-  model: CatalogModel,
-  customer: string,
-  poBase: string,
-  quantity: number,
-  startIndex: number
-): { pumps: Pump[]; events: DomainEvent[] } {
-  const pumps: Pump[] = []
-  const events: DomainEvent[] = []
-  const basePrice = getEffectivePrice(model.price, model.model)
-  const priority = assignPriority(model)
-  const hasColor = Math.random() > 0.3 // 70% have powder coat
+// ─────────────────────────────────────────────────────────────────────────────
+// Curated seed: 5 POs with current dates (anchored 2026-02-24)
+// Model mix per PO: ~30% RL200, 30% RL300, 10% DD-4S, 10% DD-6 SAFE,
+//                   10% RL200-SAFE, 10% RL300-SAFE
+// ─────────────────────────────────────────────────────────────────────────────
 
-  for (let i = 0; i < quantity; i++) {
-    const serial = genSerial()
-    // FIX: Do not append line item to PO string, or grouping fails
-    const po = poBase
-
-    // Generate realistic schedule based on lead times
-    // Spread POs across past 60 days to ensure variety in stages
-    const now = new Date()
-    const daysBack = Math.floor(Math.random() * 60) // 0-60 days ago
-    const poDate = addBusinessDays(now, -daysBack)
-    const fabricationStart = addBusinessDays(
-      poDate,
-      Math.floor(Math.random() * 5)
-    ) // Start within 5 days
-    const fabricationEnd = addBusinessDays(
-      fabricationStart,
-      model.lead_times.fabrication
-    )
-    const powderCoatEnd = addBusinessDays(
-      fabricationEnd,
-      model.lead_times.powder_coat
-    )
-    const assemblyEnd = addBusinessDays(
-      powderCoatEnd,
-      model.lead_times.assembly
-    )
-    const testingEnd = addBusinessDays(assemblyEnd, model.lead_times.testing)
-
-    // Capture dates for event generation
-    const dates: GeneratedDates = {
-      poDate,
-      fabricationStart,
-      fabricationEnd,
-      powderCoatEnd,
-      assemblyEnd,
-      testingEnd,
-    }
-
-    // Generate promise date distribution for On-Time Risk chart visualization:
-    // - 75% On Track: promise date > 7 days in future
-    // - 20% At Risk: promise date 1-7 days in future
-    // - 5% Late: promise date in the past
-    let promiseDate: Date
-    const globalIndex = startIndex + i
-    const riskSlot = globalIndex % 20
-
-    if (riskSlot === 0) {
-      // 5% LATE: promise date 1-30 days in the past
-      const daysLate = Math.floor(Math.random() * 30) + 1
-      promiseDate = addBusinessDays(now, -daysLate)
-    } else if (riskSlot < 5) {
-      // 20% AT RISK: promise date 1-7 days in the future
-      const daysUntilDue = Math.floor(Math.random() * 7) + 1
-      promiseDate = addBusinessDays(now, daysUntilDue)
-    } else {
-      // 75% ON TRACK: promise date 8-45 days in the future
-      const daysUntilDue = Math.floor(Math.random() * 38) + 8
-      promiseDate = addBusinessDays(now, daysUntilDue)
-    }
-
-    // Determine current stage using deterministic index-based distribution
-    // This ensures pumps are spread across all stages for dashboard visualization
-    let currentStage: Stage = 'QUEUE'
-    let lastUpdate = poDate.toISOString()
-    const forecastEnd = testingEnd.toISOString()
-
-    // Use pattern index (globalIndex) to distribute across stages deterministically
-    // Target distribution (mod 20):
-    // 0 = ASSEMBLY (5% -> 4 jobs)
-    // 1 = SHIP (5% -> 4 jobs)
-    // 2 = CLOSED (5% -> 4 jobs)
-    // 3-5 = QUEUE (15% -> 6 jobs)
-    // 6-12 = FABRICATION (35% -> 14 jobs)
-    // 13-19 = POWDER_COAT (35% -> 14 jobs)
-    // 13-19 NOTE: Split roughly half between POWDER_COAT and STAGED_FOR_POWDER
-    const stageSlot = globalIndex % 20
-
-    if (stageSlot === 0) {
-      // 5% in ASSEMBLY (approx 4 jobs)
-      currentStage = 'ASSEMBLY'
-      const daysInStage = Math.floor(Math.random() * 3) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else if (stageSlot === 1) {
-      // 5% in SHIP (approx 4 jobs)
-      currentStage = 'SHIP'
-      const daysInStage = Math.floor(Math.random() * 2) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else if (stageSlot === 2) {
-      // 5% CLOSED (approx 4 jobs)
-      currentStage = 'CLOSED'
-      const daysAgo = Math.floor(Math.random() * 14) + 1
-      lastUpdate = addBusinessDays(now, -daysAgo).toISOString()
-    } else if (stageSlot <= 5) {
-      // 15% in QUEUE (approx 6 jobs)
-      currentStage = 'QUEUE'
-      lastUpdate = poDate.toISOString()
-    } else if (stageSlot <= 12) {
-      // 35% in FABRICATION (approx 14 jobs)
-      currentStage = 'FABRICATION'
-      const daysInStage = Math.floor(Math.random() * 5) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    } else {
-      // 35% in POWDER_COAT (approx 14 jobs) - includes STAGED roughly half/half
-      currentStage = globalIndex % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
-      const daysInStage = Math.floor(Math.random() * 4) + 1
-      lastUpdate = addBusinessDays(now, -daysInStage).toISOString()
-    }
-
-    const pump = {
-      id: nanoid(),
-      serial,
-      po,
-      customer,
-      model: model.model,
-      stage: currentStage,
-      priority,
-      powder_color: hasColor
-        ? COLORS[Math.floor(Math.random() * COLORS.length)]
-        : undefined,
-      last_update: lastUpdate,
-      value: basePrice,
-      forecastEnd,
-      promiseDate: promiseDate.toISOString(),
-      // BOM details (for future UI visibility)
-      engine_model: getBomComponent(model.bom.engine, 'engine'),
-      gearbox_model: getBomComponent(model.bom.gearbox, 'gearbox'),
-      control_panel_model: getBomComponent(
-        model.bom.control_panel,
-        'control_panel'
-      ),
-      // Additional metadata
-      description: model.description,
-      total_lead_days: model.lead_times.total_days,
-      work_hours: getModelWorkHours(model.model),
-    }
-
-    pumps.push(pump)
-
-    // Generate events for this pump
-    const pumpEvents = generateStageEvents(pump, dates)
-    events.push(...pumpEvents)
-  }
-
-  return { pumps, events }
+// PO definitions: each entry describes one purchase order.
+interface PODefinition {
+  customer: string
+  /** Business days before today the PO was placed (controls stage spread) */
+  daysAgoStart: number
+  /** Ordered list of model codes for each pump in this PO */
+  modelCodes: string[]
 }
 
+const PO_DEFINITIONS: PODefinition[] = [
+  // PO-01 — 12 pumps, started ~28 biz-days ago (pumps deep in—or past—assembly)
+  {
+    customer: 'Herc Rentals',
+    daysAgoStart: 28,
+    modelCodes: [
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL300',
+      'RL300',
+      'RL300',
+      'RL300',
+      'DD-4S',
+      'DD-6 SAFE',
+      'RL200-SAFE',
+      'RL300-SAFE',
+    ],
+  },
+  // PO-02 — 13 pumps, started ~18 biz-days ago (pumps mostly in powder-coat / assembly)
+  {
+    customer: 'United Rentals',
+    daysAgoStart: 18,
+    modelCodes: [
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL300',
+      'RL300',
+      'RL300',
+      'RL300',
+      'DD-4S',
+      'DD-6 SAFE',
+      'RL200-SAFE',
+      'RL200-SAFE',
+      'RL300-SAFE',
+    ],
+  },
+  // PO-03 — 10 pumps, started ~12 biz-days ago (pumps in fabrication / staged-for-powder)
+  {
+    customer: 'Rain For Rent',
+    daysAgoStart: 12,
+    modelCodes: [
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL300',
+      'RL300',
+      'RL300',
+      'DD-4S',
+      'DD-6 SAFE',
+      'RL200-SAFE',
+      'RL300-SAFE',
+    ],
+  },
+  // PO-04 — 12 pumps, started ~7 biz-days ago (pumps in queue / early fabrication)
+  {
+    customer: 'Sunbelt Rentals',
+    daysAgoStart: 7,
+    modelCodes: [
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL300',
+      'RL300',
+      'RL300',
+      'RL300',
+      'DD-4S',
+      'DD-6 SAFE',
+      'RL200-SAFE',
+      'RL300-SAFE',
+    ],
+  },
+  // PO-05 — 11 pumps, started ~3 biz-days ago (pumps just received / in queue)
+  {
+    customer: 'Equipment Share',
+    daysAgoStart: 3,
+    modelCodes: [
+      'RL200',
+      'RL200',
+      'RL200',
+      'RL300',
+      'RL300',
+      'RL300',
+      'DD-4S',
+      'DD-6 SAFE',
+      'RL200-SAFE',
+      'RL200-SAFE',
+      'RL300-SAFE',
+    ],
+  },
+]
+
 // Main seed function
-export function seed(count: number = 80): {
+export function seed(_count?: number): {
   pumps: Pump[]
   events: DomainEvent[]
 } {
@@ -488,90 +433,146 @@ export function seed(count: number = 80): {
   const pumps: Pump[] = []
   const events: DomainEvent[] = []
 
-  // Create realistic orders based on catalog models
-  let generated = 0
+  const now = new Date() // 2026-02-24 or current runtime date
 
-  // Generate orders for each model
-  for (const model of CATALOG_MODELS) {
-    if (generated >= count) break
-
-    // Determine order quantity
-    // FORCE LARGE ORDERS for the first 20 generated pumps to show off Digital DNA
-    const isLargeOrder = generated < 20
-    const minQ = isLargeOrder ? 5 : 1
-    const maxQ = isLargeOrder ? 12 : 5
-
-    const orderQuantity = Math.min(
-      Math.floor(Math.random() * (maxQ - minQ + 1)) + minQ,
-      count - generated
-    )
-    const customer = CUSTOMERS[generated % CUSTOMERS.length]
+  PO_DEFINITIONS.forEach((poDef) => {
     const poBase = genPONumber()
+    const poDate = addBusinessDays(now, -poDef.daysAgoStart)
 
-    const { pumps: modelPumps, events: modelEvents } = generatePumpFromCatalog(
-      model,
-      customer,
-      poBase,
-      orderQuantity,
-      generated
-    )
+    poDef.modelCodes.forEach((modelCode, idx) => {
+      const catalogModel = CATALOG_MODELS.find((m) => m.model === modelCode)
+      if (!catalogModel) {
+        console.warn(`[seed] Unknown model code: ${modelCode} — skipping`)
+        return
+      }
 
-    pumps.push(...modelPumps)
-    events.push(...modelEvents)
-    generated += orderQuantity
-  }
+      const globalIndex = pumps.length
 
-  // If we still need more pumps, create additional orders
-  while (generated < count) {
-    const model = CATALOG_MODELS[generated % CATALOG_MODELS.length]
-    const customer = CUSTOMERS[generated % CUSTOMERS.length]
-    const poBase = genPONumber()
-    const remainingQuantity = Math.min(3, count - generated) // Small batches
+      const serial = genSerial()
+      const basePrice = getEffectivePrice(
+        catalogModel.price,
+        catalogModel.model
+      )
+      const priority = assignPriority(catalogModel)
+      const hasColor = idx % 10 !== 9 // 90% get a powder-coat colour
 
-    const { pumps: additionalPumps, events: additionalEvents } =
-      generatePumpFromCatalog(
-        model,
-        customer,
-        poBase,
-        remainingQuantity,
-        generated
+      // ── Schedule arithmetic ────────────────────────────────────────────────
+      const fabricationStart = addBusinessDays(poDate, 1)
+      const fabricationEnd = addBusinessDays(
+        fabricationStart,
+        catalogModel.lead_times.fabrication
+      )
+      const powderCoatEnd = addBusinessDays(
+        fabricationEnd,
+        catalogModel.lead_times.powder_coat
+      )
+      const assemblyEnd = addBusinessDays(
+        powderCoatEnd,
+        catalogModel.lead_times.assembly
+      )
+      const testingEnd = addBusinessDays(
+        assemblyEnd,
+        catalogModel.lead_times.testing
       )
 
-    pumps.push(...additionalPumps)
-    events.push(...additionalEvents)
-    generated += remainingQuantity
-  }
-
-  // Ensure we have exactly the requested count
-  const finalPumps = pumps.slice(0, count)
-
-  // POST-PROCESSING: Ensure some unscheduled QUEUE pumps (without forecastStart)
-  const unscheduledCount = finalPumps.filter(
-    (p) => p.stage === 'QUEUE' && !p.forecastStart
-  ).length
-  if (unscheduledCount < 5) {
-    // Force at least 5 unscheduled QUEUE pumps
-    const queuePumps = finalPumps.filter((p) => p.stage === 'QUEUE')
-    const needed = Math.min(5 - unscheduledCount, queuePumps.length)
-
-    for (let i = 0; i < needed; i++) {
-      const pump = queuePumps[i]
-      if (pump) {
-        pump.forecastStart = undefined
-        pump.forecastEnd = undefined
+      const dates: GeneratedDates = {
+        poDate,
+        fabricationStart,
+        fabricationEnd,
+        powderCoatEnd,
+        assemblyEnd,
+        testingEnd,
       }
-    }
-  }
 
-  // NOTE: events list might contain events for pumps that were sliced off if we generated too many.
-  // Not a critical issue for dev data, but cleaner to filter.
-  const finalPumpIds = new Set(finalPumps.map((p) => p.id))
-  const finalEvents = events.filter((e) => finalPumpIds.has(e.aggregateId))
+      // ── Promise date distribution (75% on-track / 20% at-risk / 5% late) ──
+      let promiseDate: Date
+      const riskSlot = globalIndex % 20
+      if (riskSlot === 0) {
+        promiseDate = addBusinessDays(
+          now,
+          -(Math.floor(Math.random() * 14) + 1)
+        )
+      } else if (riskSlot < 5) {
+        promiseDate = addBusinessDays(now, Math.floor(Math.random() * 7) + 1)
+      } else {
+        promiseDate = addBusinessDays(now, Math.floor(Math.random() * 30) + 8)
+      }
 
-  // Sort events by occurrence
-  finalEvents.sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+      // ── Stage determination based on elapsed time since PO ────────────────
+      // Compare today to the calculated milestone dates for this pump.
+      let currentStage: Stage = 'QUEUE'
+      let lastUpdate = poDate.toISOString()
 
-  return { pumps: finalPumps, events: finalEvents }
+      if (now >= testingEnd) {
+        // Fully through the pipeline — randomly mark some as CLOSED vs SHIP
+        currentStage = globalIndex % 3 === 0 ? 'CLOSED' : 'SHIP'
+        lastUpdate = addBusinessDays(
+          now,
+          -Math.floor(Math.random() * 3)
+        ).toISOString()
+      } else if (now >= assemblyEnd) {
+        currentStage = 'SHIP'
+        lastUpdate = addBusinessDays(
+          now,
+          -(Math.floor(Math.random() * 2) + 1)
+        ).toISOString()
+      } else if (now >= powderCoatEnd) {
+        currentStage = 'ASSEMBLY'
+        lastUpdate = addBusinessDays(
+          now,
+          -(Math.floor(Math.random() * 3) + 1)
+        ).toISOString()
+      } else if (now >= fabricationEnd) {
+        // In or waiting for powder coat
+        currentStage =
+          globalIndex % 2 === 0 ? 'POWDER_COAT' : 'STAGED_FOR_POWDER'
+        lastUpdate = addBusinessDays(
+          now,
+          -(Math.floor(Math.random() * 4) + 1)
+        ).toISOString()
+      } else if (now >= fabricationStart) {
+        currentStage = 'FABRICATION'
+        lastUpdate = addBusinessDays(
+          now,
+          -(Math.floor(Math.random() * 3) + 1)
+        ).toISOString()
+      } else {
+        currentStage = 'QUEUE'
+        lastUpdate = poDate.toISOString()
+      }
+
+      const pump: Pump = {
+        id: nanoid(),
+        serial,
+        po: poBase,
+        customer: poDef.customer,
+        model: catalogModel.model,
+        stage: currentStage,
+        priority,
+        powder_color: hasColor
+          ? COLORS[Math.floor(Math.random() * COLORS.length)]
+          : undefined,
+        last_update: lastUpdate,
+        value: basePrice,
+        forecastEnd: testingEnd.toISOString(),
+        promiseDate: promiseDate.toISOString(),
+        engine: getBomComponent(catalogModel.bom.engine, 'engine') ?? undefined,
+        gearbox:
+          getBomComponent(catalogModel.bom.gearbox, 'gearbox') ?? undefined,
+        work_hours: getModelWorkHours(catalogModel.model),
+      }
+
+      pumps.push(pump)
+
+      const pumpEvents = generateStageEvents(pump, dates)
+      events.push(...pumpEvents)
+    })
+  })
+
+  // Sort events chronologically
+  events.sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+
+  return { pumps, events }
 }
 
 // Export catalog data for store integration
