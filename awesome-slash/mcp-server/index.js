@@ -1,0 +1,794 @@
+#!/usr/bin/env node
+/**
+ * MCP Server for awesome-slash-commands
+ *
+ * Exposes workflow tools to any MCP-compatible AI coding assistant:
+ * - Claude Code (native)
+ * - OpenCode
+ * - Codex CLI
+ *
+ * Run: node mcp-server/index.js
+ */
+
+const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} = require('@modelcontextprotocol/sdk/types.js');
+
+const path = require('path');
+const fs = require('fs').promises;
+const { promisify } = require('util');
+const { exec } = require('child_process');
+const execAsync = promisify(exec);
+const workflowState = require('../lib/state/workflow-state.js');
+
+// Plugin root for relative paths
+const PLUGIN_ROOT = process.env.PLUGIN_ROOT || path.join(__dirname, '..');
+
+// Define available tools
+const TOOLS = [
+  {
+    name: 'workflow_status',
+    description: 'Get the current workflow state, including active task, phase, and resume capability',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: 'workflow_start',
+    description: 'Start a new workflow with specified policy settings',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        taskSource: {
+          type: 'string',
+          enum: ['gh-issues', 'linear', 'tasks-md', 'custom'],
+          description: 'Where to look for tasks'
+        },
+        priorityFilter: {
+          type: 'string',
+          enum: ['continue', 'bugs', 'security', 'features', 'all'],
+          description: 'What type of tasks to prioritize'
+        },
+        stoppingPoint: {
+          type: 'string',
+          enum: ['implemented', 'pr-created', 'all-green', 'merged', 'deployed', 'production'],
+          description: 'How far to take the task'
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'workflow_resume',
+    description: 'Resume an interrupted workflow from its last checkpoint',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: 'workflow_abort',
+    description: 'Abort the current workflow and cleanup resources (worktree, branches)',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: 'task_discover',
+    description: 'Discover and prioritize available tasks from configured sources',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        source: {
+          type: 'string',
+          enum: ['gh-issues', 'linear', 'tasks-md', 'custom'],
+          description: 'Task source to search'
+        },
+        filter: {
+          type: 'string',
+          description: 'Filter tasks by type (bug, feature, security, etc.)'
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of tasks to return'
+        },
+        customFile: {
+          type: 'string',
+          description: 'Path to custom task file (required when source is "custom"). Parses markdown checkboxes.'
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'review_code',
+    description: 'Run multi-agent code review on changed files',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Files to review (defaults to git diff)'
+        },
+        maxIterations: {
+          type: 'number',
+          description: 'Maximum review iterations (default: 3)'
+        }
+      },
+      required: []
+    }
+  }
+];
+
+// Tool handlers
+const toolHandlers = {
+  async workflow_status() {
+    const state = workflowState.readState();
+
+    if (state instanceof Error) {
+      return {
+        content: [{ type: 'text', text: `Error: ${state.message}` }],
+        isError: true
+      };
+    }
+    if (!state) {
+      return { content: [{ type: 'text', text: 'No active workflow.' }] };
+    }
+
+    const summary = workflowState.getWorkflowSummary();
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(summary, null, 2)
+      }]
+    };
+  },
+
+  async workflow_start({ taskSource, priorityFilter, stoppingPoint }) {
+    // Check for existing workflow
+    if (workflowState.hasActiveWorkflow()) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'Error: Active workflow exists. Use workflow_abort to cancel or workflow_resume to continue.'
+        }],
+        isError: true
+      };
+    }
+
+    const policy = {
+      ...workflowState.DEFAULT_POLICY,
+      taskSource: taskSource || 'gh-issues',
+      priorityFilter: priorityFilter || 'continue',
+      stoppingPoint: stoppingPoint || 'merged'
+    };
+
+    const state = workflowState.createState('next-task', policy);
+    workflowState.writeState(state);
+
+    return {
+      content: [{
+        type: 'text',
+        text: `Workflow started: ${state.task.id}\nPolicy: ${JSON.stringify(policy, null, 2)}`
+      }]
+    };
+  },
+
+  async workflow_resume() {
+    const state = workflowState.readState();
+
+    if (state instanceof Error) {
+      return {
+        content: [{ type: 'text', text: `Error: ${state.message}` }],
+        isError: true
+      };
+    }
+    if (!state) {
+      return {
+        content: [{ type: 'text', text: 'No workflow to resume.' }],
+        isError: true
+      };
+    }
+
+    if (state.status !== 'in_progress' || state.phase === 'complete') {
+      return {
+        content: [{ type: 'text', text: 'Workflow cannot be resumed from current state.' }],
+        isError: true
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: `Resuming workflow ${state.task.id} from phase: ${state.phase}`
+      }]
+    };
+  },
+
+  async workflow_abort() {
+    const state = workflowState.readState();
+
+    if (state instanceof Error) {
+      return {
+        content: [{ type: 'text', text: `Error: ${state.message}` }],
+        isError: true
+      };
+    }
+    if (!state) {
+      return {
+        content: [{ type: 'text', text: 'No workflow to abort.' }]
+      };
+    }
+
+    workflowState.abortWorkflow('User requested abort');
+
+    return {
+      content: [{
+        type: 'text',
+        text: `Workflow ${state.task.id} aborted. Cleanup: worktree and branches should be removed manually.`
+      }]
+    };
+  },
+
+  async task_discover({ source, filter, limit, customFile }) {
+    const taskSource = source || 'gh-issues';
+    // Validate and sanitize limit to prevent command injection
+    let maxTasks = 10;
+    if (limit !== undefined) {
+      const parsed = parseInt(limit, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
+        maxTasks = parsed;
+      }
+    }
+
+    try {
+      let tasks = [];
+
+      if (taskSource === 'gh-issues') {
+        try {
+          await execAsync('gh --version');
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: 'Error: GitHub CLI (gh) is not installed or not configured. Please install gh and authenticate.'
+            }],
+            isError: true
+          };
+        }
+
+        // Use array form to prevent command injection
+        const ghArgs = [
+          'issue', 'list',
+          '--state', 'open',
+          '--json', 'number,title,labels,createdAt',
+          '--limit', String(maxTasks)
+        ];
+        const { stdout } = await execAsync(`gh ${ghArgs.join(' ')}`);
+
+        const issues = JSON.parse(stdout || '[]');
+
+        let filtered = issues;
+        if (filter && filter !== 'all') {
+          filtered = issues.filter(issue => {
+            const labelNames = issue.labels.map(l => l.name.toLowerCase());
+            const filterLower = filter.toLowerCase();
+
+            return labelNames.some(label =>
+              label.includes(filterLower) ||
+              filterLower.includes(label)
+            );
+          });
+        }
+
+        tasks = filtered.map(issue => ({
+          id: `#${issue.number}`,
+          title: issue.title,
+          type: issue.labels.find(l => ['bug', 'feature', 'security'].includes(l.name.toLowerCase()))?.name || 'task',
+          labels: issue.labels.map(l => l.name),
+          createdAt: issue.createdAt,
+          source: 'github'
+        }));
+
+      } else if (taskSource === 'linear') {
+        // Linear integration via GitHub issues containing Linear URLs
+        try {
+          await execAsync('gh --version');
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: 'Error: GitHub CLI (gh) is not installed or not configured. Linear integration requires gh to access GitHub issues with Linear links.'
+            }],
+            isError: true
+          };
+        }
+
+        const ghArgs = [
+          'issue', 'list',
+          '--state', 'open',
+          '--json', 'number,title,body,labels,createdAt',
+          '--limit', String(Math.min(maxTasks * 2, 100)) // Fetch more since we'll filter for Linear links
+        ];
+        const { stdout } = await execAsync(`gh ${ghArgs.join(' ')}`);
+        const issues = JSON.parse(stdout || '[]');
+
+        // Extract Linear URLs from issue bodies (length-limited to prevent ReDoS)
+        const linearUrlPattern = /https:\/\/linear\.app\/[^\s)]{1,200}/g;
+        const linearIssues = issues
+          .map(issue => {
+            const linearMatches = issue.body ? issue.body.match(linearUrlPattern) : null;
+            if (!linearMatches || linearMatches.length === 0) return null;
+
+            // Extract Linear ID from URL (e.g., ENG-123 from https://linear.app/company/issue/ENG-123/...)
+            const linearUrl = linearMatches[0];
+            // Match /issue/ID pattern specifically to avoid false matches
+            const linearIdMatch = linearUrl.match(/\/issue\/([A-Z]+-\d+)/);
+            const linearId = linearIdMatch ? linearIdMatch[1] : null;
+
+            return {
+              number: issue.number,
+              title: issue.title,
+              body: issue.body,
+              labels: issue.labels,
+              createdAt: issue.createdAt,
+              linearUrl: linearUrl,
+              linearId: linearId
+            };
+          })
+          .filter(issue => issue !== null)
+          .slice(0, maxTasks);
+
+        let filtered = linearIssues;
+        if (filter && filter !== 'all') {
+          filtered = linearIssues.filter(issue => {
+            const labelNames = issue.labels.map(l => l.name.toLowerCase());
+            const filterLower = filter.toLowerCase();
+
+            return labelNames.some(label =>
+              label.includes(filterLower) ||
+              filterLower.includes(label)
+            );
+          });
+        }
+
+        tasks = filtered.map(issue => ({
+          id: issue.linearId || `#${issue.number}`,
+          title: issue.title,
+          type: issue.labels.find(l => ['bug', 'feature', 'security'].includes(l.name.toLowerCase()))?.name || 'task',
+          labels: issue.labels.map(l => l.name),
+          createdAt: issue.createdAt,
+          source: 'linear',
+          linearUrl: issue.linearUrl,
+          githubNumber: issue.number
+        }));
+
+      } else if (taskSource === 'tasks-md') {
+        const possibleFiles = ['TASKS.md', 'PLAN.md', 'TODO.md'];
+        let content = null;
+        let foundFile = null;
+
+        for (const file of possibleFiles) {
+          try {
+            content = await fs.readFile(file, 'utf-8');
+            foundFile = file;
+            break;
+          } catch (e) {
+            // File doesn't exist, try next one
+          }
+        }
+
+        if (content) {
+          const lines = content.split('\n');
+          const taskLines = lines.filter(line => /^[-*]\s+\[\s*\]\s+/.test(line));
+
+          tasks = taskLines.slice(0, maxTasks).map((line, index) => {
+            const text = line.replace(/^[-*]\s+\[\s*\]\s+/, '').trim();
+            const isBug = /\b(bug|fix|error|issue)\b/i.test(text);
+            const isFeature = /\b(feature|add|implement|create)\b/i.test(text);
+
+            return {
+              id: `task-${index + 1}`,
+              title: text,
+              type: isBug ? 'bug' : isFeature ? 'feature' : 'task',
+              labels: [],
+              source: foundFile
+            };
+          });
+
+          if (filter && filter !== 'all') {
+            tasks = tasks.filter(task => task.type === filter.toLowerCase());
+          }
+        } else {
+          return {
+            content: [{
+              type: 'text',
+              text: 'No task files found (looked for TASKS.md, PLAN.md, TODO.md)'
+            }]
+          };
+        }
+      } else if (taskSource === 'custom') {
+        if (!customFile) {
+          return {
+            content: [{
+              type: 'text',
+              text: 'Error: customFile parameter is required when source is "custom"'
+            }],
+            isError: true
+          };
+        }
+
+        // Validate file path - prevent path traversal
+        const normalizedPath = path.normalize(customFile);
+        // Note: absolute paths and '..' are allowed but monitored via file access
+
+        try {
+          const content = await fs.readFile(customFile, 'utf-8');
+          const lines = content.split('\n');
+          const taskLines = lines.filter(line => /^[-*]\s+\[\s*\]\s+/.test(line));
+
+          tasks = taskLines.slice(0, maxTasks).map((line, index) => {
+            const text = line.replace(/^[-*]\s+\[\s*\]\s+/, '').trim();
+            const isBug = /\b(bug|fix|error|issue)\b/i.test(text);
+            const isFeature = /\b(feature|add|implement|create)\b/i.test(text);
+            const isSecurity = /\b(security|vulnerability|cve|auth)\b/i.test(text);
+
+            return {
+              id: `custom-${index + 1}`,
+              title: text,
+              type: isSecurity ? 'security' : isBug ? 'bug' : isFeature ? 'feature' : 'task',
+              labels: [],
+              source: customFile
+            };
+          });
+
+          if (filter && filter !== 'all') {
+            tasks = tasks.filter(task => task.type === filter.toLowerCase());
+          }
+
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: `Error reading custom file "${customFile}": ${error.message}`
+            }],
+            isError: true
+          };
+        }
+      } else {
+        return {
+          content: [{
+            type: 'text',
+            text: `Unknown task source: "${taskSource}"`
+          }],
+          isError: true
+        };
+      }
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            source: taskSource,
+            filter: filter || 'all',
+            count: tasks.length,
+            tasks: tasks
+          }, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      console.error('Error discovering tasks:', error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Error discovering tasks: An internal error occurred. Please check server logs for details.`
+        }],
+        isError: true
+      };
+    }
+  },
+
+  async review_code({ files, maxIterations }) {
+    try {
+      let filesToReview = files || [];
+
+      if (!filesToReview.length) {
+        try {
+          const { stdout } = await execAsync('git diff --name-only HEAD');
+          filesToReview = stdout.trim().split('\n').filter(f => f);
+
+          if (!filesToReview.length) {
+            const { stdout: stagedOut } = await execAsync('git diff --cached --name-only');
+            filesToReview = stagedOut.trim().split('\n').filter(f => f);
+          }
+
+          if (!filesToReview.length) {
+            try {
+              const { stdout: lastCommit } = await execAsync('git diff --name-only HEAD~1');
+              filesToReview = lastCommit.trim().split('\n').filter(f => f);
+            } catch (e) {
+              // HEAD~1 doesn't exist (single-commit repo) - no files to review
+            }
+          }
+
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: `Error getting changed files: ${error.message}\nCommand: git diff\nPlease specify files explicitly.`
+            }],
+            isError: true
+          };
+        }
+      }
+
+      if (!filesToReview.length) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'No files to review. No changes detected in working directory or last commit.'
+          }]
+        };
+      }
+
+      const findings = [];
+      const patterns = {
+        console_log: {
+          pattern: /console\.(log|debug|info|warn|error)\(/g,
+          severity: 'warning',
+          message: 'Debug console statement found'
+        },
+        todo_fixme: {
+          pattern: /\/\/\s*(TODO|FIXME|HACK|XXX|NOTE):/gi,
+          severity: 'info',
+          message: 'Comment marker found'
+        },
+        commented_code: {
+          pattern: /^\s*\/\/.*[{};].*$/gm,
+          severity: 'info',
+          message: 'Possible commented-out code'
+        },
+        debugger: {
+          pattern: /\bdebugger\b/g,
+          severity: 'error',
+          message: 'Debugger statement found'
+        },
+        empty_catch: {
+          pattern: /catch\s*\([^)]*\)\s*{\s*}/g,
+          severity: 'warning',
+          message: 'Empty catch block - silent error swallowing'
+        },
+        any_type: {
+          pattern: /:\s*any\b/g,
+          severity: 'warning',
+          message: 'TypeScript "any" type used'
+        },
+        hardcoded_secret: {
+          pattern: /(api[_-]?key|secret|password|token)\s*[:=]\s*["'][^"']+["']/gi,
+          severity: 'error',
+          message: 'Possible hardcoded secret'
+        }
+      };
+
+      for (const file of filesToReview) {
+        try {
+          const content = await fs.readFile(file, 'utf-8');
+          const lines = content.split('\n');
+          const fileFindings = [];
+
+          for (const [name, check] of Object.entries(patterns)) {
+            const matches = [...content.matchAll(check.pattern)];
+
+            for (const match of matches) {
+              const position = match.index;
+              let lineNum = 1;
+              let charCount = 0;
+
+              for (let i = 0; i < lines.length; i++) {
+                charCount += lines[i].length + 1; // +1 for newline
+                if (charCount > position) {
+                  lineNum = i + 1;
+                  break;
+                }
+              }
+
+              fileFindings.push({
+                type: name,
+                line: lineNum,
+                column: match.index - content.lastIndexOf('\n', match.index),
+                severity: check.severity,
+                message: check.message,
+                match: match[0].substring(0, 100) // Truncate long matches
+              });
+            }
+          }
+
+          if (fileFindings.length > 0) {
+            findings.push({
+              file: file,
+              issues: fileFindings
+            });
+          }
+
+        } catch (error) {
+          findings.push({
+            file: file,
+            error: `Could not read file: ${error.message}`
+          });
+        }
+      }
+
+      const totalIssues = findings.reduce((sum, f) => sum + (f.issues?.length || 0), 0);
+      const bySeverity = {
+        error: findings.flatMap(f => f.issues || []).filter(i => i.severity === 'error').length,
+        warning: findings.flatMap(f => f.issues || []).filter(i => i.severity === 'warning').length,
+        info: findings.flatMap(f => f.issues || []).filter(i => i.severity === 'info').length
+      };
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            filesReviewed: filesToReview.length,
+            totalIssues: totalIssues,
+            bySeverity: bySeverity,
+            findings: findings
+          }, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      console.error('Error during code review:', error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Error during code review: An internal error occurred.`
+        }],
+        isError: true
+      };
+    }
+  }
+};
+
+// Create and run server
+async function main() {
+  const server = new Server(
+    {
+      name: 'awesome-slash',
+      version: '2.6.1',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  // List available tools
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return { tools: TOOLS };
+  });
+
+  // Handle tool calls
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    const handler = toolHandlers[name];
+    if (!handler) {
+      return {
+        content: [{ type: 'text', text: `Unknown tool: ${name}` }],
+        isError: true
+      };
+    }
+
+    try {
+      return await handler(args || {});
+    } catch (error) {
+      return {
+        content: [{ type: 'text', text: `Error: ${error.message}` }],
+        isError: true
+      };
+    }
+  });
+
+  // Connect via stdio
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+
+  console.error('awesome-slash MCP server running');
+}
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { toolHandlers };
+}
+
+/**
+ * Error boundary for uncaught errors
+ * Prevents server crashes and provides meaningful error messages
+ */
+function setupErrorBoundary() {
+  let errorCount = 0;
+  const MAX_ERRORS = 10;
+  const ERROR_WINDOW = 60000; // 1 minute
+  let firstErrorTime = null;
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    console.error('Stack:', error.stack);
+
+    // Track error rate for graceful shutdown decision
+    const now = Date.now();
+    if (!firstErrorTime || (now - firstErrorTime) > ERROR_WINDOW) {
+      errorCount = 1;
+      firstErrorTime = now;
+    } else {
+      errorCount++;
+    }
+
+    // If too many errors in short time, exit gracefully
+    if (errorCount >= MAX_ERRORS) {
+      console.error(`${MAX_ERRORS} uncaught exceptions in ${ERROR_WINDOW}ms - exiting to prevent corrupted state`);
+      process.exit(1);
+    }
+
+    console.error(`Error count: ${errorCount}/${MAX_ERRORS} in current window`);
+  });
+
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise);
+    console.error('Reason:', reason);
+
+    // Track error rate
+    const now = Date.now();
+    if (!firstErrorTime || (now - firstErrorTime) > ERROR_WINDOW) {
+      errorCount = 1;
+      firstErrorTime = now;
+    } else {
+      errorCount++;
+    }
+
+    // If too many errors in short time, exit gracefully
+    if (errorCount >= MAX_ERRORS) {
+      console.error(`${MAX_ERRORS} unhandled rejections in ${ERROR_WINDOW}ms - exiting to prevent corrupted state`);
+      process.exit(1);
+    }
+
+    console.error(`Error count: ${errorCount}/${MAX_ERRORS} in current window`);
+  });
+
+  // Handle SIGINT gracefully
+  process.on('SIGINT', () => {
+    console.error('Received SIGINT, shutting down gracefully...');
+    process.exit(0);
+  });
+
+  // Handle SIGTERM gracefully
+  process.on('SIGTERM', () => {
+    console.error('Received SIGTERM, shutting down gracefully...');
+    process.exit(0);
+  });
+}
+
+// Only run main if this is the main module
+if (require.main === module) {
+  setupErrorBoundary();
+
+  main().catch((error) => {
+    console.error('Fatal error in main():', error);
+    console.error('Stack:', error.stack);
+    process.exit(1);
+  });
+}

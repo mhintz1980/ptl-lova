@@ -1,0 +1,24 @@
+{
+  "name": "next-task",
+  "version": "2.6.1",
+  "description": "Master workflow orchestrator with autonomous task-to-production automation, quality gates, and multi-agent review",
+  "author": {
+    "name": "Avi Fenesh",
+    "email": "[email protected]",
+    "url": "https://github.com/avifenesh"
+  },
+  "homepage": "https://github.com/avifenesh/awesome-slash#next-task",
+  "repository": "https://github.com/avifenesh/awesome-slash",
+  "license": "MIT",
+  "keywords": [
+    "task-management",
+    "productivity",
+    "prioritization",
+    "github-issues",
+    "linear",
+    "workflow",
+    "autonomous",
+    "code-review",
+    "quality-gates"
+  ]
+}
