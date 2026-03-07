@@ -38,7 +38,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
-    "lucide-react": "^0.545.0",
+    "lucide-react": "^0.575.0",
     "motion": "^12.34.0",
     "nanoid": "^5.1.6",
     "papaparse": "^5.5.3",
