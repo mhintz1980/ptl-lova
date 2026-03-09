@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { CheckCircle2, Search } from 'lucide-react'
 import { Pump } from '../../types'
-import { ActionCard } from './ActionCard'
 import { QuickResolveDrawer } from './QuickResolveDrawer'
 import { GlobalSearchModal } from './GlobalSearchModal'
 import { ArmyMenGrid } from './ArmyMenGrid'
@@ -11,12 +10,12 @@ interface OmniHubHomeProps {
   pumps: Pump[]
 }
 
-type TabType = 'INBOX' | 'ON_TRACK'
+type FilterType = 'ALL' | 'CRITICAL' | 'OFF_TRACK' | 'ON_TRACK'
 
 export function OmniHubHome({ pumps }: OmniHubHomeProps) {
   const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabType>('INBOX')
+  const [activeFilter, setActiveFilter] = useState<FilterType>('ALL')
 
   // Derive simple metrics for the top toggles
   const { criticalCount, offTrackCount, onTrackCount } = useMemo(() => {
@@ -45,39 +44,6 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
     }
   }, [pumps])
 
-  // Sort pumps to show critical first for the Action Inbox
-  const actionInboxPumps = useMemo(() => {
-    return pumps
-      .filter((p) => {
-        const now = Date.now()
-        const isCritical =
-          p.isPaused || (p.serial === null && p.stage !== 'QUEUE')
-        const isOffTrack =
-          p.promiseDate && new Date(p.promiseDate).getTime() < now
-        return isCritical || isOffTrack
-      })
-      .sort((a, b) => {
-        const aCritical =
-          a.isPaused || (a.serial === null && a.stage !== 'QUEUE') ? 1 : 0
-        const bCritical =
-          b.isPaused || (b.serial === null && b.stage !== 'QUEUE') ? 1 : 0
-        return bCritical - aCritical
-      })
-      .slice(0, 50) // limit to top 50 for performance
-  }, [pumps])
-
-  // Extract ON-TRACK pumps for the Army Men Grid
-  const onTrackPumps = useMemo(() => {
-    return pumps.filter((p) => {
-      const now = Date.now()
-      const isCritical =
-        p.isPaused || (p.serial === null && p.stage !== 'QUEUE')
-      const isOffTrack =
-        p.promiseDate && new Date(p.promiseDate).getTime() < now
-      return !isCritical && !isOffTrack
-    })
-  }, [pumps])
-
   const [searchFilter, setSearchFilter] = useState('')
   const [modelFilter, setModelFilter] = useState('')
 
@@ -90,17 +56,35 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
     return Array.from(models).sort()
   }, [pumps])
 
-  // Process filtered pumps to pass directly to grids where needed
-  const finalOnTrackPumps = useMemo(() => {
-    return onTrackPumps.filter((p) => {
+  // Process filtered pumps to pass directly to grid
+  const finalPumps = useMemo(() => {
+    return pumps.filter((p) => {
+      // Apply KPI Filter
+      const now = Date.now()
+      const isCritical =
+        p.isPaused || (p.serial === null && p.stage !== 'QUEUE')
+      const isOffTrack =
+        !isCritical && p.promiseDate && new Date(p.promiseDate).getTime() < now
+      const isOnTrack = !isCritical && !isOffTrack
+
+      if (activeFilter === 'CRITICAL' && !isCritical) return false
+      if (activeFilter === 'OFF_TRACK' && !isOffTrack) return false
+      if (activeFilter === 'ON_TRACK' && !isOnTrack) return false
+
+      // Apply Inline Filters
       const matchesSearch =
         searchFilter === '' ||
         p.po.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.customer.toLowerCase().includes(searchFilter.toLowerCase())
       const matchesModel = modelFilter === '' || p.model === modelFilter
+
       return matchesSearch && matchesModel
     })
-  }, [onTrackPumps, searchFilter, modelFilter])
+  }, [pumps, activeFilter, searchFilter, modelFilter])
+
+  const toggleFilter = (filter: FilterType) => {
+    setActiveFilter((prev) => (prev === filter ? 'ALL' : filter))
+  }
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto pt-4 px-2 md:px-6">
@@ -112,8 +96,8 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
           colorClass="border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
           dotClass="bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
           textClass="text-red-500 text-shadow-sm"
-          isActive={activeTab === 'INBOX'}
-          onClick={() => setActiveTab('INBOX')}
+          isActive={activeFilter === 'CRITICAL'}
+          onClick={() => toggleFilter('CRITICAL')}
         />
         <StatusToggle
           label="OFF-TRACK"
@@ -121,8 +105,8 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
           colorClass="border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]"
           dotClass="bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)]"
           textClass="text-yellow-500 text-shadow-sm"
-          isActive={activeTab === 'INBOX'}
-          onClick={() => setActiveTab('INBOX')}
+          isActive={activeFilter === 'OFF_TRACK'}
+          onClick={() => toggleFilter('OFF_TRACK')}
         />
         <StatusToggle
           label="ON-TRACK"
@@ -130,50 +114,14 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
           colorClass="border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
           dotClass="bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"
           textClass="text-green-500 text-shadow-sm"
-          isActive={activeTab === 'ON_TRACK'}
-          onClick={() => setActiveTab('ON_TRACK')}
+          isActive={activeFilter === 'ON_TRACK'}
+          onClick={() => toggleFilter('ON_TRACK')}
         />
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex items-center justify-between mb-4 border-b border-border">
-        <div className="flex gap-6">
-          <button
-            className={`pb-3 text-sm font-bold tracking-wider uppercase transition-colors relative ${
-              activeTab === 'INBOX'
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            onClick={() => setActiveTab('INBOX')}
-          >
-            Action Inbox ({criticalCount + offTrackCount})
-            {activeTab === 'INBOX' && (
-              <motion.div
-                layoutId="tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-              />
-            )}
-          </button>
-          <button
-            className={`pb-3 text-sm font-bold tracking-wider uppercase transition-colors relative ${
-              activeTab === 'ON_TRACK'
-                ? 'text-green-500'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            onClick={() => setActiveTab('ON_TRACK')}
-          >
-            On-Track ({onTrackCount})
-            {activeTab === 'ON_TRACK' && (
-              <motion.div
-                layoutId="tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"
-              />
-            )}
-          </button>
-        </div>
-
-        {/* Inline Filters */}
-        <div className="flex items-center gap-3 pb-2">
+      {/* Inline Filters */}
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-border">
+        <div className="flex items-center gap-3">
           <div className="relative w-48 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -202,70 +150,35 @@ export function OmniHubHome({ pumps }: OmniHubHomeProps) {
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto pb-24 custom-scrollbar pr-2 min-h-0">
         <AnimatePresence mode="wait">
-          {/* TAB: INBOX */}
-          {activeTab === 'INBOX' && (
-            <motion.div
-              key="inbox"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col gap-4 h-full"
-            >
-              {actionInboxPumps.length > 0 ? (
-                actionInboxPumps.map((pump) => (
-                  <motion.div
-                    key={pump.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    style={{
-                      contentVisibility: 'auto',
-                      containIntrinsicHeight: '180px',
-                    }}
-                  >
-                    <ActionCard
-                      pump={pump}
-                      onActionClick={() => setSelectedPump(pump)}
-                    />
-                  </motion.div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center opacity-80 mt-12">
-                  <div className="w-32 h-32 rounded-full bg-green-500/10 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(34,197,94,0.2)] border border-green-500/30">
-                    <CheckCircle2 className="w-16 h-16 text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">
-                    INBOX ZERO
-                  </h2>
-                  <p className="text-muted-foreground text-lg max-w-md">
-                    All Clear! The manufacturing floor is running smoothly. No
-                    critical actions required.
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* TAB: ON-TRACK */}
-          {activeTab === 'ON_TRACK' && (
-            <motion.div
-              key="ontrack"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col gap-4 h-full"
-            >
+          <motion.div
+            key={activeFilter}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="flex flex-col gap-4 h-full"
+          >
+            {finalPumps.length > 0 ? (
               <div className="h-full">
                 <ArmyMenGrid
-                  pumps={finalOnTrackPumps}
+                  pumps={finalPumps}
                   onPumpSelect={(pump) => setSelectedPump(pump)}
                 />
               </div>
-            </motion.div>
-          )}
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center opacity-80 mt-12">
+                <div className="w-32 h-32 rounded-full bg-border/20 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(0,0,0,0.1)] border border-border/50">
+                  <CheckCircle2 className="w-16 h-16 text-muted-foreground drop-shadow-sm" />
+                </div>
+                <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">
+                  NO PUMPS FOUND
+                </h2>
+                <p className="text-muted-foreground text-lg max-w-md">
+                  There are no pumps matching the current filters.
+                </p>
+              </div>
+            )}
+          </motion.div>
         </AnimatePresence>
       </div>
 
