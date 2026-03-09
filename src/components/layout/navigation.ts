@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { Activity, BarChart3, Calendar, Layout } from 'lucide-react'
+import { Activity, BarChart3, Layout } from 'lucide-react'
 
 export type AppView = 'dashboard' | 'kanban' | 'scheduling' | 'orders'
 
