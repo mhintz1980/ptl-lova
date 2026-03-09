@@ -67,6 +67,19 @@ export function Header({
           </div>
         </div>
 
+        {/* Page Title Injection */}
+        <div className="hidden md:flex flex-1 items-center justify-start pl-6 border-l border-border/50 ml-2">
+          <h1 className="text-lg font-bold tracking-tight text-foreground uppercase">
+            {currentView === 'dashboard'
+              ? 'Omni-Hub'
+              : currentView === 'kanban'
+                ? 'Kanban Board'
+                : currentView === 'orders'
+                  ? 'Orders'
+                  : 'System'}
+          </h1>
+        </div>
+
         <nav className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
             <Button

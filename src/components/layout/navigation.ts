@@ -10,6 +10,6 @@ export const NAV_ITEMS: Array<{
 }> = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
   { id: 'kanban', label: 'Kanban', icon: Layout },
-  { id: 'scheduling', label: 'Scheduling', icon: Calendar },
+  // { id: 'scheduling', label: 'Scheduling', icon: Calendar },
   { id: 'orders', label: 'Orders', icon: Activity },
 ]

@@ -13,7 +13,7 @@ import { AddPoModal } from './components/toolbar/AddPoModal'
 import { PumpDetailModal } from './components/ui/PumpDetailModal'
 import { SettingsModal } from './components/ui/SettingsModal'
 import { ShortcutsHelpModal } from './components/ui/ShortcutsHelpModal'
-import { Dashboard } from './pages/Dashboard'
+import { OmniHubHome } from './components/omni-hub/OmniHubHome'
 import { Kanban } from './pages/Kanban'
 import { OrdersPage } from './pages/OrdersPage'
 import { SchedulingView } from './components/scheduling/SchedulingView'
@@ -172,15 +172,7 @@ function MainApp() {
             </div>
           ) : (
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <Dashboard
-                    pumps={filteredPumps}
-                    onSelectPump={setSelectedPump}
-                  />
-                }
-              />
+              <Route path="/" element={<OmniHubHome pumps={filteredPumps} />} />
               <Route path="dashboard" element={<Navigate to="/" replace />} />
               <Route
                 path="kanban"
@@ -191,10 +183,10 @@ function MainApp() {
                   />
                 }
               />
-              <Route
+              {/* <Route
                 path="scheduling"
                 element={<SchedulingView pumps={filteredPumps} />}
-              />
+              /> */}
               <Route path="orders" element={<OrdersPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -234,7 +226,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/account/update-password" element={<AccountUpdatePasswordPage />} />
+          <Route
+            path="/account/update-password"
+            element={<AccountUpdatePasswordPage />}
+          />
           <Route path="/update-password" element={<UpdatePasswordPage />} />
 
           {/* Main Application */}
