@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { useMemo } from 'react'
+import { motion } from 'motion/react'
 import { Pump } from '../../types'
 import { PumpIcon } from './ArmyMenIcons'
-import { QuickResolveDrawer } from './QuickResolveDrawer'
 
 interface ArmyMenGridProps {
   pumps: Pump[]
@@ -29,10 +28,7 @@ export function ArmyMenGrid({ pumps, onPumpSelect }: ArmyMenGridProps) {
     return { queue: q, wip: w, shipped: s }
   }, [pumps])
 
-  const [selectedPump, setSelectedPump] = useState<Pump | null>(null)
-
   const handlePumpClick = (pump: Pump) => {
-    setSelectedPump(pump)
     if (onPumpSelect) onPumpSelect(pump)
   }
 
@@ -96,15 +92,6 @@ export function ArmyMenGrid({ pumps, onPumpSelect }: ArmyMenGridProps) {
           <span>SAFE Variant</span>
         </div>
       </div>
-
-      <AnimatePresence>
-        {selectedPump && (
-          <QuickResolveDrawer
-            pump={selectedPump}
-            onClose={() => setSelectedPump(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   )
 }
