@@ -39,22 +39,22 @@ export function PumpIcon({
         </defs>
       )}
 
-      {/* Render the text - slightly downsized and spaced to fit neatly inside the border */}
-      <text
-        x="50"
-        y="65"
-        textAnchor="middle"
-        fill={iconColor}
-        fontSize="34"
-        fontFamily="sans-serif"
-        fontWeight="900"
-        letterSpacing="1"
-        filter={glowColor ? `url(#${filterId})` : undefined}
-      >
-        {abbreviation}
-      </text>
+      {/* ---------- Option C: Hard Drop Shadow ---------- */}
+      {/* Shadow for SAFE Border */}
+      {isSafe && (
+        <rect
+          x="4"
+          y="30"
+          width="96"
+          height="48"
+          rx="6"
+          fill="none"
+          stroke="rgba(0,0,0,0.85)"
+          strokeWidth="6"
+        />
+      )}
 
-      {/* Render thick border if SAFE */}
+      {/* Main border if SAFE */}
       {isSafe && (
         <rect
           x="2"
@@ -68,6 +68,35 @@ export function PumpIcon({
           filter={glowColor ? `url(#${filterId})` : undefined}
         />
       )}
+
+      {/* Shadow for Text */}
+      <text
+        x="52"
+        y="67"
+        textAnchor="middle"
+        fill="rgba(0,0,0,0.85)"
+        fontSize="34"
+        fontFamily="sans-serif"
+        fontWeight="900"
+        letterSpacing="1"
+      >
+        {abbreviation}
+      </text>
+
+      {/* Main Text */}
+      <text
+        x="50"
+        y="65"
+        textAnchor="middle"
+        fill={iconColor}
+        fontSize="34"
+        fontFamily="sans-serif"
+        fontWeight="900"
+        letterSpacing="1"
+        filter={glowColor ? `url(#${filterId})` : undefined}
+      >
+        {abbreviation}
+      </text>
     </svg>
   )
 }
