@@ -63,12 +63,10 @@ export class EventBus {
     }
 
     /**
-     * Publish multiple events.
+     * Publish multiple events concurrently.
      */
     async publishAll(events: DomainEvent[]): Promise<void> {
-        for (const event of events) {
-            await this.publish(event);
-        }
+        await Promise.all(events.map((event) => this.publish(event)));
     }
 
     /**
