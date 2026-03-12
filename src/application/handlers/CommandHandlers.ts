@@ -146,9 +146,10 @@ export class PlaceOrderHandler {
     await this.pumpRepository.saveMany(pumps)
 
     // 5. Publish events
-    const events = [
-      orderPlaced(cmd.po, cmd.customer, cmd.lines, cmd.promiseDate),
-      ...pumps.map((pump) =>
+    const orderPlacedEvent = orderPlaced(cmd.po, cmd.customer, cmd.lines, cmd.promiseDate);
+    await this.eventBus.publish(orderPlacedEvent);
+
+    const pumpEvents = pumps.map((pump) =>
         pumpCreated({
           pumpId: pump.id,
           serial: pump.serial,
@@ -159,10 +160,9 @@ export class PlaceOrderHandler {
           priority: pump.priority,
           value: pump.value,
         })
-      ),
-    ]
+    );
 
-    await this.eventBus.publishAll(events)
+    await this.eventBus.publishAll(pumpEvents)
 
     return { ok: true, value: pumps.map((p) => p.id) }
   }

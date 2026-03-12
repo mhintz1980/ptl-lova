@@ -63,20 +63,31 @@ export class EventBus {
     }
 
     /**
-     * Publish multiple events concurrently.
+     * Publish multiple events concurrently with a limit.
      */
     async publishAll(events: DomainEvent[]): Promise<void> {
-        await Promise.all(
-            events.map((event) =>
-                this.publish(event).catch((error) => {
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-                    throw new Error(
-                        `Failed to publish event [type: ${event.eventType}, aggregateId: ${event.aggregateId}]: ${errorMessage}`,
-                        { cause: error }
-                    );
-                })
-            )
-        );
+        const concurrencyLimit = 5; // A sensible limit
+        const queue = events.map((event, index) => ({ event, index }));
+        
+        const workers = Array.from({ length: concurrencyLimit }, async () => {
+            while (queue.length > 0) {
+                const item = queue.shift();
+                if (item) {
+                    const { event, index } = item;
+                    try {
+                        await this.publish(event);
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : String(error);
+                        throw new Error(
+                            `EventBus.publishAll failed for event "${event.eventType}" (id: ${event.aggregateId}) at index ${index}: ${message}`,
+                            { cause: error }
+                        );
+                    }
+                }
+            }
+        });
+        
+        await Promise.all(workers);
     }
 
     /**
