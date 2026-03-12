@@ -66,7 +66,17 @@ export class EventBus {
      * Publish multiple events concurrently.
      */
     async publishAll(events: DomainEvent[]): Promise<void> {
-        await Promise.all(events.map((event) => this.publish(event)));
+        await Promise.all(
+            events.map((event) =>
+                this.publish(event).catch((error) => {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    throw new Error(
+                        `Failed to publish event [type: ${event.eventType}, aggregateId: ${event.aggregateId}]: ${errorMessage}`,
+                        { cause: error }
+                    );
+                })
+            )
+        );
     }
 
     /**
