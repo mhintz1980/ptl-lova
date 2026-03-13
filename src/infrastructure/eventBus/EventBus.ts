@@ -63,12 +63,31 @@ export class EventBus {
     }
 
     /**
-     * Publish multiple events.
+     * Publish multiple events concurrently with a limit.
      */
     async publishAll(events: DomainEvent[]): Promise<void> {
-        for (const event of events) {
-            await this.publish(event);
-        }
+        const concurrencyLimit = 5; // A sensible limit
+        const queue = events.map((event, index) => ({ event, index }));
+        
+        const workers = Array.from({ length: concurrencyLimit }, async () => {
+            while (queue.length > 0) {
+                const item = queue.shift();
+                if (item) {
+                    const { event, index } = item;
+                    try {
+                        await this.publish(event);
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : String(error);
+                        throw new Error(
+                            `EventBus.publishAll failed for event "${event.eventType}" (id: ${event.aggregateId}) at index ${index}: ${message}`,
+                            { cause: error }
+                        );
+                    }
+                }
+            }
+        });
+        
+        await Promise.all(workers);
     }
 
     /**
